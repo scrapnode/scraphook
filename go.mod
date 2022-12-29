@@ -3,7 +3,7 @@ module github.com/scrapnode/scraphook
 go 1.19
 
 require (
-	github.com/scrapnode/scrapcore v0.0.0-20221229133434-2acbbc1d3e05
+	github.com/scrapnode/scrapcore v0.0.0-20221229141554-fcb4c28e2509
 	github.com/spf13/cobra v1.6.1
 )
 
