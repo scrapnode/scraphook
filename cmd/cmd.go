@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	corecmd "github.com/scrapnode/scrapcore/pkg/cmd"
+	corecmd "github.com/scrapnode/scrapcore/cmd"
 	"github.com/spf13/cobra"
 )
 
