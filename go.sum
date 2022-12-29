@@ -4,6 +4,8 @@ github.com/inconshreveable/mousetrap v1.0.1/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLf
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/scrapnode/scrapcore v0.0.0-20221229131913-5705b34858c4 h1:2tzehZp+zK6gh8kzWWj3B9qkg9nHU513d09rorx6wjM=
 github.com/scrapnode/scrapcore v0.0.0-20221229131913-5705b34858c4/go.mod h1:NXVhMmew5YOhsw2L3IjaP8llAaxmMKgoKvQsvoSbdzU=
+github.com/scrapnode/scrapcore v0.0.0-20221229133434-2acbbc1d3e05 h1:J9Ky39dIyGGo8pmyCvDUCMR1LBpjiZXpgWUi9jt2E58=
+github.com/scrapnode/scrapcore v0.0.0-20221229133434-2acbbc1d3e05/go.mod h1:NXVhMmew5YOhsw2L3IjaP8llAaxmMKgoKvQsvoSbdzU=
 github.com/spf13/cobra v1.6.1 h1:o94oiPyS4KD1mPy2fmcYYHHfCxLqYjJOhGsCHFZtEzA=
 github.com/spf13/cobra v1.6.1/go.mod h1:IOw/AERYS7UzyrGinqmz6HLUo219MORXGxhbaJUqzrY=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
