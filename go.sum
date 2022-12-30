@@ -252,6 +252,8 @@ github.com/scrapnode/scrapcore v0.0.0-20221230071533-9eba7cd00a69 h1:Hn85ROYbe2n
 github.com/scrapnode/scrapcore v0.0.0-20221230071533-9eba7cd00a69/go.mod h1:RY7TsihfK1jLL0qn9KnKub8cQWkOp1EZmXyfgmeApgE=
 github.com/scrapnode/scrapcore v0.0.0-20221230075245-5bcbe28562f1 h1:c1FZqEu4LkiVy14kWw8M+hssUtgan11OQB5ohbbLqOs=
 github.com/scrapnode/scrapcore v0.0.0-20221230075245-5bcbe28562f1/go.mod h1:RY7TsihfK1jLL0qn9KnKub8cQWkOp1EZmXyfgmeApgE=
+github.com/scrapnode/scrapcore v0.0.0-20221230075731-973430389631 h1:HNkbRE8YiHedgoXI2tU6QQ6zU0PfN5dd3G4dUCj5EbQ=
+github.com/scrapnode/scrapcore v0.0.0-20221230075731-973430389631/go.mod h1:RY7TsihfK1jLL0qn9KnKub8cQWkOp1EZmXyfgmeApgE=
 github.com/segmentio/ksuid v1.0.4 h1:sBo2BdShXjmcugAMwjugoGUdUV0pcxY5mW4xKRn3v4c=
 github.com/segmentio/ksuid v1.0.4/go.mod h1:/XUiZBD3kVx5SmUOl55voK5yeAbBNNIed+2O73XgrPE=
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
