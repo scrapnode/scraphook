@@ -17,3 +17,4 @@
 # Project
 .idea
 .DS_Store
+**/*.Identifier
