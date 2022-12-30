@@ -61,13 +61,14 @@ func (infra *Infra) Disconnect(ctx context.Context) error {
 }
 
 func New(ctx context.Context, cfg *configs.Configs) (*Infra, error) {
-	infra := &Infra{Configs: cfg, Logger: xlogger.FromContext(ctx).With("service", "scraphook.webhook")}
+	infra := &Infra{Configs: cfg, Logger: xlogger.FromContext(ctx)}
 
 	// use SQL database by default
 	db, err := databasesql.New(ctx, cfg.Database)
 	if err != nil {
 		return nil, err
 	}
+	infra.Database = db
 	infra.Repo = sql.New(ctx, db.Conn)
 
 	// use Nats msgbus by default

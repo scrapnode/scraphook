@@ -15,11 +15,3 @@ services:
     image: nats:2.9
     command: "-D -js --server_name nats-node-3 --cluster_name NATS --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats-node-1:6222 -routes=nats://ruser:T0pS3cr3t@nats-node-2:6222"
     depends_on: [ "nats-node-1" ]
-
-  timescaledb:
-    image: timescale/timescaledb-ha:pg14-latest
-    environment:
-      - POSTGRES_USER=scraphook
-      - POSTGRES_PASSWORD=changemenow_ortoolate
-    ports:
-      - '5432:5432'

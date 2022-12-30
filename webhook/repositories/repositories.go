@@ -9,12 +9,12 @@ import (
 )
 
 func New(ctx context.Context, cfg *databaseconfigs.Configs) (*interfaces.Repo, error) {
-	// by default we will use SQL database
+	// by default, we will use SQL database
 	// if you want to use another database, use init it here
 	db, err := databasesql.New(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return sql.New(ctx, db), err
+	return sql.New(ctx, db.Conn), err
 }
