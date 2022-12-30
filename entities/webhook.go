@@ -14,8 +14,6 @@ type Webhook struct {
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
 	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
 	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
-
-	Tokens []WebhookToken
 }
 
 func (wh *Webhook) TableName() string {
@@ -49,8 +47,14 @@ type WebhookToken struct {
 
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
 	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
+
+	Webhook *Webhook
 }
 
-func (webhookToken *WebhookToken) TableName() string {
+func (token *WebhookToken) TableName() string {
 	return "webhook_tokens"
+}
+
+func (token *WebhookToken) Censor() {
+	token.Token = utils.Censor(token.Token, 5)
 }
