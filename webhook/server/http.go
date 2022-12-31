@@ -27,15 +27,11 @@ func (server *Http) Start(ctx context.Context) error {
 		return err
 	}
 
-	server.server = &http.Server{
-		Addr: server.infra.Configs.Http.ServerListenAddress,
-	}
-
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("content-type", "application/json")
 
-		data, err := json.Marshal(map[string]interface{}{
+		data, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(map[string]interface{}{
 			"version": server.infra.Configs.Version,
 			"env":     server.infra.Configs.Env,
 		})
@@ -43,6 +39,10 @@ func (server *Http) Start(ctx context.Context) error {
 		log.Println(i, err)
 	})
 
+	server.server = &http.Server{
+		Addr:    server.infra.Configs.Http.ServerListenAddress,
+		Handler: mux,
+	}
 	server.logger.Debug("connected")
 	return nil
 }
