@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scraphook/webhook/infrastructure"
 	"go.uber.org/zap"
 	"log"
@@ -16,8 +17,8 @@ type Http struct {
 	server *http.Server
 }
 
-func New(infra *infrastructure.Infra) *Http {
-	logger := infra.Logger.With("pkg", "server.http")
+func New(ctx context.Context, infra *infrastructure.Infra) *Http {
+	logger := xlogger.FromContext(ctx).With("pkg", "server.http")
 	return &Http{infra: infra, logger: logger}
 }
 
@@ -47,8 +48,10 @@ func (server *Http) Start(ctx context.Context) error {
 }
 
 func (server *Http) Stop(ctx context.Context) error {
-	if err := server.server.Shutdown(ctx); err != nil {
-		server.logger.Errorw("shutdown http server got error", "error", err.Error())
+	if server.server != nil {
+		if err := server.server.Shutdown(ctx); err != nil {
+			server.logger.Errorw("shutdown http server got error", "error", err.Error())
+		}
 	}
 
 	if err := server.infra.Disconnect(ctx); err != nil {

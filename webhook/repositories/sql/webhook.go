@@ -6,6 +6,6 @@ import (
 )
 
 type WebhookRepo struct {
-	db    *gorm.DB
+	conn  *gorm.DB
 	clock clock.Clock
 }

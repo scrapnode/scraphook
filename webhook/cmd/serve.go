@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	corecmd "github.com/scrapnode/scrapcore/cmd"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/infrastructure"
 	"github.com/scrapnode/scraphook/webhook/server"
@@ -17,6 +18,7 @@ func NewServe() *cobra.Command {
 		Use:     "serve",
 		Short:   "serve webhook servers",
 		Example: "scraphook webhook serve",
+		PreRunE: corecmd.ChainPreRunE(),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
 			cfg := configs.FromContext(ctx)
@@ -27,7 +29,7 @@ func NewServe() *cobra.Command {
 			}
 
 			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-			srv := server.New(infra)
+			srv := server.New(ctx, infra)
 
 			go func() {
 				if err := srv.Start(ctx); err != nil {

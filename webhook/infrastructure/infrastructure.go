@@ -26,11 +26,6 @@ type Infra struct {
 }
 
 func (infra *Infra) Connect(ctx context.Context) error {
-	// always disconnect previous connection before start a new one
-	if err := infra.Disconnect(ctx); err != nil {
-		return err
-	}
-
 	infra.mu.Lock()
 	defer infra.mu.Unlock()
 
@@ -49,11 +44,16 @@ func (infra *Infra) Disconnect(ctx context.Context) error {
 	infra.mu.Lock()
 	defer infra.mu.Unlock()
 
-	if err := infra.Database.Disconnect(ctx); err != nil {
-		infra.Logger.Error(err)
+	if infra.Database != nil {
+		if err := infra.Database.Disconnect(ctx); err != nil {
+			infra.Logger.Error(err)
+		}
 	}
-	if err := infra.MsgBus.Disconnect(ctx); err != nil {
-		infra.Logger.Error(err)
+
+	if infra.MsgBus != nil {
+		if err := infra.MsgBus.Disconnect(ctx); err != nil {
+			infra.Logger.Error(err)
+		}
 	}
 
 	infra.Logger.Debug("disconnected")
@@ -61,7 +61,7 @@ func (infra *Infra) Disconnect(ctx context.Context) error {
 }
 
 func New(ctx context.Context, cfg *configs.Configs) (*Infra, error) {
-	infra := &Infra{Configs: cfg, Logger: xlogger.FromContext(ctx)}
+	infra := &Infra{Configs: cfg, Logger: xlogger.FromContext(ctx).With("pkg", "scraphook.infra")}
 
 	// use SQL database by default
 	db, err := databasesql.New(ctx, cfg.Database)
@@ -69,7 +69,7 @@ func New(ctx context.Context, cfg *configs.Configs) (*Infra, error) {
 		return nil, err
 	}
 	infra.Database = db
-	infra.Repo = sql.New(ctx, db.Conn)
+	infra.Repo = sql.New(ctx, db)
 
 	// use Nats msgbus by default
 	bus, err := msgbusnats.New(ctx, infra.Configs.MsgBus)
