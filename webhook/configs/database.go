@@ -10,7 +10,7 @@ type Database struct {
 }
 
 func (cfg *Configs) useDatabase(provider *viper.Viper) error {
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_DATABASE_DSN", "sqlite:///tmp/scraphook.sqlite")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_DATABASE_DSN", "sqlite3:///tmp/scraphook.sqlite")
 
 	var db Database
 	if err := provider.Unmarshal(&db); err != nil {
