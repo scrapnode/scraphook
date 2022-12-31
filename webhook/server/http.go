@@ -17,7 +17,7 @@ type Http struct {
 	server *http.Server
 }
 
-func New(ctx context.Context, infra *infrastructure.Infra) *Http {
+func NewHTTP(ctx context.Context, infra *infrastructure.Infra) *Http {
 	logger := xlogger.FromContext(ctx).With("pkg", "server.http")
 	return &Http{infra: infra, logger: logger}
 }
@@ -62,7 +62,7 @@ func (server *Http) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (server *Http) Run() error {
+func (server *Http) Run(ctx context.Context) error {
 	server.logger.Debugw("running", "address", server.server.Addr)
 
 	if err := server.server.ListenAndServe(); err != http.ErrServerClosed {

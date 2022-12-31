@@ -12,7 +12,6 @@ import (
 func New() *cobra.Command {
 	command := &cobra.Command{
 		Use:       "webhook",
-		Short:     "webhook service commands",
 		Example:   "scraphook webhook serve",
 		ValidArgs: []string{"serve"},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
