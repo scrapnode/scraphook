@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/benbjohnson/clock v1.3.0
 	github.com/json-iterator/go v1.1.12
-	github.com/scrapnode/scrapcore v0.0.0-20221231134045-e3f9196a6343
+	github.com/scrapnode/scrapcore v0.0.0-20230101131020-cf599c9d97c9
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 	go.uber.org/zap v1.24.0
