@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/scrapnode/scraphook/internal/interfaces"
+	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/infrastructure"
 )
 
-func New(ctx context.Context, name string) (interfaces.Server, error) {
+func New(ctx context.Context, name string) (transport.Transport, error) {
 	cfg := configs.FromContext(ctx)
 	infra, err := infrastructure.New(ctx, cfg)
 	if err != nil {

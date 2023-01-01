@@ -1,7 +1,7 @@
 package configs
 
 import (
-	msgbusconfigs "github.com/scrapnode/scrapcore/msgbus/configs"
+	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/spf13/viper"
 )
 
@@ -23,7 +23,7 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 		return err
 	}
 
-	cfg.MsgBus = &msgbusconfigs.Configs{
+	cfg.MsgBus = &msgbus.Configs{
 		Uri:      bus.Uri,
 		Region:   bus.Region,
 		Name:     bus.Name,

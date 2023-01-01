@@ -2,19 +2,17 @@ package server
 
 import (
 	"context"
-	jsoniter "github.com/json-iterator/go"
+	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scraphook/webhook/infrastructure"
 	"go.uber.org/zap"
-	"log"
-	"net/http"
 )
 
 type Http struct {
 	infra  *infrastructure.Infra
 	logger *zap.SugaredLogger
 
-	server *http.Server
+	server transport.Transport
 }
 
 func NewHTTP(ctx context.Context, infra *infrastructure.Infra) *Http {
@@ -27,29 +25,22 @@ func (server *Http) Start(ctx context.Context) error {
 		return err
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("content-type", "application/json")
-
-		data, err := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(map[string]interface{}{
-			"version": server.infra.Configs.Version,
-			"env":     server.infra.Configs.Env,
-		})
-		i, err := writer.Write(data)
-		log.Println(i, err)
-	})
-
-	server.server = &http.Server{
-		Addr:    server.infra.Configs.Http.ServerListenAddress,
-		Handler: mux,
+	handlers := []*transport.HttpHandler{
+		transport.NewHttpPing(ctx, server.infra.Configs.Configs),
 	}
+	srv, err := transport.NewHttp(ctx, server.infra.Configs.Http, handlers)
+	if err != nil {
+		return err
+	}
+
+	server.server = srv
 	server.logger.Debug("connected")
 	return nil
 }
 
 func (server *Http) Stop(ctx context.Context) error {
 	if server.server != nil {
-		if err := server.server.Shutdown(ctx); err != nil {
+		if err := server.server.Stop(ctx); err != nil {
 			server.logger.Errorw("shutdown http server got error", "error", err.Error())
 		}
 	}
@@ -63,9 +54,9 @@ func (server *Http) Stop(ctx context.Context) error {
 }
 
 func (server *Http) Run(ctx context.Context) error {
-	server.logger.Debugw("running", "address", server.server.Addr)
+	server.logger.Debugw("running", "listen_address", server.infra.Configs.Http.ListenAddress)
 
-	if err := server.server.ListenAndServe(); err != http.ErrServerClosed {
+	if err := server.server.Run(ctx); err != nil {
 		return err
 	}
 	return nil

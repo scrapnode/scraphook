@@ -1,8 +1,9 @@
 package configs
 
 import (
-	databaseconfigs "github.com/scrapnode/scrapcore/database/configs"
-	msgbusconfigs "github.com/scrapnode/scrapcore/msgbus/configs"
+	"github.com/scrapnode/scrapcore/database"
+	"github.com/scrapnode/scrapcore/msgbus"
+	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xconfig"
 	"github.com/spf13/viper"
 )
@@ -12,10 +13,10 @@ var EVENT_TYPE_MESSAGE = "webhook.message"
 type Configs struct {
 	*xconfig.Configs
 
-	Http      *Http
+	Http      *transport.Configs
 	Validator *Validator
-	MsgBus    *msgbusconfigs.Configs
-	Database  *databaseconfigs.Configs
+	MsgBus    *msgbus.Configs
+	Database  *database.Configs
 }
 
 func New(provider *viper.Viper) (*Configs, error) {

@@ -15,6 +15,8 @@ do
     echo "${PACKAGE}@${latest}"
 
     go get "${PACKAGE}@${latest}"
+    go mod tidy
+    
     git add go.mod go.sum
     git commit -m "chore: bump ${REPO} to ${latest}"
 done

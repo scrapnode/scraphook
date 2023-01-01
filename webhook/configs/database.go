@@ -1,7 +1,7 @@
 package configs
 
 import (
-	databaseconfigs "github.com/scrapnode/scrapcore/database/configs"
+	"github.com/scrapnode/scrapcore/database"
 	"github.com/spf13/viper"
 )
 
@@ -19,7 +19,7 @@ func (cfg *Configs) useDatabase(provider *viper.Viper) error {
 		return err
 	}
 
-	cfg.Database = &databaseconfigs.Configs{
+	cfg.Database = &database.Configs{
 		Dsn:        db.Dsn,
 		MigrateDir: db.MigrateDir,
 	}
