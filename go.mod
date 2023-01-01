@@ -4,8 +4,7 @@ go 1.19
 
 require (
 	github.com/benbjohnson/clock v1.3.0
-	github.com/json-iterator/go v1.1.12
-	github.com/scrapnode/scrapcore v0.0.0-20230101132504-426f92f1a83f
+	github.com/scrapnode/scrapcore v0.0.0-20230101133621-54a6ded5734d
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 	go.uber.org/zap v1.24.0
@@ -32,6 +31,8 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/compress v1.15.13 // indirect
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
