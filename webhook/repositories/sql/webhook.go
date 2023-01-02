@@ -2,10 +2,10 @@ package sql
 
 import (
 	"github.com/benbjohnson/clock"
-	"gorm.io/gorm"
+	"github.com/scrapnode/scrapcore/database/sql"
 )
 
 type WebhookRepo struct {
-	conn  *gorm.DB
+	db    *sql.SQL
 	clock clock.Clock
 }

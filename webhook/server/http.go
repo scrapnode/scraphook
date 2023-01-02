@@ -27,6 +27,7 @@ func (server *Http) Start(ctx context.Context) error {
 
 	handlers := []*transport.HttpHandler{
 		transport.NewHttpPing(ctx, server.app.Configs.Configs),
+		UseHttpReceiveMessage(server.app),
 	}
 	srv, err := transport.NewHttp(ctx, server.app.Configs.Http, handlers)
 	if err != nil {

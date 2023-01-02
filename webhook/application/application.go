@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"github.com/benbjohnson/clock"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/msgbus/nats"
 	"github.com/scrapnode/scrapcore/xlogger"
@@ -13,7 +14,11 @@ import (
 )
 
 func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
-	app := &App{Configs: cfg, Logger: xlogger.FromContext(ctx).With("pkg", "scraphook.webhook.application")}
+	app := &App{
+		Configs: cfg,
+		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.webhook.application"),
+		Clock:   clock.New(),
+	}
 
 	repo, err := sql.New(ctx, cfg.Database)
 	if err != nil {
@@ -37,6 +42,7 @@ type App struct {
 	Repo    *repositories.Repo
 
 	// services
+	Clock  clock.Clock
 	MsgBus msgbus.MsgBus
 	mu     sync.Mutex
 }

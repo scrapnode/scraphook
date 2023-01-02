@@ -13,7 +13,7 @@ var (
 	ErrWebhookNotFound = errors.New("webhook: webhook is not found")
 )
 
-func UseReceiveMessage(ctx context.Context, app *App) pipeline.Pipe {
+func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		UseReceiveMessageGetWebhook(app),
 		UseReceiveMessagePublishMessage(app),

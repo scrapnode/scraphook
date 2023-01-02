@@ -11,7 +11,7 @@ import (
 func (repo *WebhookRepo) GetToken(id, token string) (*entities.WebhookToken, error) {
 	whtoken := &entities.WebhookToken{}
 
-	tx := repo.conn.
+	tx := repo.db.GetConn().(*gorm.DB).
 		Preload("Webhook").
 		Scopes(sql.UseNotDeleted(repo.clock)).
 		Where("webhook_id = ? AND token = ?", id, token).
