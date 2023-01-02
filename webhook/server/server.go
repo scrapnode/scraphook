@@ -4,22 +4,22 @@ import (
 	"context"
 	"errors"
 	"github.com/scrapnode/scrapcore/transport"
+	"github.com/scrapnode/scraphook/webhook/application"
 	"github.com/scrapnode/scraphook/webhook/configs"
-	"github.com/scrapnode/scraphook/webhook/infrastructure"
 )
 
-func New(ctx context.Context, name string) (transport.Transport, error) {
+func New(ctx context.Context, transport string) (transport.Transport, error) {
 	cfg := configs.FromContext(ctx)
-	infra, err := infrastructure.New(ctx, cfg)
+	app, err := application.New(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	if name == "grpc" {
+	if transport == "grpc" {
 		//@TODO: implement gRPC server
 		return nil, errors.New("server: gRPC server is not implemented yet")
 	}
 
 	// by default, we will serve HTTP server
-	return NewHTTP(ctx, infra), nil
+	return NewHTTP(ctx, app), nil
 }

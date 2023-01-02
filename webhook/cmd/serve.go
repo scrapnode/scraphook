@@ -23,7 +23,8 @@ func NewServe() *cobra.Command {
 			ctx := cmd.Context()
 			logger := xlogger.FromContext(ctx).With("fn", "cli.serve")
 
-			srv, err := server.New(ctx, args[0])
+			transport := args[0]
+			srv, err := server.New(ctx, transport)
 			if err != nil {
 				logger.Fatal(err)
 			}
@@ -43,6 +44,7 @@ func NewServe() *cobra.Command {
 				}
 			}()
 
+			logger.Infow("running", "transport", transport)
 			// Listen for the interrupt signal.
 			<-ctx.Done()
 			// make sure once we stop process, we cancel all the execution

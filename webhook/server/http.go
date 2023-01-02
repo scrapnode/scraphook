@@ -4,31 +4,31 @@ import (
 	"context"
 	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xlogger"
-	"github.com/scrapnode/scraphook/webhook/infrastructure"
+	"github.com/scrapnode/scraphook/webhook/application"
 	"go.uber.org/zap"
 )
 
 type Http struct {
-	infra  *infrastructure.Infra
+	app    *application.App
 	logger *zap.SugaredLogger
 
 	server transport.Transport
 }
 
-func NewHTTP(ctx context.Context, infra *infrastructure.Infra) *Http {
+func NewHTTP(ctx context.Context, app *application.App) *Http {
 	logger := xlogger.FromContext(ctx).With("pkg", "server.http")
-	return &Http{infra: infra, logger: logger}
+	return &Http{app: app, logger: logger}
 }
 
 func (server *Http) Start(ctx context.Context) error {
-	if err := server.infra.Connect(ctx); err != nil {
+	if err := server.app.Connect(ctx); err != nil {
 		return err
 	}
 
 	handlers := []*transport.HttpHandler{
-		transport.NewHttpPing(ctx, server.infra.Configs.Configs),
+		transport.NewHttpPing(ctx, server.app.Configs.Configs),
 	}
-	srv, err := transport.NewHttp(ctx, server.infra.Configs.Http, handlers)
+	srv, err := transport.NewHttp(ctx, server.app.Configs.Http, handlers)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (server *Http) Stop(ctx context.Context) error {
 		}
 	}
 
-	if err := server.infra.Disconnect(ctx); err != nil {
+	if err := server.app.Disconnect(ctx); err != nil {
 		return err
 	}
 
@@ -54,7 +54,7 @@ func (server *Http) Stop(ctx context.Context) error {
 }
 
 func (server *Http) Run(ctx context.Context) error {
-	server.logger.Debugw("running", "listen_address", server.infra.Configs.Http.ListenAddress)
+	server.logger.Debugw("running", "listen_address", server.app.Configs.Http.ListenAddress)
 
 	if err := server.server.Run(ctx); err != nil {
 		return err

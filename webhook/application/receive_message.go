@@ -7,17 +7,16 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/webhook/configs"
-	"github.com/scrapnode/scraphook/webhook/infrastructure"
 )
 
 var (
 	ErrWebhookNotFound = errors.New("webhook: webhook is not found")
 )
 
-func UseReceiveMessage(ctx context.Context, infra *infrastructure.Infra) pipeline.Pipe {
+func UseReceiveMessage(ctx context.Context, app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		UseReceiveMessageGetWebhook(infra),
-		UseReceiveMessagePublishMessage(infra),
+		UseReceiveMessageGetWebhook(app),
+		UseReceiveMessagePublishMessage(app),
 	})
 }
 
@@ -31,13 +30,13 @@ type ReceiveMessageRes struct {
 	PubKey  string
 }
 
-func UseReceiveMessageGetWebhook(infra *infrastructure.Infra) pipeline.Pipeline {
+func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
-			logger := infra.Logger.With("webhook_id", req.WebhookId)
+			logger := app.Logger.With("webhook_id", req.WebhookId)
 
-			token, err := infra.Repo.Webhook.GetToken(req.WebhookId, req.WebhookToken)
+			token, err := app.Repo.Webhook.GetToken(req.WebhookId, req.WebhookToken)
 			if err != nil {
 				logger.Errorw(ErrWebhookNotFound.Error(), "error", err.Error())
 				return ctx, ErrWebhookNotFound
@@ -49,7 +48,7 @@ func UseReceiveMessageGetWebhook(infra *infrastructure.Infra) pipeline.Pipeline 
 	}
 }
 
-func UseReceiveMessagePublishMessage(infra *infrastructure.Infra) pipeline.Pipeline {
+func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
@@ -67,7 +66,7 @@ func UseReceiveMessagePublishMessage(infra *infrastructure.Infra) pipeline.Pipel
 				return ctx, err
 			}
 
-			pub, err := infra.MsgBus.Pub(ctx, event)
+			pub, err := app.MsgBus.Pub(ctx, event)
 			if err != nil {
 				return ctx, err
 			}
