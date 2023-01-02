@@ -1,11 +1,15 @@
 package repositories
 
 import (
-	"context"
-	"github.com/scrapnode/scraphook/webhook/repositories/interfaces"
-	"github.com/scrapnode/scraphook/webhook/repositories/sql"
+	"github.com/scrapnode/scrapcore/database"
+	"github.com/scrapnode/scraphook/entities"
 )
 
-func New(ctx context.Context) (*interfaces.Repo, error) {
-	return sql.New(ctx), nil
+type Repo struct {
+	Database database.Database
+	Webhook  WebhookRepo
+}
+
+type WebhookRepo interface {
+	GetToken(id, token string) (*entities.WebhookToken, error)
 }
