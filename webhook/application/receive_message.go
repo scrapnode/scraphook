@@ -2,15 +2,10 @@ package application
 
 import (
 	"context"
-	"errors"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/webhook/configs"
-)
-
-var (
-	ErrWebhookNotFound = errors.New("webhook: webhook is not found")
 )
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
@@ -46,6 +41,10 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 			}
 
 			req.Webhook = token.Webhook
+			req.Message.WorkspaceId = req.Webhook.WorkspaceId
+			req.Message.WebhookId = req.Webhook.Id
+
+			logger.Debugw("found webhook", "workspace_id", req.Message.WorkspaceId)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			return next(ctx)
 		}
@@ -56,6 +55,9 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
+			logger := app.Logger.
+				With("webhook_id", req.Message.WebhookId).
+				With("workspace_id", req.Message.WorkspaceId)
 
 			event := &msgbus.Event{
 				Workspace: req.Webhook.WorkspaceId,
@@ -75,6 +77,7 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			}
 
 			res := &ReceiveMessageRes{PubKey: pub.Key}
+			logger.Debugw("published event", "pubkey", res.PubKey)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}

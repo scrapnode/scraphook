@@ -6,7 +6,6 @@ import (
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scraphook/webhook/application"
 	"go.uber.org/zap"
-	"log"
 )
 
 type Scheduler struct {
@@ -27,10 +26,7 @@ func (service *Scheduler) Start(ctx context.Context) error {
 	}
 
 	sample := &msgbus.Event{Workspace: "*", App: "*", Type: "*"}
-	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sample", func(event *msgbus.Event) error {
-		log.Println(event)
-		return nil
-	})
+	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sample", UseSubscriber(service.app))
 	if err != nil {
 		return err
 	}

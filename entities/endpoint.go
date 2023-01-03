@@ -20,10 +20,8 @@ func (endpoint *Endpoint) TableName() string {
 }
 
 type EndpointRule struct {
-	WorkspaceId string `json:"workspace_id" gorm:"index:ws_wh_ep,priority:30"`
-	WebhookId   string `json:"webhook_id" gorm:"index:ws_wh_ep,priority:20"`
-	EndpointId  string `json:"endpoint_id" gorm:"index:ws_wh_ep,priority:10"`
-	Id          string `json:"id" gorm:"primaryKey"`
+	EndpointId string `json:"endpoint_id" gorm:"index"`
+	Id         string `json:"id" gorm:"primaryKey"`
 
 	Rule     string `json:"rule" gorm:"size:2048"`
 	Negative bool   `json:"negative" gorm:"default:false"`

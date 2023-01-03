@@ -2,15 +2,10 @@ package application
 
 import (
 	"context"
-	"errors"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/utils"
 	"github.com/scrapnode/scraphook/entities"
 	"time"
-)
-
-var (
-	ErrWebhookTokenInvalid = errors.New("webhook: webhook token is not valid")
 )
 
 func UseValidateWebhook(app *App) pipeline.Pipe {
@@ -49,7 +44,9 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 
 			req.WebhookToken = token
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
+
 			res := &ValidateWebhookRes{Challenge: req.Challenge, Timestamps: time.Now().UTC().UnixMilli()}
+			logger.Debugw("validated successfully", "timestamps", res.Timestamps)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
