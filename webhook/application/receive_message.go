@@ -15,19 +15,20 @@ var (
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseValidator(),
 		UseReceiveMessageGetWebhook(app),
 		UseReceiveMessagePublishMessage(app),
 	})
 }
 
 type ReceiveMessageReq struct {
-	WebhookId    string
-	WebhookToken string
+	WebhookId    string `validate:"required"`
+	WebhookToken string `validate:"required"`
+	Webhook      *entities.Webhook
 	Message      *entities.Message
 }
 type ReceiveMessageRes struct {
-	Webhook *entities.Webhook
-	PubKey  string
+	PubKey string `json:"pubkey"`
 }
 
 func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
@@ -42,8 +43,9 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 				return ctx, ErrWebhookNotFound
 			}
 
-			res := &ReceiveMessageRes{Webhook: token.Webhook}
-			return next(context.WithValue(ctx, pipeline.CTXKEY_RES, res))
+			req.Webhook = token.Webhook
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
+			return next(ctx)
 		}
 	}
 }
@@ -52,11 +54,10 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
-			res := ctx.Value(pipeline.CTXKEY_RES).(*ReceiveMessageRes)
 
 			event := &msgbus.Event{
-				Workspace: res.Webhook.WorkspaceId,
-				App:       res.Webhook.Id,
+				Workspace: req.Webhook.WorkspaceId,
+				App:       req.Webhook.Id,
 				Type:      configs.EVENT_TYPE_MESSAGE,
 			}
 			// not way to let the error is raised here
@@ -71,8 +72,9 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 				return ctx, err
 			}
 
-			res.PubKey = pub.Key
-			return next(context.WithValue(ctx, pipeline.CTXKEY_RES, res))
+			res := &ReceiveMessageRes{PubKey: pub.Key}
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
+			return next(ctx)
 		}
 	}
 }

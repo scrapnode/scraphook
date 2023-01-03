@@ -2,7 +2,6 @@ package sql
 
 import (
 	"context"
-	"github.com/benbjohnson/clock"
 	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/database/sql"
 	"github.com/scrapnode/scraphook/webhook/repositories"
@@ -16,7 +15,7 @@ func New(ctx context.Context, cfg *database.Configs) (*repositories.Repo, error)
 
 	repo := &repositories.Repo{
 		Database: db,
-		Webhook:  &WebhookRepo{db: db, clock: clock.New()},
+		Webhook:  &WebhookRepo{db: db},
 	}
 	return repo, nil
 }

@@ -44,7 +44,6 @@ type WebhookToken struct {
 	Token string `json:"token" gorm:"<-:create,unique,not null,size:256"`
 
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
-	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
 
 	Webhook *Webhook
 }

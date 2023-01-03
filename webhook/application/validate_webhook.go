@@ -19,11 +19,11 @@ func UseValidateWebhook(ctx context.Context, app *App) pipeline.Pipe {
 }
 
 type ValidateWebhookReq struct {
-	Id    string
-	Token string
+	Id           string
+	Token        string
+	WebhookToken *entities.WebhookToken
 }
 type ValidateWebhookRes struct {
-	WebhookToken *entities.WebhookToken
 }
 
 func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
@@ -40,8 +40,10 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 			// censor token before return value
 			token.Censor()
 
-			res := &ValidateWebhookRes{WebhookToken: token}
-			return next(context.WithValue(ctx, pipeline.CTXKEY_RES, res))
+			req.WebhookToken = token
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, &ValidateWebhookRes{})
+			return next(ctx)
 		}
 	}
 }

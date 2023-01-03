@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS webhook_tokens (
     id VARCHAR(64) NOT NULL,
     token VARCHAR(256) NOT NULL,
     created_at BIGINT DEFAULT 0,
-    updated_at BIGINT DEFAULT 0,
     CONSTRAINT scraphook_webhook_tokens_pk PRIMARY KEY (id)
 );
 CREATE INDEX scraphook_webhooks_idx_webhook_id ON webhook_tokens (webhook_id);

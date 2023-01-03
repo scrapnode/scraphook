@@ -6,4 +6,4 @@ INSERT INTO webhooks (workspace_id, id, name, created_at, updated_at) VALUES ('w
 -- cleanup
 DELETE FROM webhook_tokens WHERE id = 'wht_simple';
 -- insert a new one
-INSERT INTO webhook_tokens (webhook_id, id, token, created_at) VALUES ('wh_demo', 'whtoken_simple','notsimpleasyouthought', 1645488000000000000);
+INSERT INTO webhook_tokens (webhook_id, id, token, created_at) VALUES ('wh_demo', 'wht_simple','notsimpleasyouthought', 1645488000000000000);

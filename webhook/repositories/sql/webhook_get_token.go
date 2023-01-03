@@ -3,7 +3,6 @@ package sql
 import (
 	"errors"
 	"github.com/scrapnode/scrapcore/database"
-	"github.com/scrapnode/scrapcore/database/sql"
 	"github.com/scrapnode/scraphook/entities"
 	"gorm.io/gorm"
 )
@@ -13,7 +12,6 @@ func (repo *WebhookRepo) GetToken(id, token string) (*entities.WebhookToken, err
 
 	tx := repo.db.GetConn().(*gorm.DB).
 		Preload("Webhook").
-		Scopes(sql.UseNotDeleted(repo.clock)).
 		Where("webhook_id = ? AND token = ?", id, token).
 		First(whtoken)
 	if tx.Error != nil {

@@ -8,8 +8,8 @@ type Validator struct {
 }
 
 func (cfg *Configs) useValidator(provider *viper.Viper) error {
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_VALIDATOR_CHALLENGE_QUERY_NAME", "scraphook.challenge")
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_VALIDATOR_VERIFY_TOKEN_QUERY_NAME", "scraphook.verify_token")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_VALIDATOR_CHALLENGE_QUERY_NAME", "wh.challenge")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_VALIDATOR_VERIFY_TOKEN_QUERY_NAME", "wh.verify_token")
 
 	return provider.Unmarshal(&cfg.Validator)
 }
