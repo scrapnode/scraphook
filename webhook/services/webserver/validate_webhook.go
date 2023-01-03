@@ -1,4 +1,4 @@
-package http
+package webserver
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func UseHttpValidateWebhook(app *application.App) *transport.HttpHandler {
+func UseValidateWebhook(app *application.App) *transport.HttpHandler {
 	run := application.UseValidateWebhook(app)
 
 	return &transport.HttpHandler{

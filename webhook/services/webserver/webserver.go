@@ -1,4 +1,4 @@
-package http
+package webserver
 
 import (
 	"context"
@@ -8,27 +8,27 @@ import (
 	"go.uber.org/zap"
 )
 
-type Http struct {
+type Webserver struct {
 	app    *application.App
 	logger *zap.SugaredLogger
 
 	server transport.Transport
 }
 
-func New(ctx context.Context, app *application.App) *Http {
+func New(ctx context.Context, app *application.App) *Webserver {
 	logger := xlogger.FromContext(ctx).With("service", "http")
-	return &Http{app: app, logger: logger}
+	return &Webserver{app: app, logger: logger}
 }
 
-func (service *Http) Start(ctx context.Context) error {
+func (service *Webserver) Start(ctx context.Context) error {
 	if err := service.app.Connect(ctx); err != nil {
 		return err
 	}
 
 	handlers := []*transport.HttpHandler{
 		transport.NewHttpPing(ctx, service.app.Configs.Configs),
-		UseHttpReceiveMessage(service.app),
-		UseHttpValidateWebhook(service.app),
+		UseReceiveMessage(service.app),
+		UseValidateWebhook(service.app),
 	}
 	srv, err := transport.NewHttp(ctx, service.app.Configs.Http, handlers)
 	if err != nil {
@@ -40,7 +40,7 @@ func (service *Http) Start(ctx context.Context) error {
 	return nil
 }
 
-func (service *Http) Stop(ctx context.Context) error {
+func (service *Webserver) Stop(ctx context.Context) error {
 	if service.server != nil {
 		if err := service.server.Stop(ctx); err != nil {
 			service.logger.Errorw("shutdown http server got error", "error", err.Error())
@@ -55,7 +55,7 @@ func (service *Http) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (service *Http) Run(ctx context.Context) error {
+func (service *Webserver) Run(ctx context.Context) error {
 	service.logger.Debugw("running", "listen_address", service.app.Configs.Http.ListenAddress)
 
 	if err := service.server.Run(ctx); err != nil {

@@ -8,7 +8,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var EVENT_TYPE_MESSAGE = "webhook.message"
+var (
+	EVENT_TYPE_MESSAGE     = "webhook.message"
+	EVENT_TYPE_FORWARD_REQ = "webhook.forward.request"
+	EVENT_TYPE_FORWARD_RES = "webhook.forward.response"
+)
 
 type Configs struct {
 	*xconfig.Configs

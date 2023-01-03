@@ -1,4 +1,4 @@
-package http
+package webserver
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func UseHttpReceiveMessage(app *application.App) *transport.HttpHandler {
+func UseReceiveMessage(app *application.App) *transport.HttpHandler {
 	run := application.UseReceiveMessage(app)
 
 	return &transport.HttpHandler{

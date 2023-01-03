@@ -1,11 +1,12 @@
-package server
+package services
 
 import (
 	"context"
-	"errors"
 	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scraphook/webhook/application"
 	"github.com/scrapnode/scraphook/webhook/configs"
+	"github.com/scrapnode/scraphook/webhook/services/scheduler"
+	"github.com/scrapnode/scraphook/webhook/services/webserver"
 )
 
 func New(ctx context.Context, transport string) (transport.Transport, error) {
@@ -15,11 +16,10 @@ func New(ctx context.Context, transport string) (transport.Transport, error) {
 		return nil, err
 	}
 
-	if transport == "grpc" {
-		//@TODO: implement gRPC server
-		return nil, errors.New("server: gRPC server is not implemented yet")
+	if transport == "scheduler" {
+		return scheduler.New(ctx, app), nil
 	}
 
 	// by default, we will serve HTTP server
-	return NewHTTP(ctx, app), nil
+	return webserver.New(ctx, app), nil
 }

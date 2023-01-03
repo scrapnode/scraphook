@@ -28,7 +28,7 @@ func New() *cobra.Command {
 			}
 			ctx = configs.WithContext(ctx, cfg)
 
-			logger := xlogger.New(cfg.Debug()).With("service", "scraphook.webhook")
+			logger := xlogger.New(cfg.Debug()).With("service_group", "scraphook.webhook")
 			ctx = xlogger.WithContext(ctx, logger)
 
 			if err := runDBTasks(cmd, ctx); err != nil {
