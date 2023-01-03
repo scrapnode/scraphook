@@ -48,7 +48,7 @@ func (service *Webserver) Stop(ctx context.Context) error {
 	}
 
 	if err := service.app.Disconnect(ctx); err != nil {
-		return err
+		service.logger.Errorw("disconnect app got error", "error", err.Error())
 	}
 
 	service.logger.Debug("disconnected")
