@@ -28,24 +28,18 @@ func UseHttpValidateWebhook(app *application.App) *transport.HttpHandler {
 			ctx, err := run(ctx)
 			if err != nil {
 				logger.Error(err)
-				if err := transport.WriteErr400(writer, err); err != nil {
-					logger.Errorw("could not send json data to client", "error", err.Error())
-				}
+				transport.WriteErr400(writer, err)
 				return
 			}
 
 			res := ctx.Value(pipeline.CTXKEY_RES).(*application.ValidateWebhookRes)
 			// if res.challenge is set, sent raw string
 			if res.Challenge != "" {
-				if err := transport.WriteString(writer, res.Challenge); err != nil {
-					logger.Errorw("could not send string data to client", "error", err.Error())
-				}
+				transport.WriteString(writer, res.Challenge)
 				return
 			}
-
-			if err := transport.WriteJSON(writer, res); err != nil {
-				logger.Errorw("could not send json data to client", "error", err.Error())
-			}
+			// otherwise return all responses object
+			transport.WriteJSON(writer, res)
 		},
 	}
 }

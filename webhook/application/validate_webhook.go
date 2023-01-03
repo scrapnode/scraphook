@@ -6,6 +6,7 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/utils"
 	"github.com/scrapnode/scraphook/entities"
+	"time"
 )
 
 var (
@@ -14,6 +15,7 @@ var (
 
 func UseValidateWebhook(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseRecovery(app.Logger),
 		pipeline.UseValidator(),
 		UseValidateWebhookCheckToken(app),
 	})
@@ -27,7 +29,8 @@ type ValidateWebhookReq struct {
 	WebhookToken *entities.WebhookToken
 }
 type ValidateWebhookRes struct {
-	Challenge string
+	Challenge  string `validate:"challenge"`
+	Timestamps int64  `validate:"timestamps"`
 }
 
 func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
@@ -46,7 +49,8 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 
 			req.WebhookToken = token
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
-			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, &ValidateWebhookRes{Challenge: req.Challenge})
+			res := &ValidateWebhookRes{Challenge: req.Challenge, Timestamps: time.Now().UTC().UnixMilli()}
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
 	}

@@ -15,6 +15,7 @@ var (
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseRecovery(app.Logger),
 		pipeline.UseValidator(),
 		UseReceiveMessageGetWebhook(app),
 		UseReceiveMessagePublishMessage(app),

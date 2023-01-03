@@ -27,20 +27,17 @@ func UseHttpReceiveMessage(app *application.App) *transport.HttpHandler {
 			var body transport.Body
 			if err := body.FromHttpRequest(r); err != nil {
 				logger.Error(err)
-				if err := transport.WriteErr400(writer, err); err != nil {
-					logger.Errorw("could not parse body", "error", err.Error())
-				}
+				transport.WriteErr400(writer, err)
 				return
 			}
 
 			var headers transport.Headers
 			if err := headers.FromHttpRequest(r); err != nil {
 				logger.Error(err)
-				if err := transport.WriteErr400(writer, err); err != nil {
-					logger.Errorw("could not parse headers", "error", err.Error())
-				}
+				transport.WriteErr400(writer, err)
 				return
 			}
+
 			req.Message = &entities.Message{
 				Timestamps: app.Clock.Now().UTC().UnixMilli(),
 				Headers:    headers.ToString(),
@@ -52,16 +49,12 @@ func UseHttpReceiveMessage(app *application.App) *transport.HttpHandler {
 			ctx, err := run(ctx)
 			if err != nil {
 				logger.Error(err)
-				if err := transport.WriteErr400(writer, err); err != nil {
-					logger.Errorw("could not send json data to client", "error", err.Error())
-				}
+				transport.WriteErr400(writer, err)
 				return
 			}
 
 			res := ctx.Value(pipeline.CTXKEY_RES)
-			if err := transport.WriteJSON(writer, res); err != nil {
-				logger.Errorw("could not send json data to client", "error", err.Error())
-			}
+			transport.WriteJSON(writer, res)
 		},
 	}
 }
