@@ -22,10 +22,11 @@ func UseReceiveMessage(app *App) pipeline.Pipe {
 }
 
 type ReceiveMessageReq struct {
-	WebhookId    string `validate:"required"`
-	WebhookToken string `validate:"required"`
-	Webhook      *entities.Webhook
-	Message      *entities.Message
+	Id    string `validate:"required"`
+	Token string `validate:"required"`
+
+	Webhook *entities.Webhook
+	Message *entities.Message
 }
 type ReceiveMessageRes struct {
 	PubKey string `json:"pubkey"`
@@ -35,9 +36,9 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
-			logger := app.Logger.With("webhook_id", req.WebhookId)
+			logger := app.Logger.With("webhook_id", req.Id)
 
-			token, err := app.Repo.Webhook.GetToken(req.WebhookId, req.WebhookToken)
+			token, err := app.Repo.Webhook.GetToken(req.Id, req.Token)
 			if err != nil {
 				logger.Errorw(ErrWebhookNotFound.Error(), "error", err.Error())
 				return ctx, ErrWebhookNotFound

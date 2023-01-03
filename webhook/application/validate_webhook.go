@@ -12,18 +12,22 @@ var (
 	ErrWebhookTokenInvalid = errors.New("webhook: webhook token is not valid")
 )
 
-func UseValidateWebhook(ctx context.Context, app *App) pipeline.Pipe {
+func UseValidateWebhook(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseValidator(),
 		UseValidateWebhookCheckToken(app),
 	})
 }
 
 type ValidateWebhookReq struct {
-	Id           string
-	Token        string
+	Id        string `validate:"required"`
+	Token     string `validate:"required"`
+	Challenge string
+
 	WebhookToken *entities.WebhookToken
 }
 type ValidateWebhookRes struct {
+	Challenge string
 }
 
 func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
@@ -42,7 +46,7 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 
 			req.WebhookToken = token
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
-			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, &ValidateWebhookRes{})
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, &ValidateWebhookRes{Challenge: req.Challenge})
 			return next(ctx)
 		}
 	}

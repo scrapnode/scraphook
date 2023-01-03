@@ -19,8 +19,8 @@ func UseHttpReceiveMessage(app *application.App) *transport.HttpHandler {
 		Handler: func(writer http.ResponseWriter, r *http.Request) {
 			params := httprouter.ParamsFromContext(r.Context())
 			req := &application.ReceiveMessageReq{
-				WebhookId:    params.ByName("hook_id"),
-				WebhookToken: r.URL.Query().Get(app.Configs.Validator.VerifyTokenQueryName),
+				Id:    params.ByName("hook_id"),
+				Token: r.URL.Query().Get(app.Configs.Validator.VerifyTokenQueryName),
 			}
 			logger := app.Logger.With("method", http.MethodPost, "path", r.RequestURI, "http_name", "receive_message")
 
