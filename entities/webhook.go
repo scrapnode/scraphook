@@ -13,7 +13,6 @@ type Webhook struct {
 
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
 	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
-	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
 }
 
 func (wh *Webhook) TableName() string {
@@ -39,11 +38,10 @@ func (wh *Webhook) Key() string {
 }
 
 type WebhookToken struct {
-	WorkspaceId string `json:"workspace_id" gorm:"index:ws_wh,priority:30"`
-	WebhookId   string `json:"webhook_id" gorm:"index:ws_wh,priority:20"`
-	Id          string `json:"id" gorm:"primaryKey"`
+	WebhookId string `json:"webhook_id" gorm:"index:ws_wh,priority:20"`
+	Id        string `json:"id" gorm:"primaryKey"`
 
-	Token string `json:"name" gorm:"<-:create,unique,not null"`
+	Token string `json:"token" gorm:"<-:create,unique,not null,size:256"`
 
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
 	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
@@ -51,10 +49,20 @@ type WebhookToken struct {
 	Webhook *Webhook
 }
 
-func (token *WebhookToken) TableName() string {
+func (wht *WebhookToken) TableName() string {
 	return "webhook_tokens"
 }
 
-func (token *WebhookToken) Censor() {
-	token.Token = utils.Censor(token.Token, 5)
+func (wht *WebhookToken) Censor() {
+	wht.Token = utils.Censor(wht.Token, 5)
+}
+
+func (wht *WebhookToken) WithId() bool {
+	// only set data if it wasn't set yet
+	if wht.Id != "" {
+		return false
+	}
+
+	wht.Id = utils.NewId("wht")
+	return true
 }

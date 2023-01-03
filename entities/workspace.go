@@ -13,7 +13,6 @@ type Workspace struct {
 
 	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
 	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
-	DeletedAt int64 `json:"deleted_at" gorm:"default:0"`
 }
 
 func (ws *Workspace) TableName() string {

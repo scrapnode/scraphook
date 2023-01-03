@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	corecmd "github.com/scrapnode/scrapcore/cmd"
 	coredb "github.com/scrapnode/scrapcore/database/sql"
 	"github.com/scrapnode/scrapcore/xconfig"
@@ -30,23 +31,8 @@ func New() *cobra.Command {
 			logger := xlogger.New(cfg.Debug()).With("service", "scraphook.webhook")
 			ctx = xlogger.WithContext(ctx, logger)
 
-			if ok := corecmd.MustGetFlagBool(cmd, "auto-migrate"); ok {
-				db, err := coredb.New(xlogger.WithContext(ctx, logger.With("fn", "cli.auto-migrate")), cfg.Database)
-				if err != nil {
-					logger.Fatal(err)
-				}
-				defer func() {
-					if err := db.Disconnect(ctx); err != nil {
-						logger.Error(err)
-					}
-				}()
-				if err := db.Connect(ctx); err != nil {
-					logger.Fatal(err)
-				}
-
-				if err := db.Migrate(ctx); err != nil {
-					logger.Fatal(err)
-				}
+			if err := runDBTasks(cmd, ctx); err != nil {
+				return err
 			}
 
 			cmd.SetContext(ctx)
@@ -57,5 +43,47 @@ func New() *cobra.Command {
 	command.AddCommand(NewServe())
 
 	command.PersistentFlags().BoolP("auto-migrate", "", false, "run migrate up automatically")
+	command.PersistentFlags().StringArrayP("seeds", "", []string{}, "seed files that will be run before start your application")
+
 	return command
+}
+
+func runDBTasks(cmd *cobra.Command, ctx context.Context) error {
+	shouldMigrate := corecmd.MustGetFlagBool(cmd, "auto-migrate")
+	seeds := corecmd.MustGetFlagStringArray(cmd, "seeds")
+	if !shouldMigrate && len(seeds) == 0 {
+		return nil
+	}
+
+	cfg := configs.FromContext(ctx)
+	logger := xlogger.FromContext(ctx).With("fn", "cli.auto-migrate")
+	ctx = xlogger.WithContext(ctx, logger)
+
+	db, err := coredb.New(ctx, cfg.Database)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := db.Disconnect(ctx); err != nil {
+			logger.Error(err)
+		}
+	}()
+	if err := db.Connect(ctx); err != nil {
+		return err
+	}
+
+	if shouldMigrate {
+		if err := db.Migrate(ctx); err != nil {
+			return err
+		}
+	}
+
+	if len(seeds) > 0 {
+		if err := db.Seed(ctx, seeds); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
