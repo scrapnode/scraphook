@@ -20,14 +20,15 @@ func (endpoint *Endpoint) TableName() string {
 }
 
 type EndpointRule struct {
-	EndpointId string `json:"endpoint_id" gorm:"index"`
-	Id         string `json:"id" gorm:"primaryKey"`
+	EndpointId string `json:"endpoint_id"`
+	Id         string `json:"id"`
 
-	Rule     string `json:"rule" gorm:"size:2048"`
-	Negative bool   `json:"negative" gorm:"default:false"`
+	Rule     string `json:"rule"`
+	Negative bool   `json:"negative"`
+	Priority int    `json:"priority"`
 
-	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
-	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 func (endpointRule *EndpointRule) TableName() string {

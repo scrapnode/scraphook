@@ -39,12 +39,12 @@ CREATE TABLE IF NOT EXISTS endpoints (
 );
 CREATE INDEX scraphook_endpoints_idx_workspace_webhook_ids ON endpoints (workspace_id DESC, webhook_id DESC);
 
-
 CREATE TABLE IF NOT EXISTS endpoint_rules (
     endpoint_id VARCHAR(64) NOT NULL,
     id VARCHAR(64) NOT NULL,
     rule VARCHAR(2048) NOT NULL,
     negative BOOLEAN DEFAULT FALSE,
+    priority INT DEFAULT 0,
     created_at BIGINT DEFAULT 0,
     updated_at BIGINT DEFAULT 0,
     CONSTRAINT scraphook_endpoint_rules_pk PRIMARY KEY (id)

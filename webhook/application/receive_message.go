@@ -44,7 +44,7 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 			req.Message.WorkspaceId = req.Webhook.WorkspaceId
 			req.Message.WebhookId = req.Webhook.Id
 
-			logger.Debugw("found webhook", "workspace_id", req.Message.WorkspaceId)
+			logger.Debugw("webhook.receive_message: found webhook", "workspace_id", req.Message.WorkspaceId)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			return next(ctx)
 		}
@@ -77,7 +77,7 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			}
 
 			res := &ReceiveMessageRes{PubKey: pub.Key}
-			logger.Debugw("published event", "pubkey", res.PubKey)
+			logger.Debugw("webhook.receive_message: published event", "pubkey", res.PubKey)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}

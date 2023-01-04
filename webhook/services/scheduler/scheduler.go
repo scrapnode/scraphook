@@ -5,6 +5,7 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scraphook/webhook/application"
+	"github.com/scrapnode/scraphook/webhook/configs"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +26,7 @@ func (service *Scheduler) Start(ctx context.Context) error {
 		return err
 	}
 
-	sample := &msgbus.Event{Workspace: "*", App: "*", Type: "*"}
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: configs.EVENT_TYPE_MESSAGE}
 	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sample", UseSubscriber(service.app))
 	if err != nil {
 		return err

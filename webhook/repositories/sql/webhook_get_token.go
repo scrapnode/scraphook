@@ -12,7 +12,7 @@ func (repo *WebhookRepo) GetToken(id, token string) (*entities.WebhookToken, err
 
 	conn := repo.db.GetConn().(*gorm.DB)
 	tx := conn.
-		Model(&entities.Webhook{}).
+		Model(&entities.WebhookToken{}).
 		Preload("Webhook").
 		Where("webhook_id = ? AND token = ?", id, token).
 		First(whtoken)

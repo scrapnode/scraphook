@@ -16,11 +16,22 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 		ctx := context.WithValue(context.Background(), pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
-			logger.Errorw("scheduler: schedule request got error", "error", err.Error())
+			logger.Errorw("scheduler.request: schedule got error", "error", err.Error())
 			return nil
 		}
 
-		logger.Debugw("scheduler: schedule successfully")
+		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ValidateScheduleRes)
+		var success int
+		var fail int
+		for _, result := range res.Results {
+			if result.Error == "" {
+				success++
+				continue
+			}
+			fail++
+		}
+
+		logger.Debugw("scheduler: schedule successfully", "success_count", success, "fail_count", fail)
 		return nil
 	}
 }

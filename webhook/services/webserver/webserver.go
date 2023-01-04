@@ -16,7 +16,7 @@ type Webserver struct {
 }
 
 func New(ctx context.Context, app *application.App) *Webserver {
-	logger := xlogger.FromContext(ctx).With("service", "http")
+	logger := xlogger.FromContext(ctx).With("service", "webserver")
 	return &Webserver{app: app, logger: logger}
 }
 

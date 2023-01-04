@@ -9,24 +9,14 @@ func (repo *WebhookRepo) GetEndpoints(ws, id string) ([]*entities.Endpoint, erro
 	var endpoints []*entities.Endpoint
 
 	conn := repo.db.GetConn().(*gorm.DB)
-	rows, err := conn.
+	tx := conn.
 		Model(&entities.Endpoint{}).
 		Preload("Rules").
 		Where("workspace_id =  ? AND webhook_id = ?", ws, id).
-		Rows()
-	if err != nil {
-		return nil, err
+		Find(&endpoints)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
-	for rows.Next() {
-		var endpoint entities.Endpoint
-		// ScanRows is a method of `gorm.DB`, it can be used to scan a row into a struct
-		if err := conn.ScanRows(rows, &endpoint); err != nil {
-			return nil, err
-		}
-
-		endpoints = append(endpoints, &endpoint)
-	}
-
-	return endpoints, err
+	return endpoints, nil
 }

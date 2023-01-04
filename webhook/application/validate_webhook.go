@@ -46,7 +46,7 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 
 			res := &ValidateWebhookRes{Challenge: req.Challenge, Timestamps: time.Now().UTC().UnixMilli()}
-			logger.Debugw("validated successfully", "timestamps", res.Timestamps)
+			logger.Debugw("webhook.validate: validated successfully", "timestamps", res.Timestamps)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}

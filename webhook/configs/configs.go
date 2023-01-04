@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	EVENT_TYPE_MESSAGE     = "webhook.message"
-	EVENT_TYPE_FORWARD_REQ = "webhook.forward.request"
-	EVENT_TYPE_FORWARD_RES = "webhook.forward.response"
+	EVENT_TYPE_MESSAGE      = "webhook.message"
+	EVENT_TYPE_SCHEDULE_REQ = "webhook.schedule.request"
+	EVENT_TYPE_SCHEDULE_RES = "webhook.schedule.response"
 )
 
 type Configs struct {

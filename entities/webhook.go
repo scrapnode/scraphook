@@ -6,13 +6,13 @@ import (
 )
 
 type Webhook struct {
-	WorkspaceId string `json:"workspace_id" gorm:"index"`
-	Id          string `json:"id" gorm:"primaryKey"`
+	WorkspaceId string `json:"workspace_id"`
+	Id          string `json:"id"`
 
-	Name string `json:"name" gorm:"size:256"`
+	Name string `json:"name"`
 
-	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
-	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 func (wh *Webhook) TableName() string {
@@ -38,12 +38,12 @@ func (wh *Webhook) Key() string {
 }
 
 type WebhookToken struct {
-	WebhookId string `json:"webhook_id" gorm:"index:ws_wh,priority:20"`
-	Id        string `json:"id" gorm:"primaryKey"`
+	WebhookId string `json:"webhook_id"`
+	Id        string `json:"id"`
 
-	Token string `json:"token" gorm:"<-:create,unique,not null,size:256"`
+	Token string `json:"token"`
 
-	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
+	CreatedAt int64 `json:"created_at"`
 
 	Webhook *Webhook
 }
