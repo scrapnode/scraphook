@@ -8,11 +8,11 @@ import (
 )
 
 func UseSubscriber(app *application.App) msgbus.SubscribeFn {
-	run := application.UseScheduleRequest(app)
+	run := application.UseScheduleForward(app)
 	return func(event *msgbus.Event) error {
 		logger := app.Logger.With("event_key", event.Key())
 
-		req := &application.ValidateScheduleReq{Event: event}
+		req := &application.ScheduleForwardReq{Event: event}
 		ctx := context.WithValue(context.Background(), pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
@@ -20,7 +20,7 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 			return nil
 		}
 
-		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ValidateScheduleRes)
+		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ScheduleForwardRes)
 		var success int
 		var fail int
 		for _, result := range res.Results {

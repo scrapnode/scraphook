@@ -12,23 +12,23 @@ import (
 	"sync"
 )
 
-func UseScheduleRequest(app *App) pipeline.Pipe {
+func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		UseParseMessage(app),
-		UseScheduleRequestGetEndpoints(app),
-		UseScheduleRequestBuild(app),
-		UseScheduleRequestSend(app),
+		UseScheduleForwardGetEndpoints(app),
+		UseScheduleForwardBuild(app),
+		UseScheduleForwardSend(app),
 	})
 }
 
-type ValidateScheduleReq struct {
+type ScheduleForwardReq struct {
 	Event     *msgbus.Event
 	Message   *entities.Message
 	Endpoints []*entities.Endpoint
 }
 
-type ValidateScheduleRes struct {
+type ScheduleForwardRes struct {
 	Requests []*entities.Request
 	Results  []*pipeline.BatchResult
 }
@@ -37,7 +37,7 @@ func UseParseMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateScheduleReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
 			if err := req.Event.GetData(&req.Message); err != nil {
@@ -53,10 +53,10 @@ func UseParseMessage(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseScheduleRequestGetEndpoints(app *App) pipeline.Pipeline {
+func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateScheduleReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("message_id", req.Message.Id)
@@ -79,15 +79,15 @@ func UseScheduleRequestGetEndpoints(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseScheduleRequestBuild(app *App) pipeline.Pipeline {
+func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateScheduleReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("message_id", req.Message.Id)
 
-			res := &ValidateScheduleRes{Requests: []*entities.Request{}, Results: []*pipeline.BatchResult{}}
+			res := &ScheduleForwardRes{Requests: []*entities.Request{}, Results: []*pipeline.BatchResult{}}
 			for _, endpoint := range req.Endpoints {
 				if len(endpoint.Rules) == 0 {
 					logger.Warnw("schedule.request: endpoint has no rules, ignore all request", "endpoint_id", endpoint.Id)
@@ -142,11 +142,11 @@ func UseScheduleRequestBuild(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseScheduleRequestSend(app *App) pipeline.Pipeline {
+func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateScheduleReq)
-			res := ctx.Value(pipeline.CTXKEY_RES).(*ValidateScheduleRes)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
+			res := ctx.Value(pipeline.CTXKEY_RES).(*ScheduleForwardRes)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("message_id", req.Message.Id)
