@@ -25,11 +25,10 @@ func (service *Webserver) Start(ctx context.Context) error {
 		return err
 	}
 
-	handlers := []*transport.HttpHandler{
-		transport.NewHttpPing(ctx, service.app.Configs.Configs),
-		UseReceiveMessage(service.app),
-		UseValidateWebhook(service.app),
-	}
+	handlers := []*transport.HttpHandler{transport.NewHttpPing(ctx, service.app.Configs.Configs)}
+	handlers = append(handlers, UseReceiveMessage(service.app)...)
+	handlers = append(handlers, UseValidateWebhook(service.app)...)
+
 	srv, err := transport.NewHttp(ctx, service.app.Configs.Http, handlers)
 	if err != nil {
 		return err
