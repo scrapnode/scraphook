@@ -39,10 +39,10 @@ func (request *Request) WithId() bool {
 
 func (request *Request) Key() string {
 	keys := []string{
-		request.Id,
 		request.WorkspaceId,
 		request.WebhookId,
 		request.EndpointId,
+		request.Id,
 	}
 	return strings.Join(keys, "/")
 }

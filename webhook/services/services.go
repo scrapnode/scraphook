@@ -6,6 +6,7 @@ import (
 	"github.com/scrapnode/scraphook/webhook/application"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/services/scheduler"
+	"github.com/scrapnode/scraphook/webhook/services/sender"
 	"github.com/scrapnode/scraphook/webhook/services/webserver"
 )
 
@@ -18,6 +19,9 @@ func New(ctx context.Context, transport string) (transport.Transport, error) {
 
 	if transport == "scheduler" {
 		return scheduler.New(ctx, app), nil
+	}
+	if transport == "sender" {
+		return sender.New(ctx, app), nil
 	}
 
 	// by default, we will serve HTTP server

@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/scrapnode/scrapcore/utils"
+	"net/http"
 	"strings"
 )
 
@@ -32,11 +33,15 @@ func (response *Response) WithId() bool {
 
 func (response *Response) Key() string {
 	keys := []string{
-		response.RequestId,
 		response.WorkspaceId,
 		response.WebhookId,
 		response.EndpointId,
+		response.RequestId,
 		response.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (response *Response) OK() bool {
+	return response.Status >= http.StatusOK && response.Status < http.StatusMultipleChoices
 }

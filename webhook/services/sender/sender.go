@@ -1,4 +1,4 @@
-package scheduler
+package sender
 
 import (
 	"context"
@@ -9,26 +9,26 @@ import (
 	"go.uber.org/zap"
 )
 
-type Scheduler struct {
+type Sender struct {
 	app    *application.App
 	logger *zap.SugaredLogger
 
 	cleanup func() error
 }
 
-func New(ctx context.Context, app *application.App) *Scheduler {
+func New(ctx context.Context, app *application.App) *Sender {
 	logger := xlogger.FromContext(ctx).With("service", "scheduler")
-	return &Scheduler{app: app, logger: logger}
+	return &Sender{app: app, logger: logger}
 }
 
-func (service *Scheduler) Start(ctx context.Context) error {
+func (service *Sender) Start(ctx context.Context) error {
 	if err := service.app.Connect(ctx); err != nil {
 		return err
 	}
 
 	// @TODO: change queue name
-	sample := &msgbus.Event{Workspace: "*", App: "*", Type: configs.EVENT_TYPE_MESSAGE}
-	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "scheduler_sample", UseSubscriber(service.app))
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: configs.EVENT_TYPE_SCHEDULE_REQ}
+	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sender_sample", UseSubscriber(service.app))
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (service *Scheduler) Start(ctx context.Context) error {
 	return nil
 }
 
-func (service *Scheduler) Stop(ctx context.Context) error {
+func (service *Sender) Stop(ctx context.Context) error {
 	if service.cleanup != nil {
 		if err := service.cleanup(); err != nil {
 			service.logger.Errorw("cleanup subscriber got error", "error", err.Error())
@@ -53,7 +53,7 @@ func (service *Scheduler) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (service *Scheduler) Run(ctx context.Context) error {
+func (service *Sender) Run(ctx context.Context) error {
 	service.logger.Debugw("running")
 
 	return nil

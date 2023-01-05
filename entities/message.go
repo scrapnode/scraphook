@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/scrapnode/scrapcore/utils"
+import (
+	"github.com/scrapnode/scrapcore/utils"
+	"strings"
+)
 
 type Message struct {
 	WorkspaceId string `json:"workspace_id"`
@@ -21,4 +24,13 @@ func (msg *Message) WithId() bool {
 
 	msg.Id = utils.NewId("msg")
 	return true
+}
+
+func (msg *Message) Key() string {
+	keys := []string{
+		msg.WorkspaceId,
+		msg.WebhookId,
+		msg.Id,
+	}
+	return strings.Join(keys, "/")
 }

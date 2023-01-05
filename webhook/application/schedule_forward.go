@@ -15,7 +15,7 @@ import (
 func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		UseParseMessage(app),
+		UseScheduleForwarParseMessage(app),
 		UseScheduleForwardGetEndpoints(app),
 		UseScheduleForwardBuild(app),
 		UseScheduleForwardSend(app),
@@ -33,7 +33,7 @@ type ScheduleForwardRes struct {
 	Results  []*pipeline.BatchResult
 }
 
-func UseParseMessage(app *App) pipeline.Pipeline {
+func UseScheduleForwarParseMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
@@ -46,7 +46,7 @@ func UseParseMessage(app *App) pipeline.Pipeline {
 			}
 			// @TODO: validate message
 
-			logger.Debugw("schedule.request: parsed message", "message_id", req.Message.Id)
+			logger.Debugw("schedule.forward: parsed message from event", "message_key", req.Message.Key())
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			return next(ctx)
 		}
@@ -59,7 +59,7 @@ func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
-				With("message_id", req.Message.Id)
+				With("message_key", req.Message.Key())
 
 			endpoints, err := app.Repo.Webhook.GetEndpoints(req.Message.WorkspaceId, req.Message.WebhookId)
 			if err != nil {
@@ -72,7 +72,7 @@ func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 			}
 
 			req.Endpoints = endpoints
-			logger.Debugw("schedule.request: found endpoints", "endpoint_count", len(req.Endpoints))
+			logger.Debugw("schedule.forward: found endpoints", "endpoint_count", len(req.Endpoints))
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			return next(ctx)
 		}
@@ -85,12 +85,12 @@ func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
-				With("message_id", req.Message.Id)
+				With("message_key", req.Message.Key())
 
 			res := &ScheduleForwardRes{Requests: []*entities.Request{}, Results: []*pipeline.BatchResult{}}
 			for _, endpoint := range req.Endpoints {
 				if len(endpoint.Rules) == 0 {
-					logger.Warnw("schedule.request: endpoint has no rules, ignore all request", "endpoint_id", endpoint.Id)
+					logger.Warnw("schedule.forward: endpoint has no rules, ignore all request", "endpoint_id", endpoint.Id)
 					continue
 				}
 
@@ -134,7 +134,7 @@ func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 				return ctx, nil
 			}
 
-			logger.Debugw("schedule.request: schedule requests", "request_count", len(res.Requests))
+			logger.Debugw("schedule.forward: schedule requests", "request_count", len(res.Requests))
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
@@ -149,7 +149,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 			res := ctx.Value(pipeline.CTXKEY_RES).(*ScheduleForwardRes)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
-				With("message_id", req.Message.Id)
+				With("message_key", req.Message.Key())
 
 			var wg sync.WaitGroup
 			for _, r := range res.Requests {
@@ -164,16 +164,18 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 					}
 					// not way to let the error is raised here
 					_ = event.SetId()
+
 					// but set data is another story, must handle error
 					if err := event.SetData(request); err != nil {
-						logger.Errorw("schedule.request: could not set event data", "event_key", event.Key(), "request_key", request.Key())
+						logger.Errorw("schedule.forward: could not set event data", "request_key", request.Key())
 						result.Error = err.Error()
 						res.Results = append(res.Results, result)
 						return
 					}
 
+					// let publish an event to let our system knows we have scheduled a forward request
 					if _, err := app.MsgBus.Pub(ctx, event); err != nil {
-						logger.Errorw("schedule.request: could not publish event", "event_key", event.Key(), "request_key", request.Key())
+						logger.Errorw("schedule.forward: could not publish event", "request_key", request.Key())
 						result.Error = err.Error()
 						res.Results = append(res.Results, result)
 						return
@@ -184,7 +186,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 			}
 			wg.Wait()
 
-			logger.Debugw("schedule.request: sent requests", "result_count", len(res.Results))
+			logger.Debugw("schedule.forward: sent requests", "result_count", len(res.Results))
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
