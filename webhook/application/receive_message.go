@@ -13,9 +13,9 @@ import (
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		pipeline.UseTracing("receive_message", "validator", pipeline.UseValidator()),
-		pipeline.UseTracing("receive_message", "get_webhook", UseReceiveMessageGetWebhook(app)),
-		pipeline.UseTracing("receive_message", "publish_message", UseReceiveMessagePublishMessage(app)),
+		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "validator"}),
+		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "get_webhook"}),
+		pipeline.UseTracing(UseReceiveMessagePublishMessage(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "publish_message"}),
 	})
 }
 

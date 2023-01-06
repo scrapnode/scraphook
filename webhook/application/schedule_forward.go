@@ -10,7 +10,6 @@ import (
 	"github.com/sourcegraph/conc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -19,20 +18,11 @@ func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		// @TODO: replace with github.com/sourcegraph/conc
 		pipeline.UseRecovery(app.Logger),
-		func(next pipeline.Pipe) pipeline.Pipe {
-			return func(ctx context.Context) (context.Context, error) {
-				meta := GetStructByKey(ctx.Value(pipeline.CTXKEY_REQ), "Event.Metadata")
-				log.Println("---")
-				log.Println(GetStructByKey(ctx.Value(pipeline.CTXKEY_REQ), "Event.Metadatax"))
-				log.Println("---")
-				ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier(meta.(map[string]string)))
-				return next(ctx)
-			}
-		},
-		pipeline.UseTracing("schedule_forward", "parse_message", UseScheduleForwardParseMessage(app)),
-		pipeline.UseTracing("schedule_forward", "get_endpoints", UseScheduleForwardGetEndpoints(app)),
-		pipeline.UseTracing("schedule_forward", "build", UseScheduleForwardBuild(app)),
-		pipeline.UseTracing("schedule_forward", "send", UseScheduleForwardSend(app)),
+		pipeline.UseTracingPropagator("Event.Metadata"),
+		pipeline.UseTracing(UseScheduleForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "parse_message"}),
+		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "get_endpoints"}),
+		pipeline.UseTracing(UseScheduleForwardBuild(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "build"}),
+		pipeline.UseTracing(UseScheduleForwardSend(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "send"}),
 	})
 }
 
@@ -178,6 +168,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 						Workspace: request.WorkspaceId,
 						App:       request.WebhookId,
 						Type:      configs.EVENT_TYPE_SCHEDULE_REQ,
+						Metadata:  map[string]string{},
 					}
 					// not way to let the error is raised here
 					_ = event.SetId()
@@ -189,6 +180,8 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 						res.Results = append(res.Results, result)
 						return
 					}
+
+					otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(event.Metadata))
 
 					// let publish an event to let our system knows we have scheduled a forward request
 					if _, err := app.MsgBus.Pub(ctx, event); err != nil {

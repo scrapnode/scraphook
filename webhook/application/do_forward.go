@@ -17,10 +17,11 @@ func UseDoForward(app *App) pipeline.Pipe {
 
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		UseDoForwardParseMessage(app),
-		UseDoForwardSend(app, send),
+		pipeline.UseTracingPropagator("Event.Metadata"),
+		pipeline.UseTracing(UseDoForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "parse_message"}),
+		pipeline.UseTracing(UseDoForwardSend(app, send), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "send"}),
 		// optional pipeline
-		UseDoForwardNotify(app),
+		pipeline.UseTracing(UseDoForwardNotifyResponse(app), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "notify_response"}),
 	})
 }
 
@@ -102,7 +103,7 @@ func UseDoForwardSend(app *App, send xsender.Send) pipeline.Pipeline {
 	}
 }
 
-func UseDoForwardNotify(app *App) pipeline.Pipeline {
+func UseDoForwardNotifyResponse(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*DoForwardReq)
