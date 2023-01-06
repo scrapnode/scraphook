@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/benbjohnson/clock v1.3.0
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/scrapnode/scrapcore v0.0.0-20230106033655-8740df9db87f
+	github.com/scrapnode/scrapcore v0.0.0-20230106035648-4790c823d8f6
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
 	go.opentelemetry.io/otel v1.3.0
