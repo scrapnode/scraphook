@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/benbjohnson/clock v1.3.0
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/scrapnode/scrapcore v0.0.0-20230106091859-d29d5cb4c4f1
+	github.com/scrapnode/scrapcore v0.0.0-20230106092342-4c487037a835
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
