@@ -7,16 +7,17 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/webhook/configs"
+	"github.com/sourcegraph/conc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"log"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		// @TODO: replace with github.com/sourcegraph/conc
 		pipeline.UseRecovery(app.Logger),
 		UseScheduleForwardParseMessage(app),
 		UseScheduleForwardGetEndpoints(app),
@@ -173,11 +174,11 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 				With("event_key", req.Event.Key()).
 				With("message_key", req.Message.Key())
 
-			var wg sync.WaitGroup
+			var wg conc.WaitGroup
 			for _, r := range res.Requests {
-				wg.Add(1)
-				go func(request *entities.Request) {
-					defer wg.Done()
+				// reflect the value here to make sure we have no issue with concurrency
+				request := r
+				wg.Go(func() {
 					result := &pipeline.BatchResult{Key: request.Key()}
 					event := &msgbus.Event{
 						Workspace: request.WorkspaceId,
@@ -204,7 +205,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 					}
 
 					res.Results = append(res.Results, result)
-				}(r)
+				})
 			}
 			wg.Wait()
 
