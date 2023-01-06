@@ -8,15 +8,14 @@ import (
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	"log"
 )
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		pipeline.UseValidator(),
-		UseReceiveMessageGetWebhook(app),
-		UseReceiveMessagePublishMessage(app),
+		pipeline.UseTracing("receive_message", "validator", pipeline.UseValidator()),
+		pipeline.UseTracing("receive_message", "get_webhook", UseReceiveMessageGetWebhook(app)),
+		pipeline.UseTracing("receive_message", "publish_message", UseReceiveMessagePublishMessage(app)),
 	})
 }
 
@@ -34,8 +33,6 @@ type ReceiveMessageRes struct {
 func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ctx, span := otel.Tracer("receive_message").Start(ctx, "get_webhook")
-
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
 			logger := app.Logger.With("webhook_id", req.Id)
 
@@ -52,7 +49,6 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 			logger.Debugw("webhook.receive_message: found webhook", "workspace_id", req.Message.WorkspaceId)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 
-			span.End()
 			return next(ctx)
 		}
 	}
@@ -61,8 +57,6 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ctx, span := otel.Tracer("receive_message").Start(ctx, "publish_message")
-
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
 			logger := app.Logger.
 				With("webhook_id", req.Message.WebhookId).
@@ -82,9 +76,6 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			}
 
 			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(event.Metadata))
-			log.Println("---")
-			log.Println(event.Metadata)
-			log.Println("---")
 
 			pub, err := app.MsgBus.Pub(ctx, event)
 			if err != nil {
@@ -95,7 +86,6 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			logger.Debugw("webhook.receive_message: published event", "pubkey", res.PubKey)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 
-			span.End()
 			return next(ctx)
 		}
 	}

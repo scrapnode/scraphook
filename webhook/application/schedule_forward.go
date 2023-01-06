@@ -19,10 +19,20 @@ func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		// @TODO: replace with github.com/sourcegraph/conc
 		pipeline.UseRecovery(app.Logger),
-		UseScheduleForwardParseMessage(app),
-		UseScheduleForwardGetEndpoints(app),
-		UseScheduleForwardBuild(app),
-		UseScheduleForwardSend(app),
+		func(next pipeline.Pipe) pipeline.Pipe {
+			return func(ctx context.Context) (context.Context, error) {
+				meta := GetStructByKey(ctx.Value(pipeline.CTXKEY_REQ), "Event.Metadata")
+				log.Println("---")
+				log.Println(GetStructByKey(ctx.Value(pipeline.CTXKEY_REQ), "Event.Metadatax"))
+				log.Println("---")
+				ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier(meta.(map[string]string)))
+				return next(ctx)
+			}
+		},
+		pipeline.UseTracing("schedule_forward", "parse_message", UseScheduleForwardParseMessage(app)),
+		pipeline.UseTracing("schedule_forward", "get_endpoints", UseScheduleForwardGetEndpoints(app)),
+		pipeline.UseTracing("schedule_forward", "build", UseScheduleForwardBuild(app)),
+		pipeline.UseTracing("schedule_forward", "send", UseScheduleForwardSend(app)),
 	})
 }
 
@@ -44,13 +54,6 @@ func UseScheduleForwardParseMessage(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
-			ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.MapCarrier(req.Event.Metadata))
-			log.Println("---")
-			log.Println(req.Event.Metadata)
-			log.Println(ctx)
-			log.Println("---")
-			ctx, span := otel.Tracer("schedule_forward").Start(ctx, "parse_message")
-
 			if err := req.Event.GetData(&req.Message); err != nil {
 				logger.Errorw(ErrEventDataInvalid.Error(), "error", err.Error())
 				return ctx, err
@@ -60,7 +63,6 @@ func UseScheduleForwardParseMessage(app *App) pipeline.Pipeline {
 			logger.Debugw("schedule.forward: parsed message from event", "message_key", req.Message.Key())
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 
-			span.End()
 			return next(ctx)
 		}
 	}
@@ -69,8 +71,6 @@ func UseScheduleForwardParseMessage(app *App) pipeline.Pipeline {
 func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ctx, span := otel.Tracer("schedule_forward").Start(ctx, "get_endpoints")
-
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
@@ -90,7 +90,6 @@ func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 			logger.Debugw("schedule.forward: found endpoints", "endpoint_count", len(req.Endpoints))
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 
-			span.End()
 			return next(ctx)
 		}
 	}
@@ -99,8 +98,6 @@ func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ctx, span := otel.Tracer("schedule_forward").Start(ctx, "build")
-
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
@@ -157,7 +154,6 @@ func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 
-			span.End()
 			return next(ctx)
 		}
 	}
@@ -166,8 +162,6 @@ func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ctx, span := otel.Tracer("schedule_forward").Start(ctx, "send")
-
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			res := ctx.Value(pipeline.CTXKEY_RES).(*ScheduleForwardRes)
 			logger := app.Logger.
@@ -213,7 +207,6 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 
-			span.End()
 			return next(ctx)
 		}
 	}
