@@ -16,7 +16,7 @@ func UseDoForward(app *App) pipeline.Pipe {
 	})
 
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseRecovery(app.Logger),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "init"}),
 		pipeline.UseTracing(UseDoForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "parse_message"}),
 		pipeline.UseTracing(UseDoForwardSend(app, send), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "send"}),
 		// optional pipeline
@@ -116,6 +116,7 @@ func UseDoForwardNotifyResponse(app *App) pipeline.Pipeline {
 				Workspace: res.Response.WorkspaceId,
 				App:       res.Response.WebhookId,
 				Type:      configs.EVENT_TYPE_SCHEDULE_RES,
+				Metadata:  map[string]string{},
 			}
 			// not way to let the error is raised here
 			_ = event.SetId()
@@ -123,14 +124,14 @@ func UseDoForwardNotifyResponse(app *App) pipeline.Pipeline {
 			// but set data is another story, must handle error
 			if err := event.SetData(res.Response); err != nil {
 				logger.Error("schedule.forward: could not set event data")
-				// IMPORTANT: we ignore all of the error in this pipeline
+				// IMPORTANT: we ignore all the error in this pipeline
 				// because this flow is optional
 				return next(ctx)
 			}
 
 			if _, err := app.MsgBus.Pub(ctx, event); err != nil {
 				logger.Errorw("schedule.forward: could not publish event")
-				// IMPORTANT: we ignore all of the error in this pipeline
+				// IMPORTANT: we ignore all the error in this pipeline
 				// because this flow is optional
 				return next(ctx)
 			}

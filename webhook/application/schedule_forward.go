@@ -15,7 +15,7 @@ import (
 func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		// @TODO: replace with github.com/sourcegraph/conc
-		pipeline.UseRecovery(app.Logger),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "init"}),
 		pipeline.UseTracing(UseScheduleForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "parse_message"}),
 		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "get_endpoints"}),
 		pipeline.UseTracing(UseScheduleForwardBuild(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "build"}),

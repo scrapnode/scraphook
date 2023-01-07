@@ -9,7 +9,7 @@ import (
 
 func UseValidateWebhook(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseRecovery(app.Logger),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "init"}),
 		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "validator"}),
 		pipeline.UseTracing(UseValidateWebhookCheckToken(app), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "check_token"}),
 	})
