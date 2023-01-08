@@ -1,0 +1,123 @@
+name: Master/Staging CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.event.head_commit.message, 'ci') }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.19"
+
+      # Get values for cache paths to be used in later steps
+      - id: go-cache-paths
+        run: |
+          echo "GOCACHE_PATH=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+          echo "GOMODCACHE_PATH=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+
+      # Cache go build cache, used to speedup go test
+      - name: cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.GOCACHE_PATH }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache, used to speedup builds
+      - name: cache mod
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.GOMODCACHE_PATH }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: install dependencies
+        run: |
+          go get
+          go version
+
+      - name: linter
+        run: |
+          go vet .
+
+      - name: test CI
+        run: |
+          bash scripts/ci_test.sh
+
+  prepare:
+    runs-on: ubuntu-latest
+    needs: [test]
+    outputs:
+      ENABLED_ECR: ${{ steps.CHECK_ECR.outputs.ENABLED }}
+      ENABLED_DOCKERHUB: ${{ steps.CHECK_DOCKERHUB.outputs.ENABLED }}
+      BUILD_ID: ${{ steps.BUILD_ID.outputs.ID }}
+    steps:
+      - id: CHECK_DOCKERHUB
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        if: "${{ env.DOCKERHUB_USERNAME != '' }}"
+        run: echo "ENABLED=true" >> $GITHUB_OUTPUT
+
+      - id: CHECK_ECR
+        env:
+          ECR_USERNAME: ${{ secrets.ECR_USERNAME }}
+        if: "${{ env.ECR_USERNAME != '' }}"
+        run: echo "ENABLED=true" >> $GITHUB_OUTPUT
+
+      - id: BUILD_ID
+        run: |
+          branch=${GITHUB_REF##*/}
+          sha=${GITHUB_SHA::8}
+          ts=$(date +%s)
+          echo "ID=stg-${sha}-${ts}" >> $GITHUB_OUTPUT
+
+  dockerhub:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: ${{ needs.prepare.outputs.ENABLED_DOCKERHUB == 'true' }}
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: push to Docker Hub
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/scraphook:${{ needs.prepare.outputs.BUILD_ID }}, ${{ secrets.DOCKERHUB_USERNAME }}/scraphook:latest
+
+  ecr:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: ${{ needs.prepare.outputs.ENABLED_ECR == 'true' }}
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: push to AWS ECR
+        run: |
+          docker build . --tag ${{ secrets.ECR_USERNAME }}/scraphook:${{ needs.prepare.outputs.BUILD_ID }}
+          docker push ${{ secrets.ECR_USERNAME }}/scraphook:${{ needs.prepare.outputs.BUILD_ID }}
+
+          docker build . --tag ${{ secrets.ECR_USERNAME }}/scraphook:latest
+          docker push ${{ secrets.ECR_USERNAME }}/scraphook:latest
