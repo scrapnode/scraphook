@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.18-alpine as build
+FROM golang:1.19-alpine as build
 WORKDIR /app
 
 RUN apk add build-base
@@ -13,11 +13,6 @@ RUN go build -o ./bin/scraphook -buildvcs=false
 
 FROM alpine:3
 WORKDIR /app
-
-# healthcheck
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.13 && \
-    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-    chmod +x /bin/grpc_health_probe
 
 COPY --from=build /app/db ./db
 COPY --from=build /app/configs.props.example ./secrets/configs.props
