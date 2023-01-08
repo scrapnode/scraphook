@@ -17,6 +17,7 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_URI", "nats://127.0.0.1:4222")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_REGION", "earth")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_NAME", "scraphook")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_MAX_RETRY", 1)
 
 	var configs MsgBus
 	if err := provider.Unmarshal(&configs); err != nil {

@@ -18,11 +18,11 @@ var (
 type Configs struct {
 	*xconfig.Configs
 
-	Validator *Validator
-	Http      *transport.Configs
-	MsgBus    *msgbus.Configs
-	Database  *database.Configs
-	Monitor   *monitor.Configs
+	Validator *Validator         `json:"validator"`
+	Http      *transport.Configs `json:"http"`
+	MsgBus    *msgbus.Configs    `json:"msg_bus"`
+	Database  *database.Configs  `json:"database"`
+	Monitor   *monitor.Configs   `json:"monitor"`
 }
 
 func New(provider *viper.Viper) (*Configs, error) {

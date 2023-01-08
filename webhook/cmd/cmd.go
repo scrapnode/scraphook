@@ -43,6 +43,7 @@ func New() *cobra.Command {
 	}
 
 	command.AddCommand(NewServe())
+	command.AddCommand(NewGet())
 
 	command.PersistentFlags().BoolP("auto-migrate", "", false, "run migrate up automatically")
 	command.PersistentFlags().StringArrayP("seeds", "", []string{}, "seed files that will be run before start your application")
