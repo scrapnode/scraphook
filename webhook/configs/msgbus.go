@@ -18,16 +18,16 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_REGION", "earth")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_NAME", "scraphook")
 
-	var bus MsgBus
-	if err := provider.Unmarshal(&bus); err != nil {
+	var configs MsgBus
+	if err := provider.Unmarshal(&configs); err != nil {
 		return err
 	}
 
 	cfg.MsgBus = &msgbus.Configs{
-		Uri:      bus.Uri,
-		Region:   bus.Region,
-		Name:     bus.Name,
-		MaxRetry: bus.MaxRetry,
+		Uri:      configs.Uri,
+		Region:   configs.Region,
+		Name:     configs.Name,
+		MaxRetry: configs.MaxRetry,
 	}
 	return nil
 }

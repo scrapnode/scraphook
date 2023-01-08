@@ -12,11 +12,11 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 
 	// @TODO: if the pipeline error is any kind of msgbus err
 	// return that error in this subscriber to let msgbus retry it
-	return func(event *msgbus.Event) error {
+	return func(ctx context.Context, event *msgbus.Event) error {
 		logger := app.Logger.With("event_key", event.Key())
 
 		req := &application.DoForwardReq{Event: event}
-		ctx := context.WithValue(context.Background(), pipeline.CTXKEY_REQ, req)
+		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
 			logger.Errorw("do.forward: schedule got error", "error", err.Error())

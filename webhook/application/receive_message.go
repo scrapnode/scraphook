@@ -6,13 +6,11 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/webhook/configs"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/propagation"
 )
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseRecovery(app.Logger),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "init"}),
 		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "validator"}),
 		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "get_webhook"}),
 		pipeline.UseTracing(UseReceiveMessagePublishMessage(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "publish_message"}),
@@ -74,8 +72,6 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			if err := event.SetData(req.Message); err != nil {
 				return ctx, err
 			}
-
-			otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(event.Metadata))
 
 			pub, err := app.MsgBus.Pub(ctx, event)
 			if err != nil {

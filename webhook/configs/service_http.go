@@ -12,11 +12,11 @@ type Http struct {
 func (cfg *Configs) useHttp(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_HTTP_LISTEN_ADDRESS", ":8080")
 
-	var http Http
-	if err := provider.Unmarshal(&http); err != nil {
+	var configs Http
+	if err := provider.Unmarshal(&configs); err != nil {
 		return err
 	}
 
-	cfg.Http = &transport.Configs{ListenAddress: http.ListenAddress}
+	cfg.Http = &transport.Configs{ListenAddress: configs.ListenAddress}
 	return nil
 }

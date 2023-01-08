@@ -14,14 +14,14 @@ func (cfg *Configs) useDatabase(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_DATABASE_DSN", "sqlite3:///tmp/scraphook.sqlite")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_DATABASE_MIGRATE_DIR", "./db/migrations")
 
-	var db Database
-	if err := provider.Unmarshal(&db); err != nil {
+	var configs Database
+	if err := provider.Unmarshal(&configs); err != nil {
 		return err
 	}
 
 	cfg.Database = &database.Configs{
-		Dsn:        db.Dsn,
-		MigrateDir: db.MigrateDir,
+		Dsn:        configs.Dsn,
+		MigrateDir: configs.MigrateDir,
 	}
 	return nil
 }

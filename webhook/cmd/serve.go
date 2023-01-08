@@ -3,7 +3,9 @@ package cmd
 import (
 	"context"
 	corecmd "github.com/scrapnode/scrapcore/cmd"
+	"github.com/scrapnode/scrapcore/monitor"
 	"github.com/scrapnode/scrapcore/xlogger"
+	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/services"
 	"github.com/spf13/cobra"
 	"os"
@@ -21,13 +23,19 @@ func NewServe() *cobra.Command {
 		PreRunE:   corecmd.ChainPreRunE(),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
-			logger := xlogger.FromContext(ctx).With("fn", "cli.serve")
+			cfg := configs.FromContext(ctx)
+			logger := xlogger.FromContext(ctx).
+				With("fn", "cli.serve")
 
-			transport := args[0]
-			srv, err := services.New(ctx, transport)
+			name := args[0]
+			srv, err := services.New(ctx, name)
 			if err != nil {
 				logger.Fatal(err)
 			}
+
+			tracecfg := cfg.Monitor.Clone()
+			tracecfg.Name = name
+			tracer := monitor.NewTracer(ctx, tracecfg)
 
 			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -44,7 +52,15 @@ func NewServe() *cobra.Command {
 				}
 			}()
 
-			logger.Infow("running", "transport", transport)
+			go func() {
+				if err := tracer.Connect(ctx); err != nil {
+					logger.Error(err)
+					cancel()
+					return
+				}
+			}()
+
+			logger.Infow("running", "service_name", name)
 			// Listen for the interrupt signal.
 			<-ctx.Done()
 			// make sure once we stop process, we cancel all the execution
@@ -57,6 +73,9 @@ func NewServe() *cobra.Command {
 			ctx, cancel = context.WithTimeout(cmd.Context(), 11*time.Second)
 			go func() {
 				if err := srv.Stop(ctx); err != nil {
+					logger.Error(err)
+				}
+				if err := tracer.Disconnect(ctx); err != nil {
 					logger.Error(err)
 				}
 				cancel()

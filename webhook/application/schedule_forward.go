@@ -8,8 +8,6 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/sourcegraph/conc"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/propagation"
 	"regexp"
 	"strings"
 )
@@ -17,8 +15,7 @@ import (
 func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		// @TODO: replace with github.com/sourcegraph/conc
-		pipeline.UseRecovery(app.Logger),
-		pipeline.UseTracingPropagator("Event.Metadata"),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "init"}),
 		pipeline.UseTracing(UseScheduleForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "parse_message"}),
 		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "get_endpoints"}),
 		pipeline.UseTracing(UseScheduleForwardBuild(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "build"}),
@@ -180,8 +177,6 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 						res.Results = append(res.Results, result)
 						return
 					}
-
-					otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(event.Metadata))
 
 					// let publish an event to let our system knows we have scheduled a forward request
 					if _, err := app.MsgBus.Pub(ctx, event); err != nil {

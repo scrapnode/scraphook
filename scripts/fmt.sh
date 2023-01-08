@@ -2,7 +2,7 @@
 
 set -e
 
-## this will retrieve all of the .go files that have been
+## this will retrieve all the .go files that have been
 ## changed since the last commit
 STAGED_GO_FILES=$(git diff --cached --name-only -- '*.go')
 
