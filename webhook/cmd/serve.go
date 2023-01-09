@@ -33,9 +33,10 @@ func NewServe() *cobra.Command {
 				logger.Fatal(err)
 			}
 
-			tracecfg := cfg.Monitor.Clone()
-			tracecfg.Name = name
-			tracer := monitor.NewTracer(ctx, tracecfg)
+			monitorcfg := cfg.Monitor.Clone()
+			monitorcfg.Name = name
+			tracer := monitor.NewTracer(ctx, monitorcfg)
+			metrics := monitor.NewMetrics(ctx, monitorcfg)
 
 			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -46,6 +47,14 @@ func NewServe() *cobra.Command {
 					return
 				}
 				if err := srv.Run(ctx); err != nil {
+					logger.Error(err)
+					cancel()
+					return
+				}
+			}()
+
+			go func() {
+				if err := metrics.Connect(ctx); err != nil {
 					logger.Error(err)
 					cancel()
 					return
@@ -72,10 +81,13 @@ func NewServe() *cobra.Command {
 			// Because the context channel is done, so we could not reuse it, we have to use original context here
 			ctx, cancel = context.WithTimeout(cmd.Context(), 11*time.Second)
 			go func() {
-				if err := srv.Stop(ctx); err != nil {
+				if err := metrics.Disconnect(ctx); err != nil {
 					logger.Error(err)
 				}
 				if err := tracer.Disconnect(ctx); err != nil {
+					logger.Error(err)
+				}
+				if err := srv.Stop(ctx); err != nil {
 					logger.Error(err)
 				}
 				cancel()

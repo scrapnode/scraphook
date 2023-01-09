@@ -14,8 +14,10 @@ import (
 
 func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseMetrics(&pipeline.MetricsConfigs{InstrumentationName: "webhook", MetricName: "exec_milliseconds"}),
 		// @TODO: replace with github.com/sourcegraph/conc
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "init"}),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger),
+			&pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "init"}),
 		pipeline.UseTracing(UseScheduleForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "parse_message"}),
 		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "get_endpoints"}),
 		pipeline.UseTracing(UseScheduleForwardBuild(app), &pipeline.TracingConfigs{TraceName: "schedule_forward", SpanName: "build"}),

@@ -19,8 +19,8 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
-			logger.Errorw("do.forward: schedule got error", "error", err.Error())
-			return nil
+			logger.Errorw("do.forward: forwarded got error", "error", err.Error())
+			return err
 		}
 
 		res := ctx.Value(pipeline.CTXKEY_RES).(*application.DoForwardRes)

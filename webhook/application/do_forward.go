@@ -16,6 +16,7 @@ func UseDoForward(app *App) pipeline.Pipe {
 	})
 
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseMetrics(&pipeline.MetricsConfigs{InstrumentationName: "webhook", MetricName: "exec_milliseconds"}),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "init"}),
 		pipeline.UseTracing(UseDoForwardParseMessage(app), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "parse_message"}),
 		pipeline.UseTracing(UseDoForwardSend(app, send), &pipeline.TracingConfigs{TraceName: "do_forward", SpanName: "send"}),

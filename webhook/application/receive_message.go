@@ -10,6 +10,7 @@ import (
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseMetrics(&pipeline.MetricsConfigs{InstrumentationName: "webhook", MetricName: "exec_milliseconds"}),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "init"}),
 		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "validator"}),
 		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "get_webhook"}),
