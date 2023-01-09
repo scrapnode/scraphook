@@ -9,12 +9,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	EVENT_TYPE_MESSAGE      = "webhook.message"
-	EVENT_TYPE_SCHEDULE_REQ = "webhook.schedule.request"
-	EVENT_TYPE_SCHEDULE_RES = "webhook.schedule.response"
-)
-
 type Configs struct {
 	*xconfig.Configs
 

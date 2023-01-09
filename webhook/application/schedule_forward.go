@@ -6,7 +6,7 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
-	"github.com/scrapnode/scraphook/webhook/configs"
+	"github.com/scrapnode/scraphook/webhook/events"
 	"github.com/sourcegraph/conc"
 	"regexp"
 	"strings"
@@ -164,7 +164,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 					event := &msgbus.Event{
 						Workspace: request.WorkspaceId,
 						App:       request.WebhookId,
-						Type:      configs.EVENT_TYPE_SCHEDULE_REQ,
+						Type:      events.SCHEDULE_REQ,
 						Metadata:  map[string]string{},
 					}
 					// not way to let the error is raised here

@@ -5,7 +5,7 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
-	"github.com/scrapnode/scraphook/webhook/configs"
+	"github.com/scrapnode/scraphook/webhook/events"
 )
 
 func UseReceiveMessage(app *App) pipeline.Pipe {
@@ -63,7 +63,7 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 			event := &msgbus.Event{
 				Workspace: req.Webhook.WorkspaceId,
 				App:       req.Webhook.Id,
-				Type:      configs.EVENT_TYPE_MESSAGE,
+				Type:      events.MESSAGE,
 				Metadata:  map[string]string{},
 			}
 			// not way to let the error is raised here
