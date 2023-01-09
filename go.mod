@@ -6,10 +6,11 @@ require (
 	github.com/benbjohnson/clock v1.3.0
 	github.com/json-iterator/go v1.1.12
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/scrapnode/scrapcore v0.0.0-20230109035627-3c9150ef8a4b
+	github.com/scrapnode/scrapcore v0.0.0-20230109042316-4414e2c4045f
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
+	go.opentelemetry.io/otel/metric v0.34.0
 	go.uber.org/zap v1.24.0
 	gorm.io/gorm v1.24.3
 )
@@ -72,7 +73,6 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.34.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.3.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.3.0 // indirect
-	go.opentelemetry.io/otel/metric v0.34.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.11.2 // indirect
 	go.opentelemetry.io/otel/sdk/metric v0.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.11.2 // indirect
