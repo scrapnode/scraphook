@@ -39,7 +39,7 @@ func UseDoForwardParseMessage(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*DoForwardReq)
-			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "request.id", req.Request.Id)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
 			if err := req.Event.GetData(&req.Request); err != nil {
