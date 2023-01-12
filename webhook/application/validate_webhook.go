@@ -32,6 +32,7 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateWebhookReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.WebhookToken.Id)
 			logger := app.Logger.With("webhook_id", req.Id, "webhook_token", utils.Censor(req.Token, 5))
 
 			token, err := app.Repo.Webhook.GetToken(req.Id, req.Token)

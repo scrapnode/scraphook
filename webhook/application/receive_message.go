@@ -33,6 +33,7 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.Id)
 			logger := app.Logger.With("webhook_id", req.Id)
 
 			token, err := app.Repo.Webhook.GetToken(req.Id, req.Token)
@@ -57,6 +58,7 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.Id)
 			logger := app.Logger.
 				With("webhook_id", req.Message.WebhookId).
 				With("workspace_id", req.Message.WorkspaceId)

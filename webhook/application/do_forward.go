@@ -39,6 +39,7 @@ func UseDoForwardParseMessage(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*DoForwardReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "request.id", req.Request.Id)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
 			if err := req.Event.GetData(&req.Request); err != nil {
@@ -58,6 +59,7 @@ func UseDoForwardSend(app *App, send xsender.Send) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*DoForwardReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "request.id", req.Request.Id)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("request_key", req.Request.Key())
@@ -108,6 +110,8 @@ func UseDoForwardNotifyResponse(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*DoForwardReq)
 			res := ctx.Value(pipeline.CTXKEY_RES).(*DoForwardRes)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "request.id", req.Request.Id, "response.id", res.Response.Id)
+
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("response_key", req.Request.Key()).
@@ -137,9 +141,7 @@ func UseDoForwardNotifyResponse(app *App) pipeline.Pipeline {
 				return next(ctx)
 			}
 
-			logger.Debugw("schedule.forward: sent notification",
-				"status_ok", res.Response.OK(), "status", res.Response.Status,
-			)
+			logger.Debugw("schedule.forward: sent notification", "status_ok", res.Response.OK(), "status", res.Response.Status)
 			return next(ctx)
 		}
 	}

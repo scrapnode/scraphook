@@ -88,6 +88,7 @@ func UseScheduleForwardBuild(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "message.id", req.Message.Id)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("message_key", req.Message.Key())
@@ -153,6 +154,7 @@ func UseScheduleForwardSend(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ScheduleForwardReq)
 			res := ctx.Value(pipeline.CTXKEY_RES).(*ScheduleForwardRes)
+			ctx = pipeline.WithTraceAttributes(ctx, "event.id", req.Event.Id, "message.id", req.Message.Id)
 			logger := app.Logger.
 				With("event_key", req.Event.Key()).
 				With("message_key", req.Message.Key())
