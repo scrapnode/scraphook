@@ -1,9 +1,9 @@
 package sql
 
 import (
-	"github.com/scrapnode/scrapcore/database/sql"
+	"github.com/scrapnode/scrapcore/database"
 )
 
 type WebhookRepo struct {
-	db *sql.SQL
+	db *database.SQL
 }

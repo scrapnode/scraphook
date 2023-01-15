@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/benbjohnson/clock"
 	"github.com/scrapnode/scrapcore/msgbus"
-	"github.com/scrapnode/scrapcore/msgbus/nats"
 	"github.com/scrapnode/scrapcore/xlogger"
+	"github.com/scrapnode/scrapcore/xmonitor"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/repositories"
 	"github.com/scrapnode/scraphook/webhook/repositories/sql"
@@ -20,14 +20,21 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 		Clock:   clock.New(),
 	}
 
+	monitor, err := xmonitor.New(ctx, app.Configs.Monitor)
+	if err != nil {
+		return nil, err
+	}
+	app.Monitor = monitor
+	// share monitor across services via context
+	ctx = xmonitor.WithContext(ctx, app.Monitor)
+
 	repo, err := sql.New(ctx, cfg.Database)
 	if err != nil {
 		return nil, err
 	}
 	app.Repo = repo
 
-	// use Nats msgbus by default
-	bus, err := nats.New(ctx, app.Configs.MsgBus)
+	bus, err := msgbus.New(ctx, app.Configs.MsgBus)
 	if err != nil {
 		return nil, err
 	}
@@ -42,9 +49,11 @@ type App struct {
 	Repo    *repositories.Repo
 
 	// services
-	Clock  clock.Clock
-	MsgBus msgbus.MsgBus
-	mu     sync.Mutex
+	Clock   clock.Clock
+	MsgBus  msgbus.MsgBus
+	Monitor xmonitor.Monitor
+
+	mu sync.Mutex
 }
 
 func (app *App) Connect(ctx context.Context) error {
@@ -57,6 +66,9 @@ func (app *App) Connect(ctx context.Context) error {
 	if err := app.MsgBus.Connect(ctx); err != nil {
 		return err
 	}
+	if err := app.Monitor.Connect(ctx); err != nil {
+		return err
+	}
 
 	app.Logger.Debug("connected")
 	return nil
@@ -65,6 +77,12 @@ func (app *App) Connect(ctx context.Context) error {
 func (app *App) Disconnect(ctx context.Context) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
+
+	if app.Monitor != nil {
+		if err := app.Monitor.Disconnect(ctx); err != nil {
+			app.Logger.Error(err)
+		}
+	}
 
 	if app.Repo != nil && app.Repo.Database != nil {
 		if err := app.Repo.Database.Disconnect(ctx); err != nil {

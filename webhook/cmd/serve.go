@@ -3,9 +3,7 @@ package cmd
 import (
 	"context"
 	corecmd "github.com/scrapnode/scrapcore/cmd"
-	"github.com/scrapnode/scrapcore/monitor"
 	"github.com/scrapnode/scrapcore/xlogger"
-	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/services"
 	"github.com/spf13/cobra"
 	"os"
@@ -19,11 +17,10 @@ func NewServe() *cobra.Command {
 		Use:       "serve",
 		Example:   `scraphook webhook serve webserver`,
 		Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-		ValidArgs: []string{"webserver", "scheduler", "sender"},
+		ValidArgs: []string{"webserver", "scheduler", "forward"},
 		PreRunE:   corecmd.ChainPreRunE(),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()
-			cfg := configs.FromContext(ctx)
 			logger := xlogger.FromContext(ctx).
 				With("fn", "cli.serve")
 
@@ -32,11 +29,6 @@ func NewServe() *cobra.Command {
 			if err != nil {
 				logger.Fatal(err)
 			}
-
-			monitorcfg := cfg.Monitor.Clone()
-			monitorcfg.Name = name
-			tracer := monitor.NewTracer(ctx, monitorcfg)
-			metrics := monitor.NewMetrics(ctx, monitorcfg)
 
 			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -47,22 +39,6 @@ func NewServe() *cobra.Command {
 					return
 				}
 				if err := srv.Run(ctx); err != nil {
-					logger.Error(err)
-					cancel()
-					return
-				}
-			}()
-
-			go func() {
-				if err := metrics.Connect(ctx); err != nil {
-					logger.Error(err)
-					cancel()
-					return
-				}
-			}()
-
-			go func() {
-				if err := tracer.Connect(ctx); err != nil {
 					logger.Error(err)
 					cancel()
 					return
@@ -81,12 +57,6 @@ func NewServe() *cobra.Command {
 			// Because the context channel is done, so we could not reuse it, we have to use original context here
 			ctx, cancel = context.WithTimeout(cmd.Context(), 11*time.Second)
 			go func() {
-				if err := metrics.Disconnect(ctx); err != nil {
-					logger.Error(err)
-				}
-				if err := tracer.Disconnect(ctx); err != nil {
-					logger.Error(err)
-				}
 				if err := srv.Stop(ctx); err != nil {
 					logger.Error(err)
 				}

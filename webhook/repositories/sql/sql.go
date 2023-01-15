@@ -3,12 +3,11 @@ package sql
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/database"
-	"github.com/scrapnode/scrapcore/database/sql"
 	"github.com/scrapnode/scraphook/webhook/repositories"
 )
 
 func New(ctx context.Context, cfg *database.Configs) (*repositories.Repo, error) {
-	db, err := sql.New(ctx, cfg)
+	db, err := database.NewSQL(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}

@@ -10,19 +10,19 @@ import (
 	"github.com/scrapnode/scraphook/webhook/events"
 )
 
-func UseForward(app *App) pipeline.Pipe {
+func UseForward(app *App, instrumentName string) pipeline.Pipe {
 	send := xsender.New(context.Background(), &xsender.Configs{
 		TimeoutInSeconds: 5,
 		RetryMax:         3,
 	})
 
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, "forward", "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, "forward", "init"),
-		pipeline.UseTracing(UseForwardParseMessage(app), app.Monitor, "forward", "parse_messsage"),
-		pipeline.UseTracing(UseForwardSend(app, send), app.Monitor, "forward", "send"),
+		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
+		pipeline.UseTracing(UseForwardParseMessage(app), app.Monitor, instrumentName, "parse_messsage"),
+		pipeline.UseTracing(UseForwardSend(app, send), app.Monitor, instrumentName, "send"),
 		// optional pipeline
-		pipeline.UseTracing(UseForwardNotifyResponse(app), app.Monitor, "forward", "notify_response"),
+		pipeline.UseTracing(UseForwardNotifyResponse(app), app.Monitor, instrumentName, "notify_response"),
 	})
 }
 
@@ -40,7 +40,6 @@ func UseForwardParseMessage(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ForwardReq)
-			ctx = attributes.WithContext(ctx, attributes.Attributes{"event.id": req.Event.Id})
 			logger := app.Logger.With("event_key", req.Event.Key())
 
 			if err := req.Event.ScanData(&req.Request); err != nil {
@@ -127,7 +126,6 @@ func UseForwardNotifyResponse(app *App) pipeline.Pipeline {
 			}
 			event.UseId()
 
-			// but set data is another story, must handle error
 			if err := event.SetData(res.Response); err != nil {
 				logger.Errorw("could not set event data", "error", err.Error())
 				// IMPORTANT: we ignore all the error in this pipeline

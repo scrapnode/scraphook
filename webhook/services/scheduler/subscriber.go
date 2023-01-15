@@ -4,22 +4,26 @@ import (
 	"context"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
+	"github.com/scrapnode/scrapcore/xmonitor/attributes"
 	"github.com/scrapnode/scraphook/webhook/application"
 )
 
 func UseSubscriber(app *application.App) msgbus.SubscribeFn {
-	run := application.UseScheduleForward(app)
+	instrumentName := "schedule_forward"
+	run := application.UseScheduleForward(app, instrumentName)
 
-	// @TODO: if the pipeline error is any kind of msgbus err
-	// return that error in this subscriber to let msgbus retry it
 	return func(ctx context.Context, event *msgbus.Event) error {
+		ctx, span := app.Monitor.Trace(ctx, instrumentName, "msgbus_subscribe")
+		ctx = attributes.WithContext(ctx, attributes.Attributes{"event.id": event.Id})
+		defer span.End()
 		logger := app.Logger.With("event_key", event.Key())
 
 		req := &application.ScheduleForwardReq{Event: event}
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
-			logger.Errorw("scheduler.forward: schedule got error", "error", err.Error())
+			span.KO(err.Error())
+			logger.Errorw("schedule got error", "error", err.Error())
 			return nil
 		}
 
@@ -34,7 +38,8 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 			fail++
 		}
 
-		logger.Debugw("scheduler.forward: schedule successfully", "success_count", success, "fail_count", fail)
+		span.OK("scheduled successfully")
+		logger.Debugw("scheduled successfully", "success_count", success, "fail_count", fail)
 		return nil
 	}
 }

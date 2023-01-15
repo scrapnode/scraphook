@@ -6,7 +6,7 @@ import (
 )
 
 type MsgBus struct {
-	Uri    string `json:"uri" mapstructure:"SCRAPHOOK_WEBHOOK_MSGBUS_URI"`
+	Dsn    string `json:"uri" mapstructure:"SCRAPHOOK_WEBHOOK_MSGBUS_DSN"`
 	Region string `json:"region" mapstructure:"SCRAPHOOK_WEBHOOK_MSGBUS_REGION"`
 	Name   string `json:"name" mapstructure:"SCRAPHOOK_WEBHOOK_MSGBUS_NAME"`
 
@@ -14,7 +14,7 @@ type MsgBus struct {
 }
 
 func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_URI", "nats://127.0.0.1:4222")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_DSN", "nats://127.0.0.1:4222")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_REGION", "earth")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_NAME", "scraphook")
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_MSGBUS_MAX_RETRY", 1)
@@ -25,7 +25,7 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 	}
 
 	cfg.MsgBus = &msgbus.Configs{
-		Uri:      configs.Uri,
+		Dsn:      configs.Dsn,
 		Region:   configs.Region,
 		Name:     configs.Name,
 		MaxRetry: configs.MaxRetry,

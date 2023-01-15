@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	corecmd "github.com/scrapnode/scrapcore/cmd"
-	coredb "github.com/scrapnode/scrapcore/database/sql"
+	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/xconfig"
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scraphook/webhook/configs"
@@ -62,7 +62,7 @@ func runDBTasks(cmd *cobra.Command, ctx context.Context) error {
 	logger := xlogger.FromContext(ctx).With("fn", "cli.auto-migrate")
 	ctx = xlogger.WithContext(ctx, logger)
 
-	db, err := coredb.New(ctx, cfg.Database)
+	db, err := database.New(ctx, cfg.Database)
 	if err != nil {
 		return err
 	}

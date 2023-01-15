@@ -2,10 +2,10 @@ package configs
 
 import (
 	"github.com/scrapnode/scrapcore/database"
-	"github.com/scrapnode/scrapcore/monitor"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xconfig"
+	"github.com/scrapnode/scrapcore/xmonitor"
 	"github.com/spf13/viper"
 )
 
@@ -16,7 +16,7 @@ type Configs struct {
 	Http      *transport.Configs `json:"http"`
 	MsgBus    *msgbus.Configs    `json:"msg_bus"`
 	Database  *database.Configs  `json:"database"`
-	Monitor   *monitor.Configs   `json:"monitor"`
+	Monitor   *xmonitor.Configs  `json:"monitor"`
 }
 
 func New(provider *viper.Viper) (*Configs, error) {

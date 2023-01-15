@@ -7,12 +7,12 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func UseValidateWebhook(app *App) pipeline.Pipe {
+func UseValidateWebhook(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(&pipeline.MetricsConfigs{InstrumentationName: "webhook", MetricName: "exec_milliseconds"}),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "init"}),
-		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "validator"}),
-		pipeline.UseTracing(UseValidateWebhookCheckToken(app), &pipeline.TracingConfigs{TraceName: "validate_webhook", SpanName: "check_token"}),
+		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
+		pipeline.UseTracing(pipeline.UseValidator(), app.Monitor, instrumentName, "validate"),
+		pipeline.UseTracing(UseValidateWebhookCheckToken(app), app.Monitor, instrumentName, "check_token"),
 	})
 }
 
@@ -32,7 +32,6 @@ func UseValidateWebhookCheckToken(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ValidateWebhookReq)
-			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.WebhookToken.Id)
 			logger := app.Logger.With("webhook_id", req.Id, "webhook_token", utils.Censor(req.Token, 5))
 
 			token, err := app.Repo.Webhook.GetToken(req.Id, req.Token)

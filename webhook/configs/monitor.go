@@ -1,56 +1,30 @@
 package configs
 
 import (
-	"github.com/scrapnode/scrapcore/monitor"
+	"github.com/scrapnode/scrapcore/xmonitor"
 	"github.com/spf13/viper"
 )
 
 type Monitor struct {
-	Namespace string `json:"namespace" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_NAMESPACE"`
-	Version   string `json:"version" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_VERSION"`
-}
-
-type MonitorTracer struct {
-	Endpoint string  `json:"endpoint" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_TRACER_ENDPOINT"`
-	Ratio    float64 `json:"ratio" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_TRACER_RATIO"`
-}
-
-type MonitorMetrics struct {
-	Endpoint string `json:"endpoint" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_METRICS_ENDPOINT"`
+	Provider       string `json:"provider" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_PROVIDER"`
+	ServiceName    string `json:"service_name" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_SERVICE_NAME"`
+	ServiceVersion string `json:"version" mapstructure:"SCRAPHOOK_WEBHOOK_MONITOR_SERVICE_VERSION"`
 }
 
 func (cfg *Configs) useMonitor(provider *viper.Viper) error {
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_NAMESPACE", "webhook")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_PROVIDER", "noop")
+	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_SERVICE_NAME", "")
 	provider.Set("SCRAPHOOK_WEBHOOK_MONITOR_VERSION", cfg.Version)
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_TRACER_ENDPOINT", "0.0.0.0:4317")
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_TRACER_RATIO", 1)
-	provider.SetDefault("SCRAPHOOK_WEBHOOK_MONITOR_METRICS_ENDPOINT", "0.0.0.0:4317")
 
 	var configs Monitor
 	if err := provider.Unmarshal(&configs); err != nil {
 		return err
 	}
 
-	var tracerConfigs MonitorTracer
-	if err := provider.Unmarshal(&tracerConfigs); err != nil {
-		return err
-	}
-
-	var metricsConfigs MonitorMetrics
-	if err := provider.Unmarshal(&metricsConfigs); err != nil {
-		return err
-	}
-
-	cfg.Monitor = &monitor.Configs{
-		Namespace: configs.Namespace,
-		Version:   configs.Version,
-		Tracer: &monitor.TracerConfigs{
-			Endpoint: tracerConfigs.Endpoint,
-			Ratio:    tracerConfigs.Ratio,
-		},
-		Metrics: &monitor.MetricsConfigs{
-			Endpoint: metricsConfigs.Endpoint,
-		},
+	cfg.Monitor = &xmonitor.Configs{
+		Provider:       configs.Provider,
+		ServiceName:    configs.ServiceName,
+		ServiceVersion: configs.ServiceVersion,
 	}
 	return nil
 }

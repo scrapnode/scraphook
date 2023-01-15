@@ -8,13 +8,13 @@ import (
 	"github.com/scrapnode/scraphook/webhook/events"
 )
 
-func UseReceiveMessage(app *App) pipeline.Pipe {
+func UseReceiveMessage(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(&pipeline.MetricsConfigs{InstrumentationName: "webhook", MetricName: "exec_milliseconds"}),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "init"}),
-		pipeline.UseTracing(pipeline.UseValidator(), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "validator"}),
-		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "get_webhook"}),
-		pipeline.UseTracing(UseReceiveMessagePublishMessage(app), &pipeline.TracingConfigs{TraceName: "receive_message", SpanName: "publish_message"}),
+		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
+		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
+		pipeline.UseTracing(pipeline.UseValidator(), app.Monitor, instrumentName, "validate"),
+		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), app.Monitor, instrumentName, "get_webhook"),
+		pipeline.UseTracing(UseReceiveMessagePublishMessage(app), app.Monitor, instrumentName, "publish_message"),
 	})
 }
 
@@ -33,7 +33,6 @@ func UseReceiveMessageGetWebhook(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
-			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.Id)
 			logger := app.Logger.With("webhook_id", req.Id)
 
 			token, err := app.Repo.Webhook.GetToken(req.Id, req.Token)
@@ -58,7 +57,6 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ReceiveMessageReq)
-			ctx = pipeline.WithTraceAttributes(ctx, "webhook.id", req.Id)
 			logger := app.Logger.
 				With("webhook_id", req.Message.WebhookId).
 				With("workspace_id", req.Message.WorkspaceId)
@@ -69,9 +67,7 @@ func UseReceiveMessagePublishMessage(app *App) pipeline.Pipeline {
 				Type:      events.MESSAGE,
 				Metadata:  map[string]string{},
 			}
-			// not way to let the error is raised here
-			_ = event.SetId()
-			// but set data is another story, must handle error
+			event.UseId()
 			if err := event.SetData(req.Message); err != nil {
 				return ctx, err
 			}
