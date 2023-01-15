@@ -1,4 +1,4 @@
-package sender
+package forward
 
 import (
 	"context"
@@ -9,19 +9,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type Sender struct {
+type Forward struct {
 	app    *application.App
 	logger *zap.SugaredLogger
 
 	cleanup func() error
 }
 
-func New(ctx context.Context, app *application.App) *Sender {
-	logger := xlogger.FromContext(ctx).With("service", "scheduler")
-	return &Sender{app: app, logger: logger}
+func New(ctx context.Context, app *application.App) *Forward {
+	logger := xlogger.FromContext(ctx).With("service", "forward")
+	return &Forward{app: app, logger: logger}
 }
 
-func (service *Sender) Start(ctx context.Context) error {
+func (service *Forward) Start(ctx context.Context) error {
 	if err := service.app.Connect(ctx); err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (service *Sender) Start(ctx context.Context) error {
 	return nil
 }
 
-func (service *Sender) Stop(ctx context.Context) error {
+func (service *Forward) Stop(ctx context.Context) error {
 	if service.cleanup != nil {
 		if err := service.cleanup(); err != nil {
 			service.logger.Errorw("cleanup subscriber got error", "error", err.Error())
@@ -53,7 +53,7 @@ func (service *Sender) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (service *Sender) Run(ctx context.Context) error {
+func (service *Forward) Run(ctx context.Context) error {
 	service.logger.Debugw("running")
 
 	return nil

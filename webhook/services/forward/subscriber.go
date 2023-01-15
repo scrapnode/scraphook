@@ -1,4 +1,4 @@
-package sender
+package forward
 
 import (
 	"context"
@@ -8,23 +8,21 @@ import (
 )
 
 func UseSubscriber(app *application.App) msgbus.SubscribeFn {
-	run := application.UseDoForward(app)
+	run := application.UseForward(app)
 
-	// @TODO: if the pipeline error is any kind of msgbus err
-	// return that error in this subscriber to let msgbus retry it
 	return func(ctx context.Context, event *msgbus.Event) error {
 		logger := app.Logger.With("event_key", event.Key())
 
-		req := &application.DoForwardReq{Event: event}
+		req := &application.ForwardReq{Event: event}
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
-			logger.Errorw("do.forward: forwarded got error", "error", err.Error())
+			logger.Errorw("forward got error", "error", err.Error())
 			return err
 		}
 
-		res := ctx.Value(pipeline.CTXKEY_RES).(*application.DoForwardRes)
-		logger.Debugw("do.forward: forwarded successfully", "response_key", res.Response.Key())
+		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ForwardRes)
+		logger.Debugw("forwarded successfully", "response_key", res.Response.Key())
 		return nil
 	}
 }
