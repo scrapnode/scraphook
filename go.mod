@@ -6,7 +6,7 @@ require (
 	github.com/benbjohnson/clock v1.1.0
 	github.com/json-iterator/go v1.1.12
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/scrapnode/scrapcore v0.0.0-20230116015808-c62a9e54bf35
+	github.com/scrapnode/scrapcore v0.0.0-20230116021252-90c2832c8752
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
