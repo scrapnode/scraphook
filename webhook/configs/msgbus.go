@@ -30,7 +30,7 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 		configs.QueueName = utils.NewId("queue")
 	}
 	if configs.QueueName == "" {
-		return errors.New("webhook.configs: msgbus queue name could not be empty")
+		return errors.New("msgbus queue name could not be empty")
 	}
 
 	cfg.MsgBus = &msgbus.Configs{
