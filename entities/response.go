@@ -14,6 +14,7 @@ type Response struct {
 	WorkspaceId string `json:"workspace_id"`
 	WebhookId   string `json:"webhook_id"`
 	EndpointId  string `json:"endpoint_id"`
+	MessageId   string `json:"message_id"`
 	RequestId   string `json:"request_id"`
 	Id          string `json:"id"`
 

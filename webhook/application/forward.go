@@ -19,7 +19,7 @@ func UseForward(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseForwardParseMessage(app), app.Monitor, instrumentName, "parse_messsage"),
+		pipeline.UseTracing(UseForwardParseEvent(app), app.Monitor, instrumentName, "parse_messsage"),
 		pipeline.UseTracing(UseForwardSend(app, send), app.Monitor, instrumentName, "send"),
 		// optional pipeline
 		pipeline.UseTracing(UseForwardNotifyResponse(app), app.Monitor, instrumentName, "notify_response"),
@@ -35,7 +35,7 @@ type ForwardRes struct {
 	Response *entities.Response
 }
 
-func UseForwardParseMessage(app *App) pipeline.Pipeline {
+func UseForwardParseEvent(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
@@ -89,6 +89,7 @@ func UseForwardSend(app *App, send xsender.Send) pipeline.Pipeline {
 					WorkspaceId: req.Request.WorkspaceId,
 					WebhookId:   req.Request.WebhookId,
 					EndpointId:  req.Request.EndpointId,
+					MessageId:   req.Request.MessageId,
 					RequestId:   req.Request.Id,
 
 					Uri:        response.Uri,

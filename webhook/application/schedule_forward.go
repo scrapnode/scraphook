@@ -17,7 +17,7 @@ func UseScheduleForward(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseScheduleForwardParseMessage(app), app.Monitor, instrumentName, "parse_message"),
+		pipeline.UseTracing(UseScheduleForwardParseEvent(app), app.Monitor, instrumentName, "parse_message"),
 		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), app.Monitor, instrumentName, "get_endpoints"),
 		pipeline.UseTracing(UseScheduleForwardBuildRequests(app), app.Monitor, instrumentName, "build_requests"),
 		pipeline.UseTracing(UseScheduleForwardPublishRequests(app), app.Monitor, instrumentName, "publish_requests"),
@@ -35,7 +35,7 @@ type ScheduleForwardRes struct {
 	Results  []*pipeline.BatchResult
 }
 
-func UseScheduleForwardParseMessage(app *App) pipeline.Pipeline {
+func UseScheduleForwardParseEvent(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
@@ -122,6 +122,7 @@ func UseScheduleForwardBuildRequests(app *App) pipeline.Pipeline {
 							WorkspaceId: req.Message.WorkspaceId,
 							WebhookId:   req.Message.WebhookId,
 							EndpointId:  endpoint.Id,
+							MessageId:   req.Message.Id,
 							Uri:         endpoint.Uri,
 							Status:      entities.REQ_STATUS_INIT,
 							Method:      req.Message.Method,
