@@ -26,15 +26,15 @@ func (service *Forward) Start(ctx context.Context) error {
 		return err
 	}
 
-	// @TODO: change queue name
 	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.SCHEDULE_REQUEST}
-	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sender_sample", UseSubscriber(service.app))
+	queue := service.app.Configs.MsgBus.QueueName
+	cleanup, err := service.app.MsgBus.Sub(ctx, sample, queue, UseSubscriber(service.app))
 	if err != nil {
 		return err
 	}
 
 	service.cleanup = cleanup
-	service.logger.Debug("connected")
+	service.logger.Debugw("connected", "queue_name", queue)
 	return nil
 }
 
