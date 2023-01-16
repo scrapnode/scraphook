@@ -1,5 +1,7 @@
 package entities
 
+import "github.com/scrapnode/scrapcore/utils"
+
 type Endpoint struct {
 	WorkspaceId string `json:"workspace_id" gorm:"index:ws_wh,priority:30"`
 	WebhookId   string `json:"webhook_id" gorm:"index:ws_wh,priority:20"`
@@ -13,6 +15,10 @@ type Endpoint struct {
 	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
 
 	Rules []EndpointRule
+}
+
+func (endpoint *Endpoint) UseId() {
+	endpoint.Id = utils.NewId("ep")
 }
 
 func (endpoint *Endpoint) TableName() string {
@@ -31,6 +37,10 @@ type EndpointRule struct {
 	UpdatedAt int64 `json:"updated_at"`
 }
 
-func (endpointRule *EndpointRule) TableName() string {
+func (rule *EndpointRule) UseId() {
+	rule.Id = utils.NewId("epr")
+}
+
+func (rule *EndpointRule) TableName() string {
 	return "endpoint_rules"
 }

@@ -62,7 +62,7 @@ func UseReceiveMessageHandler(app *application.App) http.HandlerFunc {
 			Body:       body.ToString(),
 			Method:     r.Method,
 		}
-		req.Message.WithId()
+		req.Message.UseId()
 
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)

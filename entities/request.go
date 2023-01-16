@@ -3,6 +3,7 @@ package entities
 import (
 	"github.com/scrapnode/scrapcore/utils"
 	"strings"
+	"time"
 )
 
 var (
@@ -12,6 +13,9 @@ var (
 )
 
 type Request struct {
+	Timestamps int64  `json:"timestamps"`
+	Bucket     string `json:"bucket"`
+
 	WorkspaceId string `json:"workspace_id"`
 	WebhookId   string `json:"webhook_id"`
 	EndpointId  string `json:"endpoint_id"`
@@ -23,18 +27,18 @@ type Request struct {
 	Headers string `json:"headers"`
 	Body    string `json:"body"`
 	Method  string `json:"method"`
-
-	Timestamps int64 `json:"timestamps"`
 }
 
-func (request *Request) WithId() bool {
-	// only set data if it wasn't set yet
-	if request.Id != "" {
-		return false
-	}
+func (request *Request) TableName() string {
+	return "requests"
+}
 
+func (request *Request) UseId() {
 	request.Id = utils.NewId("req")
-	return true
+}
+
+func (request *Request) UseTs(tpl string, t time.Time) {
+	request.Bucket, request.Timestamps = utils.NewBucket(tpl, t)
 }
 
 func (request *Request) Key() string {

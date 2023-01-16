@@ -19,14 +19,8 @@ func (wh *Webhook) TableName() string {
 	return "webhooks"
 }
 
-func (wh *Webhook) WithId() bool {
-	// only set data if it wasn't set yet
-	if wh.Id != "" {
-		return false
-	}
-
+func (wh *Webhook) UseIds() {
 	wh.Id = utils.NewId("wh")
-	return true
 }
 
 func (wh *Webhook) Key() string {

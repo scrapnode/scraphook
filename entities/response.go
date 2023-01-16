@@ -4,9 +4,13 @@ import (
 	"github.com/scrapnode/scrapcore/utils"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Response struct {
+	Timestamps int64  `json:"timestamps"`
+	Bucket     string `json:"bucket"`
+
 	WorkspaceId string `json:"workspace_id"`
 	WebhookId   string `json:"webhook_id"`
 	EndpointId  string `json:"endpoint_id"`
@@ -17,18 +21,18 @@ type Response struct {
 	Status  int    `json:"status"`
 	Headers string `json:"headers"`
 	Body    string `json:"body"`
-
-	Timestamps int64 `json:"timestamps"`
 }
 
-func (response *Response) WithId() bool {
-	// only set data if it wasn't set yet
-	if response.Id != "" {
-		return false
-	}
+func (response *Response) TableName() string {
+	return "responses"
+}
 
+func (response *Response) UseId() {
 	response.Id = utils.NewId("res")
-	return true
+}
+
+func (response *Response) UseTs(tpl string, t time.Time) {
+	response.Bucket, response.Timestamps = utils.NewBucket(tpl, t)
 }
 
 func (response *Response) Key() string {

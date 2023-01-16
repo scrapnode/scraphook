@@ -128,7 +128,9 @@ func UseScheduleForwardBuildRequests(app *App) pipeline.Pipeline {
 							Headers:     req.Message.Headers,
 							Body:        req.Message.Body,
 						}
-						request.WithId()
+						request.UseId()
+						request.UseTs(app.Configs.BucketTemplate, app.Clock.Now().UTC())
+
 						res.Requests = append(res.Requests, request)
 					}
 				}
@@ -166,7 +168,7 @@ func UseScheduleForwardPublishRequests(app *App) pipeline.Pipeline {
 					event := &msgbus.Event{
 						Workspace: request.WorkspaceId,
 						App:       request.WebhookId,
-						Type:      events.SCHEDULE_REQ,
+						Type:      events.SCHEDULE_REQUEST,
 						Metadata:  map[string]string{},
 					}
 					event.UseId()

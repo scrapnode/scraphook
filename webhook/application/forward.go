@@ -98,7 +98,8 @@ func UseForwardSend(app *App, send xsender.Send) pipeline.Pipeline {
 					Timestamps: app.Clock.Now().UTC().UnixMilli(),
 				},
 			}
-			res.Response.WithId()
+			res.Response.UseId()
+			res.Response.UseTs(app.Configs.BucketTemplate, app.Clock.Now().UTC())
 
 			logger.Debugw("forwared successfully", "status_ok", res.Response.OK(), "status", res.Response.Status)
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
@@ -121,7 +122,7 @@ func UseForwardNotifyResponse(app *App) pipeline.Pipeline {
 			event := &msgbus.Event{
 				Workspace: res.Response.WorkspaceId,
 				App:       res.Response.WebhookId,
-				Type:      events.SCHEDULE_RES,
+				Type:      events.SCHEDULE_RESPONSE,
 				Metadata:  map[string]string{},
 			}
 			event.UseId()

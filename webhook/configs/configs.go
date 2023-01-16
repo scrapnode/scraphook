@@ -12,16 +12,22 @@ import (
 type Configs struct {
 	*xconfig.Configs
 
-	Validator *Validator         `json:"validator"`
-	Http      *transport.Configs `json:"http"`
-	MsgBus    *msgbus.Configs    `json:"msg_bus"`
-	Database  *database.Configs  `json:"database"`
-	Monitor   *xmonitor.Configs  `json:"monitor"`
+	BucketTemplate string             `json:"bucket_template" mapstructure:"SCRAPHOOK_BUCKET_TEMPLATE"`
+	Validator      *Validator         `json:"validator"`
+	Http           *transport.Configs `json:"http"`
+	MsgBus         *msgbus.Configs    `json:"msg_bus"`
+	Database       *database.Configs  `json:"database"`
+	Monitor        *xmonitor.Configs  `json:"monitor"`
 }
 
 func New(provider *viper.Viper) (*Configs, error) {
+	provider.SetDefault("SCRAPHOOK_BUCKET_TEMPLATE", "20060102")
+
 	cfg := &Configs{Configs: &xconfig.Configs{}}
 	if err := cfg.Configs.Unmarshal(provider); err != nil {
+		return nil, err
+	}
+	if err := cfg.Unmarshal(provider); err != nil {
 		return nil, err
 	}
 	if err := cfg.useValidator(provider); err != nil {

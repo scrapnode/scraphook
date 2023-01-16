@@ -19,14 +19,8 @@ func (ws *Workspace) TableName() string {
 	return "workspaces"
 }
 
-func (ws *Workspace) WithId() bool {
-	// only set data if it wasn't set yet
-	if ws.Id != "" {
-		return false
-	}
-
+func (ws *Workspace) UseId() {
 	ws.Id = utils.NewId("ws")
-	return true
 }
 
 func (ws *Workspace) Key() string {

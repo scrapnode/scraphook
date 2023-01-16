@@ -27,7 +27,7 @@ func (service *Forward) Start(ctx context.Context) error {
 	}
 
 	// @TODO: change queue name
-	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.SCHEDULE_REQ}
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.SCHEDULE_REQUEST}
 	cleanup, err := service.app.MsgBus.Sub(ctx, sample, "sender_sample", UseSubscriber(service.app))
 	if err != nil {
 		return err

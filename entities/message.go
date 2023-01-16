@@ -16,14 +16,8 @@ type Message struct {
 	Method  string `json:"method"`
 }
 
-func (msg *Message) WithId() bool {
-	// only set data if it wasn't set yet
-	if msg.Id != "" {
-		return false
-	}
-
+func (msg *Message) UseId() {
 	msg.Id = utils.NewId("msg")
-	return true
 }
 
 func (msg *Message) Key() string {
