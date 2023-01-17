@@ -1,27 +1,28 @@
-package scheduler
+package message
 
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/msgbus"
+	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xlogger"
+	"github.com/scrapnode/scraphook/capture/application"
 	"github.com/scrapnode/scraphook/events"
-	"github.com/scrapnode/scraphook/webhook/application"
 	"go.uber.org/zap"
 )
 
-type Scheduler struct {
+func New(ctx context.Context, app *application.App) transport.Transport {
+	logger := xlogger.FromContext(ctx).With("service", "message")
+	return &Message{app: app, logger: logger}
+}
+
+type Message struct {
 	app    *application.App
 	logger *zap.SugaredLogger
 
 	cleanup func() error
 }
 
-func New(ctx context.Context, app *application.App) *Scheduler {
-	logger := xlogger.FromContext(ctx).With("service", "scheduler")
-	return &Scheduler{app: app, logger: logger}
-}
-
-func (service *Scheduler) Start(ctx context.Context) error {
+func (service *Message) Start(ctx context.Context) error {
 	if err := service.app.Connect(ctx); err != nil {
 		return err
 	}
@@ -34,11 +35,11 @@ func (service *Scheduler) Start(ctx context.Context) error {
 	}
 	service.cleanup = cleanup
 
-	service.logger.Debugw("connected", "queue_name", queue)
+	service.logger.Debug("connected")
 	return nil
 }
 
-func (service *Scheduler) Stop(ctx context.Context) error {
+func (service *Message) Stop(ctx context.Context) error {
 	if service.cleanup != nil {
 		if err := service.cleanup(); err != nil {
 			service.logger.Errorw("cleanup subscriber got error", "error", err.Error())
@@ -53,7 +54,7 @@ func (service *Scheduler) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (service *Scheduler) Run(ctx context.Context) error {
+func (service *Message) Run(ctx context.Context) error {
 	service.logger.Debugw("running")
 	return nil
 }

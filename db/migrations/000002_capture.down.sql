@@ -1,0 +1,1 @@
+-- We never run migrate down, so no need to write it

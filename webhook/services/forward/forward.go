@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/xlogger"
+	"github.com/scrapnode/scraphook/events"
 	"github.com/scrapnode/scraphook/webhook/application"
-	"github.com/scrapnode/scraphook/webhook/events"
 	"go.uber.org/zap"
 )
 

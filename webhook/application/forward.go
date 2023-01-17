@@ -7,7 +7,7 @@ import (
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
 	"github.com/scrapnode/scrapcore/xsender"
 	"github.com/scrapnode/scraphook/entities"
-	"github.com/scrapnode/scraphook/webhook/events"
+	"github.com/scrapnode/scraphook/events"
 )
 
 func UseForward(app *App, instrumentName string) pipeline.Pipe {

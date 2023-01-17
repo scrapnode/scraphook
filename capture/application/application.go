@@ -6,9 +6,9 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scrapcore/xmonitor"
-	"github.com/scrapnode/scraphook/webhook/configs"
-	"github.com/scrapnode/scraphook/webhook/repositories"
-	"github.com/scrapnode/scraphook/webhook/repositories/sql"
+	"github.com/scrapnode/scraphook/capture/configs"
+	"github.com/scrapnode/scraphook/capture/repositories"
+	"github.com/scrapnode/scraphook/capture/repositories/sql"
 	"go.uber.org/zap"
 	"sync"
 )
@@ -16,7 +16,7 @@ import (
 func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	app := &App{
 		Configs: cfg,
-		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.webhook.application"),
+		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.capture.application"),
 		Clock:   clock.New(),
 	}
 
@@ -46,12 +46,12 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 type App struct {
 	Configs *configs.Configs
 	Logger  *zap.SugaredLogger
-	Repo    *repositories.Repo
 
 	// services
 	Clock   clock.Clock
 	MsgBus  msgbus.MsgBus
 	Monitor xmonitor.Monitor
+	Repo    *repositories.Repo
 
 	mu sync.Mutex
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
 	"github.com/scrapnode/scraphook/entities"
-	"github.com/scrapnode/scraphook/webhook/events"
+	"github.com/scrapnode/scraphook/events"
 	"github.com/sourcegraph/conc"
 	"regexp"
 	"strings"

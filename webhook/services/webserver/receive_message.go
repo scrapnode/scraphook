@@ -63,6 +63,7 @@ func UseReceiveMessageHandler(app *application.App) http.HandlerFunc {
 			Method:     r.Method,
 		}
 		req.Message.UseId()
+		req.Message.UseTs(app.Configs.BucketTemplate, app.Clock.Now().UTC())
 
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)

@@ -26,7 +26,7 @@ func New(provider *viper.Viper) (*Configs, error) {
 	if err := cfg.Configs.Unmarshal(provider); err != nil {
 		return nil, err
 	}
-	if err := cfg.Unmarshal(provider); err != nil {
+	if err := provider.Unmarshal(cfg); err != nil {
 		return nil, err
 	}
 	if err := cfg.useTrigger(provider); err != nil {

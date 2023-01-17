@@ -1,16 +1,16 @@
-package scheduler
+package message
 
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
-	"github.com/scrapnode/scraphook/webhook/application"
+	"github.com/scrapnode/scraphook/capture/application"
 )
 
 func UseSubscriber(app *application.App) msgbus.SubscribeFn {
-	instrumentName := "schedule_forward"
-	run := application.UseScheduleForward(app, instrumentName)
+	instrumentName := "capture_message"
+	run := application.UseCaptureMessage(app, instrumentName)
 
 	return func(ctx context.Context, event *msgbus.Event) error {
 		ctx, span := app.Monitor.Trace(ctx, instrumentName, "msgbus_subscribe")
@@ -18,28 +18,17 @@ func UseSubscriber(app *application.App) msgbus.SubscribeFn {
 		defer span.End()
 		logger := app.Logger.With("event_key", event.Key())
 
-		req := &application.ScheduleForwardReq{Event: event}
+		req := &application.CaptureMessageReq{Event: event}
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
 			span.KO(err.Error())
-			logger.Errorw("schedule got error", "error", err.Error())
+			logger.Errorw("capture got error", "error", err.Error())
 			return nil
 		}
-		span.OK("scheduled successfully")
+		span.OK("captured successfully")
 
-		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ScheduleForwardRes)
-		var success int
-		var fail int
-		for _, result := range res.Results {
-			if result.Error == "" {
-				success++
-				continue
-			}
-			fail++
-		}
-
-		logger.Debugw("scheduled successfully", "success_count", success, "fail_count", fail)
+		logger.Debugw("captured successfully")
 		return nil
 	}
 }

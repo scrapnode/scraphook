@@ -5,7 +5,7 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
-	"github.com/scrapnode/scraphook/webhook/events"
+	"github.com/scrapnode/scraphook/events"
 )
 
 func UseReceiveMessage(app *App, instrumentName string) pipeline.Pipe {

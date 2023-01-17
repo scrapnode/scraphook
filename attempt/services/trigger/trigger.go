@@ -28,11 +28,11 @@ func (service *Trigger) Start(ctx context.Context) error {
 
 	service.cron = cron.New()
 
-	msgEntryId, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseMessage(service.app))
+	id, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseEndpoints(service.app))
 	if err != nil {
 		return err
 	}
-	service.jobs = append(service.jobs, msgEntryId)
+	service.jobs = append(service.jobs, id)
 
 	service.cron.Start()
 	service.logger.Debug("connected")
