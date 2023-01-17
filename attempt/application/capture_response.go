@@ -8,51 +8,51 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func UseCaptureMessage(app *App, instrumentName string) pipeline.Pipe {
+func UseCaptureResponse(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseCaptureMessageParseEvent(app), app.Monitor, instrumentName, "parse_message"),
-		pipeline.UseTracing(UseCaptureMessagePut(app), app.Monitor, instrumentName, "put"),
+		pipeline.UseTracing(UseCaptureResponseParseEvent(app), app.Monitor, instrumentName, "parse_response"),
+		pipeline.UseTracing(UseCaptureResponsePut(app), app.Monitor, instrumentName, "put_response"),
 	})
 }
 
-type CaptureMessageReq struct {
-	Event   *msgbus.Event
-	Message *entities.Message
+type CaptureResponseReq struct {
+	Event    *msgbus.Event
+	Response *entities.Response
 }
 
-type CaptureMessageRes struct {
+type CaptureResponseRes struct {
 }
 
-func UseCaptureMessageParseEvent(app *App) pipeline.Pipeline {
+func UseCaptureResponseParseEvent(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: validate event
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*CaptureMessageReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*CaptureResponseReq)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
-			if err := req.Event.ScanData(&req.Message); err != nil {
+			if err := req.Event.ScanData(&req.Response); err != nil {
 				logger.Errorw(ErrEventDataInvalid.Error(), "error", err.Error())
 				return ctx, err
 			}
 			// @TODO: validate message
 
-			ctx = attributes.WithContext(ctx, attributes.Attributes{"message.id": req.Message.Id})
-			logger.Debugw("parsed message from event", "message_key", req.Message.Key())
+			ctx = attributes.WithContext(ctx, attributes.Attributes{"request.id": req.Response.Id})
+			logger.Debugw("parsed message from event", "message_key", req.Response.Key())
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 
 			return next(ctx)
 		}
 	}
 }
-func UseCaptureMessagePut(app *App) pipeline.Pipeline {
+func UseCaptureResponsePut(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*CaptureMessageReq)
-			logger := app.Logger.With("event_key", req.Event.Key()).With("msg_key", req.Message.Key())
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*CaptureResponseReq)
+			logger := app.Logger.With("event_key", req.Event.Key()).With("res_key", req.Response.Key())
 
-			if err := app.Repo.Message.Put(req.Message); err != nil {
+			if err := app.Repo.Response.Put(req.Response); err != nil {
 				logger.Errorw(ErrMessagePutFailed.Error(), "error", err.Error())
 				return ctx, err
 			}

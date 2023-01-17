@@ -7,6 +7,8 @@ import (
 	"github.com/scrapnode/scrapcore/xlogger"
 	"github.com/scrapnode/scrapcore/xmonitor"
 	"github.com/scrapnode/scraphook/attempt/configs"
+	"github.com/scrapnode/scraphook/attempt/repositories"
+	"github.com/scrapnode/scraphook/attempt/repositories/sql"
 	"go.uber.org/zap"
 	"sync"
 )
@@ -26,6 +28,12 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	// share monitor across services via context
 	ctx = xmonitor.WithContext(ctx, app.Monitor)
 
+	repo, err := sql.New(ctx, cfg.Database)
+	if err != nil {
+		return nil, err
+	}
+	app.Repo = repo
+
 	bus, err := msgbus.New(ctx, app.Configs.MsgBus)
 	if err != nil {
 		return nil, err
@@ -43,6 +51,7 @@ type App struct {
 	Clock   clock.Clock
 	MsgBus  msgbus.MsgBus
 	Monitor xmonitor.Monitor
+	Repo    *repositories.Repo
 
 	mu sync.Mutex
 }
@@ -51,6 +60,9 @@ func (app *App) Connect(ctx context.Context) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
+	if err := app.Repo.Database.Connect(ctx); err != nil {
+		return err
+	}
 	if err := app.MsgBus.Connect(ctx); err != nil {
 		return err
 	}
@@ -74,6 +86,12 @@ func (app *App) Disconnect(ctx context.Context) error {
 
 	if app.MsgBus != nil {
 		if err := app.MsgBus.Disconnect(ctx); err != nil {
+			app.Logger.Error(err)
+		}
+	}
+
+	if app.Repo != nil && app.Repo.Database != nil {
+		if err := app.Repo.Database.Disconnect(ctx); err != nil {
 			app.Logger.Error(err)
 		}
 	}

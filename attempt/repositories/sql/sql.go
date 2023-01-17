@@ -3,7 +3,7 @@ package sql
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/database"
-	"github.com/scrapnode/scraphook/capture/repositories"
+	"github.com/scrapnode/scraphook/attempt/repositories"
 )
 
 func New(ctx context.Context, cfg *database.Configs) (*repositories.Repo, error) {
@@ -15,6 +15,8 @@ func New(ctx context.Context, cfg *database.Configs) (*repositories.Repo, error)
 	repo := &repositories.Repo{
 		Database: db,
 		Message:  &MessageRepo{db: db},
+		Request:  &RequestRepo{db: db},
+		Response: &ResponseRepo{db: db},
 	}
 	return repo, nil
 }
