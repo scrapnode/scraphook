@@ -7,7 +7,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/scrapnode/scrapcore v0.0.0-20230118020735-624d5d070b63
+	github.com/scrapnode/scrapcore v0.0.0-20230118022805-61c662082f7f
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
