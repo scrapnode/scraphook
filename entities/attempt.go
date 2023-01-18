@@ -3,9 +3,8 @@ package entities
 import "strings"
 
 type AttemptTrigger struct {
-	Bucket string `json:"bucket"`
-	Start  int64  `json:"start"`
-	End    int64  `json:"end"`
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
 
 	WorkspaceId string `json:"workspace_id"`
 	WebhookId   string `json:"webhook_id"`

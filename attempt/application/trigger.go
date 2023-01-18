@@ -5,7 +5,6 @@ import (
 	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
-	"github.com/scrapnode/scrapcore/utils"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/events"
 	"github.com/sourcegraph/conc"
@@ -45,12 +44,9 @@ func UseTriggerConstructBuckets(app *App) pipeline.Pipeline {
 			// example of boundaries: [100-199, 200-299, 300-399]
 			for count > 0 {
 				end := start.Add(-time.Duration(app.Configs.Trigger.BucketSizeInMinutes) * time.Minute)
-
-				bucket, _ := utils.NewBucket(app.Configs.BucketTemplate, start)
 				req.Buckets = append(req.Buckets, entities.AttemptTrigger{
-					Bucket: bucket,
-					Start:  start.UnixMilli() - 1,
-					End:    end.UnixMilli(),
+					Start: start.UnixMilli() - 1,
+					End:   end.UnixMilli(),
 				})
 
 				start = end
@@ -104,7 +100,6 @@ func UseTriggerBuildTriggers(app *App) pipeline.Pipeline {
 			for _, endpoint := range res.Endpoints {
 				for _, bucket := range req.Buckets {
 					res.Triggers = append(res.Triggers, entities.AttemptTrigger{
-						Bucket:      bucket.Bucket,
 						Start:       bucket.Start,
 						End:         bucket.End,
 						WorkspaceId: endpoint.WorkspaceId,
