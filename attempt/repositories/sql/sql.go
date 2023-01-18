@@ -17,6 +17,7 @@ func New(ctx context.Context, cfg *database.Configs) (*repositories.Repo, error)
 		Message:  &MessageRepo{db: db},
 		Request:  &RequestRepo{db: db},
 		Response: &ResponseRepo{db: db},
+		Endpoint: &EndpointRepo{db: db},
 	}
 	return repo, nil
 }

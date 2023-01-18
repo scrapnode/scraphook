@@ -20,7 +20,7 @@ type Configs struct {
 }
 
 func New(provider *viper.Viper) (*Configs, error) {
-	provider.SetDefault("SCRAPHOOK_BUCKET_TEMPLATE", "20060102")
+	provider.SetDefault("SCRAPHOOK_BUCKET_TEMPLATE", "2006010215")
 
 	cfg := &Configs{Configs: &xconfig.Configs{}}
 	if err := cfg.Configs.Unmarshal(provider); err != nil {

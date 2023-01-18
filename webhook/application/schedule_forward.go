@@ -31,8 +31,8 @@ type ScheduleForwardReq struct {
 }
 
 type ScheduleForwardRes struct {
-	Requests []*entities.Request
-	Results  []*pipeline.BatchResult
+	Requests []entities.Request
+	Results  []pipeline.BatchResult
 }
 
 func UseScheduleForwardParseEvent(app *App) pipeline.Pipeline {
@@ -92,7 +92,7 @@ func UseScheduleForwardBuildRequests(app *App) pipeline.Pipeline {
 				With("event_key", req.Event.Key()).
 				With("message_key", req.Message.Key())
 
-			res := &ScheduleForwardRes{Requests: []*entities.Request{}, Results: []*pipeline.BatchResult{}}
+			res := &ScheduleForwardRes{Requests: []entities.Request{}, Results: []pipeline.BatchResult{}}
 			for _, endpoint := range req.Endpoints {
 				if len(endpoint.Rules) == 0 {
 					logger.Warnw("endpoint has no rules, ignore all request", "endpoint_id", endpoint.Id)
@@ -118,7 +118,7 @@ func UseScheduleForwardBuildRequests(app *App) pipeline.Pipeline {
 							continue
 						}
 
-						request := &entities.Request{
+						request := entities.Request{
 							WorkspaceId: req.Message.WorkspaceId,
 							WebhookId:   req.Message.WebhookId,
 							EndpointId:  endpoint.Id,
@@ -165,7 +165,7 @@ func UseScheduleForwardPublishRequests(app *App) pipeline.Pipeline {
 				// reflect the value here to make sure we have no issue with concurrency
 				request := r
 				wg.Go(func() {
-					result := &pipeline.BatchResult{Key: request.Key()}
+					result := pipeline.BatchResult{Key: request.Key()}
 					event := &msgbus.Event{
 						Workspace: request.WorkspaceId,
 						App:       request.WebhookId,
@@ -196,7 +196,6 @@ func UseScheduleForwardPublishRequests(app *App) pipeline.Pipeline {
 
 			logger.Debugw("sent requests", "result_count", len(res.Results))
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
-			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 
 			return next(ctx)
 		}

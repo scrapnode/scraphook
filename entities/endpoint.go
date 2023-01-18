@@ -3,16 +3,16 @@ package entities
 import "github.com/scrapnode/scrapcore/utils"
 
 type Endpoint struct {
-	WorkspaceId string `json:"workspace_id" gorm:"index:ws_wh,priority:30"`
-	WebhookId   string `json:"webhook_id" gorm:"index:ws_wh,priority:20"`
-	Id          string `json:"id" gorm:"primaryKey"`
+	WorkspaceId string `json:"workspace_id"`
+	WebhookId   string `json:"webhook_id"`
+	Id          string `json:"id"`
 
-	Name string `json:"name" gorm:"size:256"`
+	Name string `json:"name"`
 	// http, gRPC
-	Uri string `json:"uri" gorm:"size:1024"`
+	Uri string `json:"uri"`
 
-	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
-	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 
 	Rules []EndpointRule
 }

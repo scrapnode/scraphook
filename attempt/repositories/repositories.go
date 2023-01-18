@@ -10,6 +10,7 @@ type Repo struct {
 	Message  MessageRepo
 	Request  RequestRepo
 	Response ResponseRepo
+	Endpoint EndpointRepo
 }
 
 type MessageRepo interface {
@@ -22,4 +23,12 @@ type RequestRepo interface {
 
 type ResponseRepo interface {
 	Put(msg *entities.Response) error
+}
+
+type EndpointScanResult struct {
+	database.ScanResult
+	Records []entities.Endpoint
+}
+type EndpointRepo interface {
+	Scan(query *database.ScanQuery) (*EndpointScanResult, error)
 }

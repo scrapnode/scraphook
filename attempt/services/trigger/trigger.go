@@ -28,7 +28,7 @@ func (service *Trigger) Start(ctx context.Context) error {
 
 	service.cron = cron.New()
 
-	id, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseEndpoints(service.app))
+	id, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseCronjobHandler(service.app))
 	if err != nil {
 		return err
 	}
