@@ -5,6 +5,7 @@ import (
 	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
+	"github.com/scrapnode/scrapcore/utils"
 	"github.com/scrapnode/scraphook/entities"
 	"github.com/scrapnode/scraphook/events"
 	"github.com/sourcegraph/conc"
@@ -40,13 +41,23 @@ func UseTriggerConstructBuckets(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerReq)
 
 			count := req.BucketCount
-			start := app.Clock.Now().UTC()
-			// example of boundaries: [100-199, 200-299, 300-399]
+
+			startBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, app.Clock.Now().UTC())
+			start, err := time.Parse(app.Configs.BucketTemplate, startBucket)
+			if err != nil {
+				return ctx, err
+			}
+
+			// example of boundaries:
+			// bucket [2023011901, 2023011900, 2023011823]
+			// end-start [1674089999999-1674086400000, 1674086399999-1674082800000, 1674082799999-1674079200000]
 			for count > 0 {
+				bucket, _ := utils.NewBucket(app.Configs.BucketTemplate, start)
 				end := start.Add(-time.Duration(app.Configs.Trigger.BucketSizeInMinutes) * time.Minute)
 				req.Buckets = append(req.Buckets, entities.AttemptTrigger{
-					Start: start.UnixMilli() - 1,
-					End:   end.UnixMilli(),
+					Bucket: bucket,
+					Start:  start.UnixMilli() - 1,
+					End:    end.UnixMilli(),
 				})
 
 				start = end
