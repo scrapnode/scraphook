@@ -10,7 +10,7 @@ import (
 )
 
 func New(ctx context.Context, app *application.App) transport.Transport {
-	logger := xlogger.FromContext(ctx).With("service", "webserver")
+	logger := xlogger.FromContext(ctx).With("service", "trigger")
 	return &Trigger{app: app, logger: logger}
 }
 
@@ -28,7 +28,7 @@ func (service *Trigger) Start(ctx context.Context) error {
 
 	service.cron = cron.New()
 
-	id, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseCronjobHandler(service.app))
+	id, err := service.cron.AddFunc(service.app.Configs.Trigger.CronPattern, UseTriggerRequest(service.app))
 	if err != nil {
 		return err
 	}

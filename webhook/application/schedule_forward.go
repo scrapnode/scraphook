@@ -181,7 +181,7 @@ func UseScheduleForwardPublishRequests(app *App) pipeline.Pipeline {
 						return
 					}
 
-					// let publish an event to let our system knows we have scheduled a forward request
+					// let publish an event to let our system knows we have scheduled a examiner request
 					if _, err := app.MsgBus.Pub(ctx, event); err != nil {
 						logger.Errorw("could not publish event", "request_key", request.Key())
 						result.Error = err.Error()

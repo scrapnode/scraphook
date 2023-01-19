@@ -1,14 +1,30 @@
-package forward
+package examiner
 
 import (
 	"context"
+	"fmt"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
+	"github.com/scrapnode/scraphook/events"
 	"github.com/scrapnode/scraphook/webhook/application"
 )
 
-func UseSubscriber(app *application.App) msgbus.SubscribeFn {
+func RegisterExamineRequest(service *Examiner, ctx context.Context) error {
+	name := "examine_request"
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.ATTEMPT_TRIGGER_REQUEST}
+	queue := fmt.Sprintf("%s_%s", name, service.app.Configs.MsgBus.QueueName)
+	cleanup, err := service.app.MsgBus.Sub(ctx, sample, queue, UseExamineRequest(service.app))
+	if err != nil {
+		return err
+	}
+
+	service.logger.Debugw("registered", "queue_name", queue)
+	service.cleanup[name] = cleanup
+	return nil
+}
+
+func UseExamineRequest(app *application.App) msgbus.SubscribeFn {
 	instrumentName := "examiner"
 	run := application.UseForward(app, instrumentName)
 

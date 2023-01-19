@@ -46,6 +46,7 @@ func UseCaptureMessageParseEvent(app *App) pipeline.Pipeline {
 		}
 	}
 }
+
 func UseCaptureMessagePut(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {

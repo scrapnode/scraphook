@@ -20,7 +20,7 @@ func New(ctx context.Context, name string) (transport.Transport, error) {
 	if name == "scheduler" {
 		return scheduler.New(ctx, app), nil
 	}
-	if name == "forward" {
+	if name == "examiner" {
 		return forward.New(ctx, app), nil
 	}
 

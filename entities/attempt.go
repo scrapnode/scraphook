@@ -1,6 +1,9 @@
 package entities
 
-import "strings"
+import (
+	"github.com/scrapnode/scrapcore/utils"
+	"strings"
+)
 
 type AttemptTrigger struct {
 	Bucket string `json:"bucket"`
@@ -10,6 +13,11 @@ type AttemptTrigger struct {
 	WorkspaceId string `json:"workspace_id"`
 	WebhookId   string `json:"webhook_id"`
 	EndpointId  string `json:"endpoint_id"`
+	Id          string `json:"id"`
+}
+
+func (trigger *AttemptTrigger) UseId() {
+	trigger.Id = utils.NewId("ep")
 }
 
 func (trigger *AttemptTrigger) Key() string {

@@ -12,33 +12,33 @@ import (
 	"time"
 )
 
-func UseTrigger(app *App, instrumentName string) pipeline.Pipe {
+func UseTriggerRequest(app *App, instrumentName string) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseTriggerConstructBuckets(app), app.Monitor, instrumentName, "construct_buckets"),
-		pipeline.UseTracing(UseTriggerScanEndpoints(app), app.Monitor, instrumentName, "scan_endpoints"),
-		pipeline.UseTracing(UseTriggerBuildTriggers(app), app.Monitor, instrumentName, "build_triggers"),
-		pipeline.UseTracing(UseTriggerPublish(app), app.Monitor, instrumentName, "publish"),
+		pipeline.UseTracing(UseTriggerRequestConstructBuckets(app), app.Monitor, instrumentName, "construct_buckets"),
+		pipeline.UseTracing(UseTriggerRequestScanEndpoints(app), app.Monitor, instrumentName, "scan_endpoints"),
+		pipeline.UseTracing(UseTriggerRequestBuildTriggers(app), app.Monitor, instrumentName, "build_triggers"),
+		pipeline.UseTracing(UseTriggerRequestPublish(app), app.Monitor, instrumentName, "publish"),
 	})
 }
 
-type TriggerReq struct {
+type TriggerRequestReq struct {
 	BucketTemplate string `json:"bucket_template"`
 	BucketCount    int    `json:"bucket_count"`
 	Buckets        []entities.AttemptTrigger
 }
 
-type TriggerRes struct {
+type TriggerRequestRes struct {
 	Endpoints []entities.Endpoint
 	Triggers  []entities.AttemptTrigger
 	Results   []pipeline.BatchResult
 }
 
-func UseTriggerConstructBuckets(app *App) pipeline.Pipeline {
+func UseTriggerRequestConstructBuckets(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 
 			count := req.BucketCount
 
@@ -69,13 +69,13 @@ func UseTriggerConstructBuckets(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseTriggerScanEndpoints(app *App) pipeline.Pipeline {
+func UseTriggerRequestScanEndpoints(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 			logger := app.Logger.With("bucket_template", req.BucketTemplate)
 
-			res := &TriggerRes{Endpoints: []entities.Endpoint{}, Triggers: []entities.AttemptTrigger{}}
+			res := &TriggerRequestRes{Endpoints: []entities.Endpoint{}, Triggers: []entities.AttemptTrigger{}}
 			var cursor string
 
 			for {
@@ -102,21 +102,23 @@ func UseTriggerScanEndpoints(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseTriggerBuildTriggers(app *App) pipeline.Pipeline {
+func UseTriggerRequestBuildTriggers(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerReq)
-			res := ctx.Value(pipeline.CTXKEY_RES).(*TriggerRes)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
+			res := ctx.Value(pipeline.CTXKEY_RES).(*TriggerRequestRes)
 
 			for _, endpoint := range res.Endpoints {
 				for _, bucket := range req.Buckets {
-					res.Triggers = append(res.Triggers, entities.AttemptTrigger{
+					trigger := entities.AttemptTrigger{
 						Start:       bucket.Start,
 						End:         bucket.End,
 						WorkspaceId: endpoint.WorkspaceId,
 						WebhookId:   endpoint.WebhookId,
 						EndpointId:  endpoint.Id,
-					})
+					}
+					trigger.UseId()
+					res.Triggers = append(res.Triggers, trigger)
 				}
 			}
 
@@ -125,10 +127,10 @@ func UseTriggerBuildTriggers(app *App) pipeline.Pipeline {
 	}
 }
 
-func UseTriggerPublish(app *App) pipeline.Pipeline {
+func UseTriggerRequestPublish(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			res := ctx.Value(pipeline.CTXKEY_RES).(*TriggerRes)
+			res := ctx.Value(pipeline.CTXKEY_RES).(*TriggerRequestRes)
 			logger := app.Logger
 
 			var wg conc.WaitGroup
@@ -140,7 +142,7 @@ func UseTriggerPublish(app *App) pipeline.Pipeline {
 					event := &msgbus.Event{
 						Workspace: trigger.WorkspaceId,
 						App:       trigger.WebhookId,
-						Type:      events.ATTEMPT_TRIGGER,
+						Type:      events.ATTEMPT_TRIGGER_REQUEST,
 						Metadata:  map[string]string{},
 					}
 					event.UseId()
@@ -152,7 +154,7 @@ func UseTriggerPublish(app *App) pipeline.Pipeline {
 						return
 					}
 
-					// let publish an event to let our system knows we have scheduled a forward request
+					// let publish an event to let our system knows we have scheduled a examiner request
 					if _, err := app.MsgBus.Pub(ctx, event); err != nil {
 						logger.Errorw("could not publish event", "trigger_key", trigger.Key())
 						result.Error = err.Error()

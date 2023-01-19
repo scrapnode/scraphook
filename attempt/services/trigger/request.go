@@ -6,16 +6,16 @@ import (
 	"github.com/scrapnode/scraphook/attempt/application"
 )
 
-func UseCronjobHandler(app *application.App) func() {
-	instrumentName := "forward"
-	run := application.UseTrigger(app, instrumentName)
+func UseTriggerRequest(app *application.App) func() {
+	instrumentName := "trigger_request"
+	run := application.UseTriggerRequest(app, instrumentName)
 
 	return func() {
 		ctx, span := app.Monitor.Trace(context.Background(), instrumentName, "cronjob_handler")
 		defer span.End()
 		logger := app.Logger
 
-		req := &application.TriggerReq{
+		req := &application.TriggerRequestReq{
 			BucketTemplate: app.Configs.BucketTemplate,
 			BucketCount:    app.Configs.Trigger.BucketCount,
 		}
@@ -28,7 +28,7 @@ func UseCronjobHandler(app *application.App) func() {
 		}
 
 		span.OK("trigger cronjob successfully")
-		res := ctx.Value(pipeline.CTXKEY_RES).(*application.TriggerRes)
+		res := ctx.Value(pipeline.CTXKEY_RES).(*application.TriggerRequestRes)
 		logger.Debugw("trigger cronjob successfully", "endpoint_count", len(res.Endpoints), "trigger_count", len(res.Triggers))
 		return
 	}

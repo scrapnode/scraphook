@@ -17,7 +17,7 @@ type Forward struct {
 }
 
 func New(ctx context.Context, app *application.App) *Forward {
-	logger := xlogger.FromContext(ctx).With("service", "forward")
+	logger := xlogger.FromContext(ctx).With("service", "examiner")
 	return &Forward{app: app, logger: logger}
 }
 
