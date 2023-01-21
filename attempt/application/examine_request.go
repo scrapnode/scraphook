@@ -9,6 +9,8 @@ import (
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
 	"github.com/scrapnode/scraphook/attempt/repositories"
 	"github.com/scrapnode/scraphook/entities"
+	"github.com/scrapnode/scraphook/events"
+	"github.com/sourcegraph/conc"
 )
 
 func UseExamineRequest(app *App, instrumentName string) pipeline.Pipe {
@@ -19,6 +21,7 @@ func UseExamineRequest(app *App, instrumentName string) pipeline.Pipe {
 		pipeline.UseTracing(UseExamineRequestScan(app), app.Monitor, instrumentName, "scan_requests"),
 		pipeline.UseTracing(UseExamineRequestMarkRequestsAsAttempt(app), app.Monitor, instrumentName, "mark_requests_as_attempt"),
 		pipeline.UseTracing(UseExamineRequestFilter(app), app.Monitor, instrumentName, "filter_requests"),
+		pipeline.UseTracing(UseExamineRequestPublishAttemptRequests(app), app.Monitor, instrumentName, "publish_attempt_requests"),
 	})
 }
 
@@ -29,6 +32,7 @@ type ExamineRequestReq struct {
 
 type ExamineRequestRes struct {
 	Requests []entities.Request
+	Results  []pipeline.BatchResult
 }
 
 func UseExamineRequestParseEvent(app *App) pipeline.Pipeline {
@@ -59,7 +63,7 @@ func UseExamineRequestScan(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ExamineRequestReq)
 			logger := app.Logger.With("event_key", req.Event.Key())
 
-			res := &ExamineRequestRes{Requests: []entities.Request{}}
+			res := &ExamineRequestRes{Requests: []entities.Request{}, Results: []pipeline.BatchResult{}}
 			query := &repositories.RequestScanQuery{
 				ScanQuery: database.ScanQuery{Cursor: "", Limit: app.Configs.Trigger.ScanSize},
 				Before:    req.Trigger.End,
@@ -94,8 +98,8 @@ func UseExamineRequestMarkRequestsAsAttempt(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*ExamineRequestReq)
-			res := ctx.Value(pipeline.CTXKEY_RES).(*ExamineRequestRes)
 			logger := app.Logger.With("event_key", req.Event.Key())
+			res := ctx.Value(pipeline.CTXKEY_RES).(*ExamineRequestRes)
 
 			ids := lo.Map[entities.Request](res.Requests, func(item entities.Request, _ int) string {
 				return item.Id
@@ -114,6 +118,58 @@ func UseExamineRequestFilter(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			// @TODO: use redis to filter attempt request if it's exceeded
+			return next(ctx)
+		}
+	}
+}
+
+func UseExamineRequestPublishAttemptRequests(app *App) pipeline.Pipeline {
+	return func(next pipeline.Pipe) pipeline.Pipe {
+		return func(ctx context.Context) (context.Context, error) {
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ExamineRequestReq)
+			logger := app.Logger.With("event_key", req.Event.Key())
+			res := ctx.Value(pipeline.CTXKEY_RES).(*ExamineRequestRes)
+
+			if len(res.Requests) == 0 {
+				logger.Warn("found no request to attempt")
+				return next(ctx)
+			}
+
+			// @TODO: count metrics manually
+
+			var wg conc.WaitGroup
+			for _, r := range res.Requests {
+				// reflect the value here to make sure we have no issue with concurrency
+				request := r
+				wg.Go(func() {
+					result := pipeline.BatchResult{Key: request.Key()}
+					event := &msgbus.Event{
+						Workspace: request.WorkspaceId,
+						App:       request.WebhookId,
+						Type:      events.SCHEDULE_REQUEST,
+						Metadata:  map[string]string{},
+					}
+					event.UseId()
+
+					if err := event.SetData(request); err != nil {
+						logger.Errorw("could not set event data", "request_key", request.Key())
+						result.Error = err.Error()
+						res.Results = append(res.Results, result)
+						return
+					}
+
+					// let publish an event to let our system knows we have scheduled a examiner request
+					if _, err := app.MsgBus.Pub(ctx, event); err != nil {
+						logger.Errorw("could not publish event", "request_key", request.Key())
+						result.Error = err.Error()
+						res.Results = append(res.Results, result)
+						return
+					}
+
+					res.Results = append(res.Results, pipeline.BatchResult{})
+				})
+			}
+
 			return next(ctx)
 		}
 	}
