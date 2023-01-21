@@ -26,12 +26,12 @@ func UseTriggerRequest(app *App, instrumentName string) pipeline.Pipe {
 type TriggerRequestReq struct {
 	BucketTemplate string `json:"bucket_template"`
 	BucketCount    int    `json:"bucket_count"`
-	Buckets        []entities.AttemptTrigger
+	Buckets        []entities.RequestTrigger
 }
 
 type TriggerRequestRes struct {
 	Endpoints []entities.Endpoint
-	Triggers  []entities.AttemptTrigger
+	Triggers  []entities.RequestTrigger
 	Results   []pipeline.BatchResult
 }
 
@@ -40,21 +40,19 @@ func UseTriggerRequestConstructBuckets(app *App) pipeline.Pipeline {
 		return func(ctx context.Context) (context.Context, error) {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 
-			count := req.BucketCount
-
-			startBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, app.Clock.Now().UTC())
-			start, err := time.Parse(app.Configs.BucketTemplate, startBucket)
-			if err != nil {
-				return ctx, err
-			}
+			delay := -time.Duration(app.Configs.Trigger.BucketDelayInMinutes) * time.Minute
+			startTime := app.Clock.Now().UTC().Add(delay)
+			startBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, startTime)
+			start, _ := time.Parse(app.Configs.BucketTemplate, startBucket)
 
 			// example of boundaries:
 			// bucket [2023011901, 2023011900, 2023011823]
 			// end-start [1674089999999-1674086400000, 1674086399999-1674082800000, 1674082799999-1674079200000]
+			count := req.BucketCount
 			for count > 0 {
 				bucket, _ := utils.NewBucket(app.Configs.BucketTemplate, start)
 				end := start.Add(-time.Duration(app.Configs.Trigger.BucketSizeInMinutes) * time.Minute)
-				req.Buckets = append(req.Buckets, entities.AttemptTrigger{
+				req.Buckets = append(req.Buckets, entities.RequestTrigger{
 					Bucket: bucket,
 					Start:  start.UnixMilli() - 1,
 					End:    end.UnixMilli(),
@@ -75,11 +73,11 @@ func UseTriggerRequestScanEndpoints(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 			logger := app.Logger.With("bucket_template", req.BucketTemplate)
 
-			res := &TriggerRequestRes{Endpoints: []entities.Endpoint{}, Triggers: []entities.AttemptTrigger{}}
-			var cursor string
+			res := &TriggerRequestRes{Endpoints: []entities.Endpoint{}, Triggers: []entities.RequestTrigger{}}
+			query := &database.ScanQuery{Cursor: "", Limit: app.Configs.Trigger.ScanSize}
 
 			for {
-				results, err := app.Repo.Endpoint.Scan(&database.ScanQuery{Cursor: cursor, Limit: app.Configs.Trigger.ScanSize})
+				results, err := app.Repo.Endpoint.Scan(query)
 				if err != nil {
 					logger.Errorw("could not scan endpoints", "error", err.Error())
 					return context.WithValue(ctx, pipeline.CTXKEY_RES, res), err
@@ -93,7 +91,7 @@ func UseTriggerRequestScanEndpoints(app *App) pipeline.Pipeline {
 				}
 
 				// continue scan with next cursor
-				cursor = results.Cursor
+				query.Cursor = results.Cursor
 			}
 
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
@@ -110,7 +108,7 @@ func UseTriggerRequestBuildTriggers(app *App) pipeline.Pipeline {
 
 			for _, endpoint := range res.Endpoints {
 				for _, bucket := range req.Buckets {
-					trigger := entities.AttemptTrigger{
+					trigger := entities.RequestTrigger{
 						Start:       bucket.Start,
 						End:         bucket.End,
 						WorkspaceId: endpoint.WorkspaceId,

@@ -3,7 +3,7 @@ package examiner
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/xlogger"
-	"github.com/scrapnode/scraphook/webhook/application"
+	"github.com/scrapnode/scraphook/attempt/application"
 	"go.uber.org/zap"
 )
 

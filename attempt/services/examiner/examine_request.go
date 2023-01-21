@@ -6,8 +6,8 @@ import (
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
+	"github.com/scrapnode/scraphook/attempt/application"
 	"github.com/scrapnode/scraphook/events"
-	"github.com/scrapnode/scraphook/webhook/application"
 )
 
 func RegisterExamineRequest(service *Examiner, ctx context.Context) error {
@@ -26,7 +26,7 @@ func RegisterExamineRequest(service *Examiner, ctx context.Context) error {
 
 func UseExamineRequest(app *application.App) msgbus.SubscribeFn {
 	instrumentName := "examiner"
-	run := application.UseForward(app, instrumentName)
+	run := application.UseExamineRequest(app, instrumentName)
 
 	return func(ctx context.Context, event *msgbus.Event) error {
 		ctx, span := app.Monitor.Trace(ctx, instrumentName, "msgbus_subscribe")
@@ -34,7 +34,7 @@ func UseExamineRequest(app *application.App) msgbus.SubscribeFn {
 		defer span.End()
 		logger := app.Logger.With("event_key", event.Key())
 
-		req := &application.ForwardReq{Event: event}
+		req := &application.ExamineRequestReq{Event: event}
 		ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, req)
 		ctx, err := run(ctx)
 		if err != nil {
@@ -44,8 +44,8 @@ func UseExamineRequest(app *application.App) msgbus.SubscribeFn {
 		}
 
 		span.OK("forwarded successfully")
-		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ForwardRes)
-		logger.Debugw("forwarded successfully", "response_key", res.Response.Key())
+		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ExamineRequestRes)
+		logger.Debugw("forwarded successfully", "request_count", len(res.Requests))
 		return nil
 	}
 }

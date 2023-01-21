@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type AttemptTrigger struct {
+type RequestTrigger struct {
 	Bucket string `json:"bucket"`
 	Start  int64  `json:"start"`
 	End    int64  `json:"end"`
@@ -16,11 +16,11 @@ type AttemptTrigger struct {
 	Id          string `json:"id"`
 }
 
-func (trigger *AttemptTrigger) UseId() {
+func (trigger *RequestTrigger) UseId() {
 	trigger.Id = utils.NewId("ep")
 }
 
-func (trigger *AttemptTrigger) Key() string {
+func (trigger *RequestTrigger) Key() string {
 	keys := []string{
 		trigger.WorkspaceId,
 		trigger.WebhookId,

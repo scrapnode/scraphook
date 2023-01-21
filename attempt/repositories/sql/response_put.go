@@ -6,8 +6,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (repo *ResponseRepo) Put(msg *entities.Response) error {
+func (repo *ResponseRepo) Put(res *entities.Response) error {
 	conn := repo.db.GetConn().(*gorm.DB)
-	tx := conn.Clauses(clause.OnConflict{DoNothing: true}).Create(msg)
+	tx := conn.Clauses(clause.OnConflict{DoNothing: true}).Create(res)
 	return tx.Error
 }

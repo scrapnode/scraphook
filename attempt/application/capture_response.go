@@ -13,6 +13,7 @@ func UseCaptureResponse(app *App, instrumentName string) pipeline.Pipe {
 		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
 		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
 		pipeline.UseTracing(UseCaptureResponseParseEvent(app), app.Monitor, instrumentName, "parse_response"),
+		pipeline.UseTracing(UseCaptureResponseMarkRequestAsDone(app), app.Monitor, instrumentName, "mark_request_as_done"),
 		pipeline.UseTracing(UseCaptureResponsePut(app), app.Monitor, instrumentName, "put_response"),
 	})
 }
@@ -23,6 +24,7 @@ type CaptureResponseReq struct {
 }
 
 type CaptureResponseRes struct {
+	RequestId string
 }
 
 func UseCaptureResponseParseEvent(app *App) pipeline.Pipeline {
@@ -46,6 +48,22 @@ func UseCaptureResponseParseEvent(app *App) pipeline.Pipeline {
 		}
 	}
 }
+
+func UseCaptureResponseMarkRequestAsDone(app *App) pipeline.Pipeline {
+	return func(next pipeline.Pipe) pipeline.Pipe {
+		return func(ctx context.Context) (context.Context, error) {
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*CaptureResponseReq)
+			logger := app.Logger.With("event_key", req.Event.Key()).With("res_key", req.Response.Key(), "request_id", req.Response.RequestId)
+
+			if err := app.Repo.Request.MarkAsDone(req.Response.RequestId); err != nil {
+				logger.Errorw(ErrMarkRequestAsDoneFailed.Error(), "error", err.Error())
+				return ctx, err
+			}
+
+			return next(ctx)
+		}
+	}
+}
 func UseCaptureResponsePut(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
@@ -53,7 +71,7 @@ func UseCaptureResponsePut(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("event_key", req.Event.Key()).With("res_key", req.Response.Key())
 
 			if err := app.Repo.Response.Put(req.Response); err != nil {
-				logger.Errorw(ErrMessagePutFailed.Error(), "error", err.Error())
+				logger.Errorw(ErrResponsePutFailed.Error(), "error", err.Error())
 				return ctx, err
 			}
 

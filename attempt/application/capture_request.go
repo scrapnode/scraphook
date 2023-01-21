@@ -53,7 +53,7 @@ func UseCaptureRequestPut(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("event_key", req.Event.Key()).With("req_key", req.Request.Key())
 
 			if err := app.Repo.Request.Put(req.Request); err != nil {
-				logger.Errorw(ErrMessagePutFailed.Error(), "error", err.Error())
+				logger.Errorw(ErrRequestPutFailed.Error(), "error", err.Error())
 				return ctx, err
 			}
 
