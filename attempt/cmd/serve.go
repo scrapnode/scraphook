@@ -17,7 +17,7 @@ func NewServe() *cobra.Command {
 		Use:       "serve",
 		Example:   `scraphook attempt serve webserver`,
 		Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-		ValidArgs: []string{"capture", "trigger"},
+		ValidArgs: []string{"capture", "trigger", "examiner"},
 		PreRunE:   corecmd.ChainPreRunE(),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()

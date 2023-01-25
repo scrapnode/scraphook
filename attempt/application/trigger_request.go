@@ -41,24 +41,24 @@ func UseTriggerRequestConstructBuckets(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 
 			delay := -time.Duration(app.Configs.Trigger.BucketDelayInMinutes) * time.Minute
-			startTime := app.Clock.Now().UTC().Add(delay)
-			startBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, startTime)
-			start, _ := time.Parse(app.Configs.BucketTemplate, startBucket)
+			endTime := app.Clock.Now().UTC().Add(delay)
+			endBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, endTime)
+			end, _ := time.Parse(app.Configs.BucketTemplate, endBucket)
 
 			// example of boundaries:
 			// bucket [2023011901, 2023011900, 2023011823]
-			// end-start [1674089999999-1674086400000, 1674086399999-1674082800000, 1674082799999-1674079200000]
+			// end-start [1674597600000-1674601199999, 1674601200000-1674604799999, 1674604800000-1674608399999]
 			count := req.BucketCount
 			for count > 0 {
-				bucket, _ := utils.NewBucket(app.Configs.BucketTemplate, start)
-				end := start.Add(-time.Duration(app.Configs.Trigger.BucketSizeInMinutes) * time.Minute)
+				bucket, _ := utils.NewBucket(app.Configs.BucketTemplate, end)
+				start := end.Add(-time.Duration(app.Configs.Trigger.BucketSizeInMinutes) * time.Minute)
 				req.Buckets = append(req.Buckets, entities.RequestTrigger{
 					Bucket: bucket,
-					Start:  start.UnixMilli() - 1,
-					End:    end.UnixMilli(),
+					Start:  start.UnixMilli(),
+					End:    end.UnixMilli() - 1,
 				})
 
-				start = end
+				end = start
 				count--
 			}
 
@@ -140,7 +140,7 @@ func UseTriggerRequestPublish(app *App) pipeline.Pipeline {
 					event := &msgbus.Event{
 						Workspace: trigger.WorkspaceId,
 						App:       trigger.WebhookId,
-						Type:      events.ATTEMPT_TRIGGER_REQUEST,
+						Type:      events.TRIGGER_REQUEST,
 						Metadata:  map[string]string{},
 					}
 					event.UseId()

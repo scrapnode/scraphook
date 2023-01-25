@@ -12,7 +12,7 @@ import (
 
 func RegisterExamineRequest(service *Examiner, ctx context.Context) error {
 	name := "examine_request"
-	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.ATTEMPT_TRIGGER_REQUEST}
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.TRIGGER_REQUEST}
 	queue := fmt.Sprintf("%s_%s", name, service.app.Configs.MsgBus.QueueName)
 	cleanup, err := service.app.MsgBus.Sub(ctx, sample, queue, UseExamineRequest(service.app))
 	if err != nil {
@@ -43,9 +43,9 @@ func UseExamineRequest(app *application.App) msgbus.SubscribeFn {
 			return err
 		}
 
-		span.OK("forwarded successfully")
+		span.OK("examine successfully")
 		res := ctx.Value(pipeline.CTXKEY_RES).(*application.ExamineRequestRes)
-		logger.Debugw("forwarded successfully", "request_count", len(res.Requests))
+		logger.Debugw("examine successfully", "request_count", len(res.Requests))
 		return nil
 	}
 }

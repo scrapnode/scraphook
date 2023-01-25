@@ -7,9 +7,10 @@ import (
 
 type RequestScanQuery struct {
 	database.ScanQuery
-	Bucket string
-	Before int64
-	After  int64
+	Filters map[string]string
+	Bucket  string
+	Before  int64
+	After   int64
 }
 
 type RequestScanResult struct {

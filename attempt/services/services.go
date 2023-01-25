@@ -6,6 +6,7 @@ import (
 	"github.com/scrapnode/scraphook/attempt/application"
 	"github.com/scrapnode/scraphook/attempt/configs"
 	"github.com/scrapnode/scraphook/attempt/services/capture"
+	"github.com/scrapnode/scraphook/attempt/services/examiner"
 	"github.com/scrapnode/scraphook/attempt/services/trigger"
 )
 
@@ -18,6 +19,9 @@ func New(ctx context.Context, name string) (transport.Transport, error) {
 
 	if name == "capture" {
 		return capture.New(ctx, app), nil
+	}
+	if name == "examiner" {
+		return examiner.New(ctx, app), nil
 	}
 
 	// by default, we will serve trigger

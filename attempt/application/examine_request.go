@@ -66,6 +66,7 @@ func UseExamineRequestScan(app *App) pipeline.Pipeline {
 			res := &ExamineRequestRes{Requests: []entities.Request{}, Results: []pipeline.BatchResult{}}
 			query := &repositories.RequestScanQuery{
 				ScanQuery: database.ScanQuery{Cursor: "", Limit: app.Configs.Trigger.ScanSize},
+				Filters:   map[string]string{"endpoint_id": req.Trigger.EndpointId},
 				Before:    req.Trigger.End,
 				After:     req.Trigger.Start,
 			}
@@ -101,6 +102,12 @@ func UseExamineRequestMarkRequestsAsAttempt(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("event_key", req.Event.Key())
 			res := ctx.Value(pipeline.CTXKEY_RES).(*ExamineRequestRes)
 
+			// no request to process
+			if len(res.Requests) == 0 {
+				logger.Warn("no request to mark as attempt")
+				return next(ctx)
+			}
+
 			ids := lo.Map[entities.Request](res.Requests, func(item entities.Request, _ int) string {
 				return item.Id
 			})
@@ -117,6 +124,16 @@ func UseExamineRequestMarkRequestsAsAttempt(app *App) pipeline.Pipeline {
 func UseExamineRequestFilter(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*ExamineRequestReq)
+			logger := app.Logger.With("event_key", req.Event.Key())
+			res := ctx.Value(pipeline.CTXKEY_RES).(*ExamineRequestRes)
+
+			// no request to process
+			if len(res.Requests) == 0 {
+				logger.Warn("no request to mark as attempt")
+				return next(ctx)
+			}
+
 			// @TODO: use redis to filter attempt request if it's exceeded
 			return next(ctx)
 		}

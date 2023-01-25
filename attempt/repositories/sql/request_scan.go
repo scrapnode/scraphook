@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"fmt"
 	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scraphook/attempt/repositories"
 	"github.com/scrapnode/scraphook/entities"
@@ -13,11 +14,16 @@ func (repo *RequestRepo) Scan(query *repositories.RequestScanQuery) (*repositori
 		Where("status in ?", []int{entities.REQ_STATUS_INIT, entities.REQ_STATUS_ATTEMPT}).
 		Limit(query.Limit).
 		Order("id ASC")
-	if query.Before > 0 {
-		tx = tx.Where("timestamps <= ?", query.Before)
+	if len(query.Filters) > 0 {
+		for col, value := range query.Filters {
+			tx = tx.Where(fmt.Sprintf("%s = ?", col), value)
+		}
 	}
 	if query.After > 0 {
 		tx = tx.Where("timestamps >= ?", query.After)
+	}
+	if query.Before > 0 {
+		tx = tx.Where("timestamps <= ?", query.Before)
 	}
 	if query.Cursor != "" {
 		tx = tx.Where("id > ?", query.Cursor)
