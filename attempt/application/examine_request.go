@@ -150,9 +150,8 @@ func UseExamineRequestFilter(app *App) pipeline.Pipeline {
 						return
 					}
 
-					if count >= app.Configs.Examiner.MaxCount {
+					if count > app.Configs.Examiner.MaxCount {
 						app.Logger.Warnw("reached max count of attempt",
-							"error", err.Error(),
 							"request_key", request.Key(),
 							"count", count,
 							"max_count", app.Configs.Examiner.MaxCount,

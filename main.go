@@ -12,7 +12,6 @@ func main() {
 		if r := recover(); r != nil {
 			log.Println("main.recover:", r)
 			log.Println("main.recover.trace:", string(debug.Stack()))
-			os.Exit(1)
 		}
 	}()
 
