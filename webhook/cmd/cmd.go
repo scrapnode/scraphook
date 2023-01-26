@@ -28,7 +28,11 @@ func New() *cobra.Command {
 			}
 			ctx = configs.WithContext(ctx, cfg)
 
-			logger := xlogger.New(cfg.Debug()).
+			logLevel := xlogger.LEVEL_PROD
+			if cfg.Debug() {
+				logLevel = xlogger.LEVEL_DEV
+			}
+			logger := xlogger.New(logLevel).
 				With("service_group", "scraphook.webhook").
 				With("version", cfg.Version)
 			ctx = xlogger.WithContext(ctx, logger)

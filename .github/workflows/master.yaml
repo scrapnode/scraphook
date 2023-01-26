@@ -17,24 +17,24 @@ jobs:
         with:
           go-version: ">=1.19"
 
-      # Get values for cache paths to be used in later steps
-      - id: go-cache-paths
+      # Get values for xcache paths to be used in later steps
+      - id: go-xcache-paths
         run: |
           echo "GOCACHE_PATH=$(go env GOCACHE)" >> $GITHUB_OUTPUT
           echo "GOMODCACHE_PATH=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
 
-      # Cache go build cache, used to speedup go test
-      - name: cache build
-        uses: actions/cache@v3
+      # Cache go build xcache, used to speedup go test
+      - name: xcache build
+        uses: actions/xcache@v3
         with:
-          path: ${{ steps.go-cache-paths.outputs.GOCACHE_PATH }}
+          path: ${{ steps.go-xcache-paths.outputs.GOCACHE_PATH }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
-      # Cache go mod cache, used to speedup builds
-      - name: cache mod
-        uses: actions/cache@v3
+      # Cache go mod xcache, used to speedup builds
+      - name: xcache mod
+        uses: actions/xcache@v3
         with:
-          path: ${{ steps.go-cache-paths.outputs.GOMODCACHE_PATH }}
+          path: ${{ steps.go-xcache-paths.outputs.GOMODCACHE_PATH }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: install dependencies

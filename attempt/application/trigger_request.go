@@ -41,9 +41,7 @@ func UseTriggerRequestConstructBuckets(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*TriggerRequestReq)
 
 			delay := -time.Duration(app.Configs.Trigger.BucketDelayInMinutes) * time.Minute
-			endTime := app.Clock.Now().UTC().Add(delay)
-			endBucket, _ := utils.NewBucket(app.Configs.BucketTemplate, endTime)
-			end, _ := time.Parse(app.Configs.BucketTemplate, endBucket)
+			end := app.Clock.Now().UTC().Add(delay)
 
 			// example of boundaries:
 			// bucket [2023011901, 2023011900, 2023011823]

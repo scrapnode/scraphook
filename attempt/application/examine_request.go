@@ -134,7 +134,44 @@ func UseExamineRequestFilter(app *App) pipeline.Pipeline {
 				return next(ctx)
 			}
 
-			// @TODO: use redis to filter attempt request if it's exceeded
+			dict := map[string]entities.Request{}
+			var results []string
+			var wg conc.WaitGroup
+			for _, r := range res.Requests {
+				// reflect the value here to make sure we have no issue with concurrency
+				dict[r.Key()] = r
+				request := r
+				wg.Go(func() {
+					count, err := app.Cache.Incr(ctx, request.Key())
+					if err != nil {
+						app.Logger.Errorw("could not increase counter of request",
+							"error", err.Error(),
+							"request_key", request.Key())
+						return
+					}
+
+					if count >= app.Configs.Examiner.MaxCount {
+						app.Logger.Warnw("reached max count of attempt",
+							"error", err.Error(),
+							"request_key", request.Key(),
+							"count", count,
+							"max_count", app.Configs.Examiner.MaxCount,
+						)
+						return
+					}
+					results = append(results, request.Key())
+				})
+			}
+			wg.Wait()
+
+			// reset request list
+			res.Requests = []entities.Request{}
+			// add valid request to list
+			for _, requestKey := range results {
+				res.Requests = append(res.Requests, dict[requestKey])
+			}
+
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
 	}
@@ -186,6 +223,7 @@ func UseExamineRequestPublishAttemptRequests(app *App) pipeline.Pipeline {
 					res.Results = append(res.Results, pipeline.BatchResult{})
 				})
 			}
+			wg.Wait()
 
 			return next(ctx)
 		}
