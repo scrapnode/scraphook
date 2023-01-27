@@ -26,10 +26,11 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 	if err := provider.Unmarshal(&configs); err != nil {
 		return err
 	}
+	// make local dev is convinient with auto queue
 	if configs.QueueName == "" && cfg.Debug() {
 		configs.QueueName = utils.NewId("queue")
 	}
-	// @TODO: each service should have seperate queue name
+	// in production, we have to set queue name explicitly
 	if configs.QueueName == "" {
 		return errors.New("msgbus queue name could not be empty")
 	}

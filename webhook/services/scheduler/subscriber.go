@@ -2,14 +2,30 @@ package scheduler
 
 import (
 	"context"
+	"fmt"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scrapcore/xmonitor/attributes"
+	"github.com/scrapnode/scraphook/events"
 	"github.com/scrapnode/scraphook/webhook/application"
 )
 
+func RegisterSSubscriber(service *Scheduler, ctx context.Context) error {
+	name := "schedule"
+	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.MESSAGE}
+	queue := fmt.Sprintf("%s_%s", name, service.app.Configs.MsgBus.QueueName)
+	cleanup, err := service.app.MsgBus.Sub(ctx, sample, queue, UseSubscriber(service.app))
+	if err != nil {
+		return err
+	}
+
+	service.logger.Debugw("registered", "queue_name", queue)
+	service.cleanup[name] = cleanup
+	return nil
+}
+
 func UseSubscriber(app *application.App) msgbus.SubscribeFn {
-	instrumentName := "schedule_forward"
+	instrumentName := "schedule"
 	run := application.UseScheduleForward(app, instrumentName)
 
 	return func(ctx context.Context, event *msgbus.Event) error {

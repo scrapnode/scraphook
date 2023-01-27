@@ -2,9 +2,7 @@ package forward
 
 import (
 	"context"
-	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/xlogger"
-	"github.com/scrapnode/scraphook/events"
 	"github.com/scrapnode/scraphook/webhook/application"
 	"go.uber.org/zap"
 )
@@ -13,7 +11,7 @@ type Forward struct {
 	app    *application.App
 	logger *zap.SugaredLogger
 
-	cleanup func() error
+	cleanup map[string]func() error
 }
 
 func New(ctx context.Context, app *application.App) *Forward {
@@ -26,22 +24,21 @@ func (service *Forward) Start(ctx context.Context) error {
 		return err
 	}
 
-	sample := &msgbus.Event{Workspace: "*", App: "*", Type: events.SCHEDULE_REQUEST}
-	queue := service.app.Configs.MsgBus.QueueName
-	cleanup, err := service.app.MsgBus.Sub(ctx, sample, queue, UseSubscriber(service.app))
-	if err != nil {
+	service.cleanup = map[string]func() error{}
+	if err := RegisterSSubscriber(service, ctx); err != nil {
 		return err
 	}
 
-	service.cleanup = cleanup
-	service.logger.Debugw("connected", "queue_name", queue)
+	service.logger.Debugw("connected")
 	return nil
 }
 
 func (service *Forward) Stop(ctx context.Context) error {
-	if service.cleanup != nil {
-		if err := service.cleanup(); err != nil {
-			service.logger.Errorw("cleanup subscriber got error", "error", err.Error())
+	if len(service.cleanup) > 0 {
+		for name, cleanup := range service.cleanup {
+			if err := cleanup(); err != nil {
+				service.logger.Errorw(name+": cleanup subscriber got error", "error", err.Error())
+			}
 		}
 	}
 
