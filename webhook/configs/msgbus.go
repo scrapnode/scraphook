@@ -29,6 +29,7 @@ func (cfg *Configs) useMsgBus(provider *viper.Viper) error {
 	if configs.QueueName == "" && cfg.Debug() {
 		configs.QueueName = utils.NewId("queue")
 	}
+	// @TODO: each service should have seperate queue name
 	if configs.QueueName == "" {
 		return errors.New("msgbus queue name could not be empty")
 	}
