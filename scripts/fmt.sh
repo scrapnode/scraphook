@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 ## this will retrieve all the .go files that have been

@@ -8,7 +8,6 @@ import (
 	"github.com/scrapnode/scrapcore/xmonitor"
 	"github.com/scrapnode/scraphook/webhook/configs"
 	"github.com/scrapnode/scraphook/webhook/repositories"
-	"github.com/scrapnode/scraphook/webhook/repositories/sql"
 	"go.uber.org/zap"
 	"sync"
 )
@@ -28,7 +27,7 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	// share monitor across services via context
 	ctx = xmonitor.WithContext(ctx, app.Monitor)
 
-	repo, err := sql.New(ctx, cfg.Database)
+	repo, err := repositories.New(ctx, cfg.Database)
 	if err != nil {
 		return nil, err
 	}

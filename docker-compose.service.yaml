@@ -1,0 +1,99 @@
+services:
+  webhook.webserver:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    ports:
+      - "8080:8080"
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379
+    command:
+      - webhook
+      - serve
+      - webserver
+      - --auto-migrate
+      - --seeds /app/db/seeds/000001_webhook.sql
+
+  webhook.scheduler:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379/0
+    command:
+      - webhook
+      - serve
+      - scheduler
+
+  webhook.forward:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379/0
+    command:
+      - webhook
+      - serve
+      - forward
+
+  attempt.capture:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379/0
+    command:
+      - attempt
+      - serve
+      - capture
+
+  attempt.trigger:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379/0
+    command:
+      - attempt
+      - serve
+      - trigger
+
+  attempt.examiner:
+    build: .
+    restart: always
+    networks:
+      - scraphook
+    environment:
+      - SCRAP_ENV=development
+      - SCRAPHOOK_MSGBUS_DSN=nats://nats-node-1:4222
+      - SCRAPHOOK_DATABASE_DSN=postgresql://scraphook:changemenow@postgresql:5432/scraphook?sslmode=disable
+      - SCRAPHOOK_CACHE_DSN=redis://redis:6379/0
+    command:
+      - attempt
+      - serve
+      - examiner
+
+networks:
+  scraphook:
+    name: scraphook_scraphook
+    external: true

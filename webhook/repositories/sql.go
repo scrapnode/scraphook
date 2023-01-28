@@ -13,6 +13,7 @@ func NewSql(ctx context.Context, cfg *database.Configs) (*Repo, error) {
 
 	repo := &Repo{
 		Database: db,
+		Webhook:  &SqlWebhook{db: db},
 	}
 	return repo, nil
 }

@@ -13,6 +13,10 @@ func NewSql(ctx context.Context, cfg *database.Configs) (*Repo, error) {
 
 	repo := &Repo{
 		Database: db,
+		Message:  &SqlMessage{db: db},
+		Request:  &SqlRequest{db: db},
+		Response: &SqlResponse{db: db},
+		Endpoint: &SqlEndpoint{db: db},
 	}
 	return repo, nil
 }

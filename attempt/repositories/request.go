@@ -5,6 +5,13 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
+type Request interface {
+	Put(msg *entities.Request) error
+	MarkAsDone(id string) error
+	Scan(query *RequestScanQuery) (*RequestScanResult, error)
+	MarkAsAttempt(ids []string) error
+}
+
 type RequestScanQuery struct {
 	database.ScanQuery
 	Filters map[string]string
@@ -16,11 +23,4 @@ type RequestScanQuery struct {
 type RequestScanResult struct {
 	database.ScanResult
 	Records []entities.Request
-}
-
-type RequestRepo interface {
-	Put(msg *entities.Request) error
-	MarkAsDone(id string) error
-	Scan(query *RequestScanQuery) (*RequestScanResult, error)
-	MarkAsAttempt(ids []string) error
 }

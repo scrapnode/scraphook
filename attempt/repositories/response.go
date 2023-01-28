@@ -2,6 +2,6 @@ package repositories
 
 import "github.com/scrapnode/scraphook/entities"
 
-type ResponseRepo interface {
+type Response interface {
 	Put(msg *entities.Response) error
 }

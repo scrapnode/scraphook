@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 REPOS=("git@github.com:scrapnode/scrapcore.git")
