@@ -3,6 +3,7 @@ package configs
 import (
 	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/msgbus"
+	"github.com/scrapnode/scrapcore/transport"
 	"github.com/scrapnode/scrapcore/xcache"
 	"github.com/scrapnode/scrapcore/xconfig"
 	"github.com/scrapnode/scrapcore/xmonitor"
@@ -14,10 +15,11 @@ type Configs struct {
 
 	BucketTemplate string `json:"bucket_template" mapstructure:"SCRAPHOOK_BUCKET_TEMPLATE"`
 
-	MsgBus   *msgbus.Configs   `json:"msg_bus"`
-	Database *database.Configs `json:"database"`
-	Cache    *xcache.Configs   `json:"xcache"`
-	Monitor  *xmonitor.Configs `json:"monitor"`
+	GRPC     *transport.Configs `json:"grpc"`
+	MsgBus   *msgbus.Configs    `json:"msg_bus"`
+	Database *database.Configs  `json:"database"`
+	Cache    *xcache.Configs    `json:"xcache"`
+	Monitor  *xmonitor.Configs  `json:"monitor"`
 }
 
 func New(provider *viper.Viper) (*Configs, error) {
@@ -28,6 +30,9 @@ func New(provider *viper.Viper) (*Configs, error) {
 		return nil, err
 	}
 	if err := provider.Unmarshal(cfg); err != nil {
+		return nil, err
+	}
+	if err := cfg.useGRPC(provider); err != nil {
 		return nil, err
 	}
 	if err := cfg.useMsgBus(provider); err != nil {
