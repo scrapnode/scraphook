@@ -6,13 +6,13 @@ import (
 )
 
 type Workspace struct {
-	UserId string `json:"user_id" gorm:"index"`
-	Id     string `json:"id"  gorm:"primaryKey"`
+	UserId string `json:"user_id"`
+	Id     string `json:"id"`
 
-	Name string `json:"name" gorm:"size:256"`
+	Name string `json:"name"`
 
-	CreatedAt int64 `json:"created_at" gorm:"autoCreateTime:milli"`
-	UpdatedAt int64 `json:"updated_at" gorm:"autoUpdateTime:milli"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 func (ws *Workspace) TableName() string {

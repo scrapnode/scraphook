@@ -29,7 +29,7 @@ func (service *Dashboard) Start(ctx context.Context) error {
 	}
 
 	service.server = grpc.NewServer()
-	protos.RegisterAccountServer(service.server, &AccountServer{app: service.app})
+	protos.RegisterAccountServer(service.server, NewAccountServer(service.app))
 	reflection.Register(service.server)
 
 	service.logger.Debug("connected")

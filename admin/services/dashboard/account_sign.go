@@ -2,25 +2,30 @@ package dashboard
 
 import (
 	"context"
-	"github.com/scrapnode/scrapcore/auth"
+	"github.com/scrapnode/scrapcore/pipeline"
+	"github.com/scrapnode/scraphook/admin/application"
 	"github.com/scrapnode/scraphook/admin/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (server *AccountServer) Sign(ctx context.Context, req *protos.SignReq) (*protos.SignRes, error) {
-	tokens, err := server.app.Root.Sign(ctx, &auth.SignCreds{
+	request := &application.AccountSignReq{
 		Username: req.Username,
 		Password: req.Password,
-	})
+	}
+	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
+
+	ctx, err := server.sign(ctx)
 	if err != nil {
 		server.app.Logger.Errorw("invalid username or password", "error", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "invalid username or password")
 	}
 
+	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountSignRes)
 	res := &protos.SignRes{
-		AccessToken:  tokens.AccessToken,
-		RefreshToken: tokens.RefreshToken,
+		AccessToken:  response.AccessToken,
+		RefreshToken: response.RefreshToken,
 	}
 	return res, nil
 }

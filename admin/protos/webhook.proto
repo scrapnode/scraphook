@@ -1,0 +1,16 @@
+syntax = "proto3";
+package scraphook.admin.dashboard.v1;
+option go_package = "github.com/scrapnode/scraphook/admin/protos";
+
+service Webhook {
+  rpc Create(CreateReq) returns (CreateRes) {}
+}
+
+message CreateReq {
+  string workspace_id = 1;
+  string name = 2;
+}
+
+message CreateRes {
+  string id = 3;
+}
