@@ -8,12 +8,11 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func UseCaptureRequest(app *App, instrumentName string) pipeline.Pipe {
+func UseCaptureRequest(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseCaptureRequestParseEvent(app), app.Monitor, instrumentName, "parse_request"),
-		pipeline.UseTracing(UseCaptureRequestPut(app), app.Monitor, instrumentName, "put_request"),
+		pipeline.UseRecovery(app.Logger),
+		UseCaptureRequestParseEvent(app),
+		UseCaptureRequestPut(app),
 	})
 }
 

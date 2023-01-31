@@ -7,12 +7,11 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func UseValidateWebhook(app *App, instrumentName string) pipeline.Pipe {
+func UseValidateWebhook(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(pipeline.UseValidator(), app.Monitor, instrumentName, "validate"),
-		pipeline.UseTracing(UseValidateWebhookCheckToken(app), app.Monitor, instrumentName, "check_token"),
+		pipeline.UseRecovery(app.Logger),
+		pipeline.UseValidator(),
+		UseValidateWebhookCheckToken(app),
 	})
 }
 

@@ -12,14 +12,13 @@ import (
 	"time"
 )
 
-func UseTriggerRequest(app *App, instrumentName string) pipeline.Pipe {
+func UseTriggerRequest(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseTriggerRequestConstructBuckets(app), app.Monitor, instrumentName, "construct_buckets"),
-		pipeline.UseTracing(UseTriggerRequestScanEndpoints(app), app.Monitor, instrumentName, "scan_endpoints"),
-		pipeline.UseTracing(UseTriggerRequestBuildTriggers(app), app.Monitor, instrumentName, "build_triggers"),
-		pipeline.UseTracing(UseTriggerRequestPublish(app), app.Monitor, instrumentName, "publish"),
+		pipeline.UseRecovery(app.Logger),
+		UseTriggerRequestConstructBuckets(app),
+		UseTriggerRequestScanEndpoints(app),
+		UseTriggerRequestBuildTriggers(app),
+		UseTriggerRequestPublish(app),
 	})
 }
 

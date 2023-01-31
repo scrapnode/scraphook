@@ -13,15 +13,13 @@ import (
 	"github.com/sourcegraph/conc"
 )
 
-func UseExamineRequest(app *App, instrumentName string) pipeline.Pipe {
+func UseExamineRequest(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseExamineRequestParseEvent(app), app.Monitor, instrumentName, "parse_trigger"),
-		pipeline.UseTracing(UseExamineRequestScan(app), app.Monitor, instrumentName, "scan_requests"),
-		pipeline.UseTracing(UseExamineRequestMarkRequestsAsAttempt(app), app.Monitor, instrumentName, "mark_requests_as_attempt"),
-		pipeline.UseTracing(UseExamineRequestFilter(app), app.Monitor, instrumentName, "filter_requests"),
-		pipeline.UseTracing(UseExamineRequestPublishAttemptRequests(app), app.Monitor, instrumentName, "publish_attempt_requests"),
+		pipeline.UseRecovery(app.Logger),
+		UseExamineRequestParseEvent(app), UseExamineRequestScan(app),
+		UseExamineRequestMarkRequestsAsAttempt(app),
+		UseExamineRequestFilter(app),
+		UseExamineRequestPublishAttemptRequests(app),
 	})
 }
 
@@ -79,7 +77,7 @@ func UseExamineRequestScan(app *App) pipeline.Pipeline {
 				}
 				res.Requests = append(res.Requests, results.Records...)
 
-				// no more records cause we didn't get next cursor,
+				// no more records because we didn't get next cursor,
 				// stop here
 				if results.Cursor == "" {
 					break

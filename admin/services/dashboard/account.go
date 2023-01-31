@@ -7,12 +7,11 @@ import (
 )
 
 func NewAccountServer(app *application.App) *AccountServer {
-	instrumentName := "admin_account"
 	return &AccountServer{
 		app:     app,
-		sign:    application.NewAccountSign(app, instrumentName),
-		verify:  application.NewAccountVerify(app, instrumentName),
-		refresh: application.NewAccountRefresh(app, instrumentName),
+		sign:    application.NewAccountSign(app),
+		verify:  application.NewAccountVerify(app),
+		refresh: application.NewAccountRefresh(app),
 	}
 }
 

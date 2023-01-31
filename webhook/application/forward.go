@@ -10,19 +10,16 @@ import (
 	"github.com/scrapnode/scraphook/events"
 )
 
-func UseForward(app *App, instrumentName string) pipeline.Pipe {
+func UseForward(app *App) pipeline.Pipe {
 	send := xsender.New(context.Background(), &xsender.Configs{
 		TimeoutInSeconds: 5,
 		RetryMax:         3,
 	})
 
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseForwardParseEvent(app), app.Monitor, instrumentName, "parse_messsage"),
-		pipeline.UseTracing(UseForwardSend(app, send), app.Monitor, instrumentName, "send"),
-		// optional pipeline
-		pipeline.UseTracing(UseForwardNotifyResponse(app), app.Monitor, instrumentName, "notify_response"),
+		pipeline.UseRecovery(app.Logger),
+		UseForwardParseEvent(app),
+		UseForwardSend(app, send), UseForwardNotifyResponse(app),
 	})
 }
 

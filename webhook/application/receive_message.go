@@ -8,13 +8,12 @@ import (
 	"github.com/scrapnode/scraphook/events"
 )
 
-func UseReceiveMessage(app *App, instrumentName string) pipeline.Pipe {
+func UseReceiveMessage(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(pipeline.UseValidator(), app.Monitor, instrumentName, "validate"),
-		pipeline.UseTracing(UseReceiveMessageGetWebhook(app), app.Monitor, instrumentName, "get_webhook"),
-		pipeline.UseTracing(UseReceiveMessagePublishMessage(app), app.Monitor, instrumentName, "publish_message"),
+		pipeline.UseRecovery(app.Logger),
+		pipeline.UseValidator(),
+		UseReceiveMessageGetWebhook(app),
+		UseReceiveMessagePublishMessage(app),
 	})
 }
 

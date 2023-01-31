@@ -13,14 +13,13 @@ import (
 	"strings"
 )
 
-func UseScheduleForward(app *App, instrumentName string) pipeline.Pipe {
+func UseScheduleForward(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseScheduleForwardParseEvent(app), app.Monitor, instrumentName, "parse_message"),
-		pipeline.UseTracing(UseScheduleForwardGetEndpoints(app), app.Monitor, instrumentName, "get_endpoints"),
-		pipeline.UseTracing(UseScheduleForwardBuildRequests(app), app.Monitor, instrumentName, "build_requests"),
-		pipeline.UseTracing(UseScheduleForwardPublishRequests(app), app.Monitor, instrumentName, "publish_requests"),
+		pipeline.UseRecovery(app.Logger),
+		UseScheduleForwardParseEvent(app),
+		UseScheduleForwardGetEndpoints(app),
+		UseScheduleForwardBuildRequests(app),
+		UseScheduleForwardPublishRequests(app),
 	})
 }
 

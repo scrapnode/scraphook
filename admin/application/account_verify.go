@@ -6,12 +6,11 @@ import (
 	"github.com/scrapnode/scrapcore/pipeline"
 )
 
-func NewAccountVerify(app *App, instrumentName string) pipeline.Pipe {
+func NewAccountVerify(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
-		pipeline.UseMetrics(app.Monitor, instrumentName, "exec_time"),
-		pipeline.UseTracing(pipeline.UseRecovery(app.Logger), app.Monitor, instrumentName, "init"),
-		pipeline.UseTracing(UseAccountVerifyForRoot(app), app.Monitor, instrumentName, "verify_root_token"),
-		pipeline.UseTracing(UseAccountVerifyCheckAccount(app), app.Monitor, instrumentName, "check_account"),
+		pipeline.UseRecovery(app.Logger),
+		UseAccountVerifyForRoot(app),
+		UseAccountVerifyCheckAccount(app),
 	})
 }
 
