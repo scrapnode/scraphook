@@ -1,0 +1,31 @@
+syntax = "proto3";
+package scraphook.admin.dashboard.v1;
+option go_package = "github.com/scrapnode/scraphook/admin/protos";
+
+service Account {
+  rpc Sign(SignReq) returns (SignRes) {}
+  rpc Verify(VerifyReq) returns (VerifyRes) {}
+}
+
+message SignReq {
+  string username = 1;
+  string password = 2;
+}
+
+message SignRes {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message VerifyReq {
+  string access_token = 1;
+  string workspace_id = 2;
+}
+
+message VerifyRes {
+  repeated string workspaces = 1;
+  string workspace_id = 2;
+  string id  = 3;
+  string name = 4;
+  string email = 5;
+}
