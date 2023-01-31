@@ -13,8 +13,8 @@ import (
 type Configs struct {
 	*xconfig.Configs
 
-	BucketTemplate string `json:"bucket_template" mapstructure:"SCRAPHOOK_BUCKET_TEMPLATE"`
-	Root           *Root  `json:"root"`
+	BucketTemplate string    `json:"bucket_template" mapstructure:"SCRAPHOOK_BUCKET_TEMPLATE"`
+	AuthRoot       *AuthRoot `json:"auth_root"`
 
 	GRPC     *transport.Configs `json:"grpc"`
 	MsgBus   *msgbus.Configs    `json:"msg_bus"`
@@ -31,6 +31,9 @@ func New(provider *viper.Viper) (*Configs, error) {
 		return nil, err
 	}
 	if err := provider.Unmarshal(cfg); err != nil {
+		return nil, err
+	}
+	if err := cfg.useAuthRoot(provider); err != nil {
 		return nil, err
 	}
 	if err := cfg.useServiceGRPC(provider); err != nil {

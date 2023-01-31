@@ -1,4 +1,19 @@
 services:
+  postgresql:
+    image: postgres:15-alpine
+    networks:
+      - scraphook
+    environment:
+      - POSTGRES_USER=scraphook
+      - POSTGRES_PASSWORD=changemenow
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - scraphook
+
   webhook.webserver:
     build: .
     restart: always

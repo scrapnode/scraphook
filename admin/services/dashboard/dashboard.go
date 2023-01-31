@@ -63,7 +63,7 @@ func (service *Dashboard) Stop(ctx context.Context) error {
 }
 
 func (service *Dashboard) Run(ctx context.Context) error {
-	service.logger.Debugw("running")
+	service.logger.Debugw("running", "listen_address", service.app.Configs.GRPC.ListenAddress)
 
 	listener, err := net.Listen("tcp", service.app.Configs.GRPC.ListenAddress)
 	if err != nil {

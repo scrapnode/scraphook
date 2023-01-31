@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AccountClient interface {
 	Sign(ctx context.Context, in *SignReq, opts ...grpc.CallOption) (*SignRes, error)
 	Verify(ctx context.Context, in *VerifyReq, opts ...grpc.CallOption) (*VerifyRes, error)
+	Refresh(ctx context.Context, in *RefreshReq, opts ...grpc.CallOption) (*RefreshRes, error)
 }
 
 type accountClient struct {
@@ -52,12 +53,22 @@ func (c *accountClient) Verify(ctx context.Context, in *VerifyReq, opts ...grpc.
 	return out, nil
 }
 
+func (c *accountClient) Refresh(ctx context.Context, in *RefreshReq, opts ...grpc.CallOption) (*RefreshRes, error) {
+	out := new(RefreshRes)
+	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Account/Refresh", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServer is the server API for Account service.
 // All implementations must embed UnimplementedAccountServer
 // for forward compatibility
 type AccountServer interface {
 	Sign(context.Context, *SignReq) (*SignRes, error)
 	Verify(context.Context, *VerifyReq) (*VerifyRes, error)
+	Refresh(context.Context, *RefreshReq) (*RefreshRes, error)
 	mustEmbedUnimplementedAccountServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedAccountServer) Sign(context.Context, *SignReq) (*SignRes, err
 }
 func (UnimplementedAccountServer) Verify(context.Context, *VerifyReq) (*VerifyRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
+}
+func (UnimplementedAccountServer) Refresh(context.Context, *RefreshReq) (*RefreshRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
 }
 func (UnimplementedAccountServer) mustEmbedUnimplementedAccountServer() {}
 
@@ -120,6 +134,24 @@ func _Account_Verify_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Account_Refresh_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServer).Refresh(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scraphook.admin.dashboard.v1.Account/Refresh",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServer).Refresh(ctx, req.(*RefreshReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Account_ServiceDesc is the grpc.ServiceDesc for Account service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var Account_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Verify",
 			Handler:    _Account_Verify_Handler,
+		},
+		{
+			MethodName: "Refresh",
+			Handler:    _Account_Refresh_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

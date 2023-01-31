@@ -19,7 +19,7 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 		Configs: cfg,
 		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.attempt.application"),
 		Clock:   clock.New(),
-		Root:    auth.NewAccessKey(cfg.Root.AccessKeyId, cfg.Root.AccessKeySecret),
+		Root:    auth.NewAccessKey(cfg.AuthRoot.AccessKeyId, cfg.AuthRoot.AccessKeySecret),
 	}
 
 	monitor, err := xmonitor.New(ctx, app.Configs.Monitor)
