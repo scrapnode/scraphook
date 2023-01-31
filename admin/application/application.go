@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"github.com/benbjohnson/clock"
+	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/msgbus"
 	"github.com/scrapnode/scrapcore/xcache"
 	"github.com/scrapnode/scrapcore/xlogger"
@@ -18,6 +19,7 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 		Configs: cfg,
 		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.attempt.application"),
 		Clock:   clock.New(),
+		Root:    auth.NewAccessKey(cfg.Root.AccessKeyId, cfg.Root.AccessKeySecret),
 	}
 
 	monitor, err := xmonitor.New(ctx, app.Configs.Monitor)
@@ -27,6 +29,12 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	app.Monitor = monitor
 	// share monitor across services via context
 	ctx = xmonitor.WithContext(ctx, app.Monitor)
+
+	bus, err := msgbus.New(ctx, app.Configs.MsgBus)
+	if err != nil {
+		return nil, err
+	}
+	app.MsgBus = bus
 
 	cache, err := xcache.New(ctx, cfg.Cache)
 	if err != nil {
@@ -40,21 +48,16 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	}
 	app.Repo = repo
 
-	bus, err := msgbus.New(ctx, app.Configs.MsgBus)
-	if err != nil {
-		return nil, err
-	}
-	app.MsgBus = bus
-
 	return app, nil
 }
 
 type App struct {
 	Configs *configs.Configs
 	Logger  *zap.SugaredLogger
+	Clock   clock.Clock
 
 	// services
-	Clock   clock.Clock
+	Root    *auth.AccessKey
 	MsgBus  msgbus.MsgBus
 	Monitor xmonitor.Monitor
 	Cache   xcache.Cache
@@ -67,6 +70,9 @@ func (app *App) Connect(ctx context.Context) error {
 	app.mu.Lock()
 	defer app.mu.Unlock()
 
+	if err := app.Root.Connect(ctx); err != nil {
+		return err
+	}
 	if err := app.Cache.Connect(ctx); err != nil {
 		return err
 	}
@@ -108,6 +114,12 @@ func (app *App) Disconnect(ctx context.Context) error {
 
 	if app.Cache != nil {
 		if err := app.Cache.Disconnect(ctx); err != nil {
+			app.Logger.Error(err)
+		}
+	}
+
+	if app.Root != nil {
+		if err := app.Root.Disconnect(ctx); err != nil {
 			app.Logger.Error(err)
 		}
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	corecmd "github.com/scrapnode/scrapcore/cmd"
 	"github.com/scrapnode/scrapcore/xlogger"
-	"github.com/scrapnode/scraphook/attempt/services"
+	"github.com/scrapnode/scraphook/admin/services"
 	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
@@ -15,9 +15,9 @@ import (
 func NewServe() *cobra.Command {
 	command := &cobra.Command{
 		Use:       "serve",
-		Example:   `scraphook attempt serve capture`,
+		Example:   `scraphook admin serve dashboard`,
 		Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-		ValidArgs: []string{"capture", "trigger", "examiner"},
+		ValidArgs: []string{"dashboard"},
 		PreRunE:   corecmd.ChainPreRunE(),
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := cmd.Context()

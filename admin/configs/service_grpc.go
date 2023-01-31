@@ -9,7 +9,7 @@ type GRPC struct {
 	ListenAddress string `json:"listen_address" mapstructure:"SCRAPHOOK_ADMIN_GRPC_LISTEN_ADDRESS"`
 }
 
-func (cfg *Configs) useGRPC(provider *viper.Viper) error {
+func (cfg *Configs) useServiceGRPC(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_ADMIN_GRPC_LISTEN_ADDRESS", ":8081")
 
 	var configs GRPC

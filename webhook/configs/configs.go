@@ -36,7 +36,7 @@ func New(provider *viper.Viper) (*Configs, error) {
 	if err := cfg.useValidator(provider); err != nil {
 		return nil, err
 	}
-	if err := cfg.useHttp(provider); err != nil {
+	if err := cfg.useServiceHttp(provider); err != nil {
 		return nil, err
 	}
 	if err := cfg.useMsgBus(provider); err != nil {

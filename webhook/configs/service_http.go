@@ -9,7 +9,7 @@ type Http struct {
 	ListenAddress string `json:"listen_address" mapstructure:"SCRAPHOOK_WEBHOOK_HTTP_LISTEN_ADDRESS"`
 }
 
-func (cfg *Configs) useHttp(provider *viper.Viper) error {
+func (cfg *Configs) useServiceHttp(provider *viper.Viper) error {
 	provider.SetDefault("SCRAPHOOK_WEBHOOK_HTTP_LISTEN_ADDRESS", ":8080")
 
 	var configs Http

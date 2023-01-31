@@ -52,9 +52,9 @@ func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 type App struct {
 	Configs *configs.Configs
 	Logger  *zap.SugaredLogger
+	Clock   clock.Clock
 
 	// services
-	Clock   clock.Clock
 	MsgBus  msgbus.MsgBus
 	Monitor xmonitor.Monitor
 	Cache   xcache.Cache
