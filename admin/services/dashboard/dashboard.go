@@ -77,9 +77,14 @@ func (service *Dashboard) Start(ctx context.Context) error {
 				ctx = context.WithValue(ctx, pipeline.CTXKEY_ACC, response.Account)
 
 				// workspace validation
-				if header := meta.Get("X-ScrapNode-Token-Type"); len(header) > 0 {
+				if header := meta.Get("X-ScrapNode-Workspace-Id"); len(header) > 0 {
+					workspace, err := service.app.Repo.Workspace.GetById(header[0])
+					if err != nil {
+						service.app.Logger.Errorw("could not verify workspace", "error", err.Error())
+						return nil, status.Error(codes.Unauthenticated, "workspace is not found")
+					}
 					//	@TODO: validate workspace is exist
-					ctx = context.WithValue(ctx, pipeline.CTXKEY_WS, header[0])
+					ctx = context.WithValue(ctx, pipeline.CTXKEY_WS, workspace)
 				}
 
 				return handler(ctx, req)

@@ -29,9 +29,10 @@ type WebhookSaveRes struct {
 func WebhookSavePrepare(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
+			ws := ctx.Value(pipeline.CTXKEY_WS).(*entities.Workspace)
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveReq)
 			webhook := &entities.Webhook{
-				WorkspaceId: ctx.Value(pipeline.CTXKEY_WS).(string),
+				WorkspaceId: ws.Id,
 				Name:        req.Name,
 				CreatedAt:   app.Clock.Now().UTC().UnixMilli(),
 			}
@@ -52,9 +53,9 @@ func WebhookSavePrepare(app *App) pipeline.Pipeline {
 func WebhookSavePutToDatabase(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
+			ws := ctx.Value(pipeline.CTXKEY_WS).(*entities.Workspace)
 			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
-			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
+			logger := app.Logger.With("ws_id", ws.Id, "account_id", account.Id)
 
 			res := ctx.Value(pipeline.CTXKEY_RES).(*WebhookSaveRes)
 			if err := app.Repo.Webhook.Save(res.Webhook); err != nil {
