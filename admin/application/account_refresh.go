@@ -21,8 +21,7 @@ type AccountRefreshReq struct {
 }
 
 type AccountRefreshRes struct {
-	AccessToken  string
-	RefreshToken string
+	TokenPair *auth.TokenPair
 }
 
 func UseAccountRefreshForRoot(app *App) pipeline.Pipeline {
@@ -35,13 +34,13 @@ func UseAccountRefreshForRoot(app *App) pipeline.Pipeline {
 				return next(ctx)
 			}
 
-			tokens, err := app.Root.Refresh(ctx, &auth.Tokens{AccessToken: req.AccessToken, RefreshToken: req.RefreshToken})
+			tokens, err := app.Root.Refresh(ctx, &auth.TokenPair{AccessToken: req.AccessToken, RefreshToken: req.RefreshToken})
 			if err != nil {
 				logger.Errorw(ErrRefreshFailed.Error(), "error", err.Error())
 				return ctx, err
 			}
 
-			res := &AccountRefreshRes{AccessToken: tokens.AccessToken, RefreshToken: tokens.RefreshToken}
+			res := &AccountRefreshRes{TokenPair: tokens}
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
@@ -59,8 +58,8 @@ func UseAccountRefreshCheckTokens(app *App) pipeline.Pipeline {
 				return ctx, ErrRefreshFailed
 			}
 
-			signed := res != nil && res.AccessToken != "" && res.RefreshToken != ""
-			if !signed {
+			refreshed := res != nil && res.TokenPair != nil
+			if !refreshed {
 				return ctx, ErrRefreshFailed
 			}
 

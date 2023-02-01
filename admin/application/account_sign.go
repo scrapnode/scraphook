@@ -20,8 +20,7 @@ type AccountSignReq struct {
 }
 
 type AccountSignRes struct {
-	AccessToken  string
-	RefreshToken string
+	TokenPair *auth.TokenPair
 }
 
 func UseAccountSignAsRoot(app *App) pipeline.Pipeline {
@@ -40,7 +39,7 @@ func UseAccountSignAsRoot(app *App) pipeline.Pipeline {
 				return ctx, err
 			}
 
-			res := &AccountSignRes{AccessToken: tokens.AccessToken, RefreshToken: tokens.RefreshToken}
+			res := &AccountSignRes{TokenPair: tokens}
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
@@ -58,7 +57,7 @@ func UseAccountSignCheckTokens(app *App) pipeline.Pipeline {
 				return ctx, ErrSignFailed
 			}
 
-			signed := res != nil && res.AccessToken != "" && res.RefreshToken != ""
+			signed := res != nil && res.TokenPair != nil
 			if !signed {
 				return ctx, ErrSignFailed
 			}
