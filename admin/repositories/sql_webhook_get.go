@@ -12,6 +12,6 @@ func (repo *SqlWebhook) Get(workspaceId, webhookId string) (*entities.Webhook, e
 	tx := conn.Model(&entities.Webhook{}).
 		Scopes(UseWorkspaceScope(workspaceId)).
 		Where("id = ?", webhookId).
-		Scan(&webhook)
+		First(&webhook)
 	return &webhook, tx.Error
 }

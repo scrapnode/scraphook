@@ -20,7 +20,7 @@ func NewWebhookGet(app *App) pipeline.Pipe {
 }
 
 type WebhookGetReq struct {
-	Id         string
+	Id         string `validate:"required"`
 	WithTokens bool
 }
 

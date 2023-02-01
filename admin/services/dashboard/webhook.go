@@ -11,6 +11,7 @@ func NewWebhookServer(app *application.App) *WebhookServer {
 		app:  app,
 		save: application.NewWebhookSave(app),
 		get:  application.NewWebhookGet(app),
+		list: application.NewWebhookList(app),
 	}
 }
 
@@ -19,4 +20,5 @@ type WebhookServer struct {
 	app  *application.App
 	save pipeline.Pipe
 	get  pipeline.Pipe
+	list pipeline.Pipe
 }

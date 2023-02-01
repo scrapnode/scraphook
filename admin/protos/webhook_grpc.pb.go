@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type WebhookClient interface {
 	Save(ctx context.Context, in *WebhookSaveReq, opts ...grpc.CallOption) (*WebhookSaveRes, error)
 	Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookGetRes, error)
+	List(ctx context.Context, in *WebhookListReq, opts ...grpc.CallOption) (*WebhookListRes, error)
 }
 
 type webhookClient struct {
@@ -52,12 +53,22 @@ func (c *webhookClient) Get(ctx context.Context, in *WebhookGetReq, opts ...grpc
 	return out, nil
 }
 
+func (c *webhookClient) List(ctx context.Context, in *WebhookListReq, opts ...grpc.CallOption) (*WebhookListRes, error) {
+	out := new(WebhookListRes)
+	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Webhook/List", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WebhookServer is the server API for Webhook service.
 // All implementations must embed UnimplementedWebhookServer
 // for forward compatibility
 type WebhookServer interface {
 	Save(context.Context, *WebhookSaveReq) (*WebhookSaveRes, error)
 	Get(context.Context, *WebhookGetReq) (*WebhookGetRes, error)
+	List(context.Context, *WebhookListReq) (*WebhookListRes, error)
 	mustEmbedUnimplementedWebhookServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedWebhookServer) Save(context.Context, *WebhookSaveReq) (*Webho
 }
 func (UnimplementedWebhookServer) Get(context.Context, *WebhookGetReq) (*WebhookGetRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedWebhookServer) List(context.Context, *WebhookListReq) (*WebhookListRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedWebhookServer) mustEmbedUnimplementedWebhookServer() {}
 
@@ -120,6 +134,24 @@ func _Webhook_Get_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Webhook_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WebhookListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WebhookServer).List(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/scraphook.admin.dashboard.v1.Webhook/List",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WebhookServer).List(ctx, req.(*WebhookListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Webhook_ServiceDesc is the grpc.ServiceDesc for Webhook service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var Webhook_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Get",
 			Handler:    _Webhook_Get_Handler,
+		},
+		{
+			MethodName: "List",
+			Handler:    _Webhook_List_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

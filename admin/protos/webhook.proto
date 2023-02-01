@@ -5,6 +5,7 @@ option go_package = "github.com/scrapnode/scraphook/admin/protos";
 service Webhook {
   rpc Save(WebhookSaveReq) returns (WebhookSaveRes) {}
   rpc Get(WebhookGetReq) returns (WebhookGetRes) {}
+  rpc List(WebhookListReq) returns (WebhookListRes) {}
 }
 
 message WebhookSaveReq {
@@ -48,6 +49,7 @@ message WebhookGetRes {
 message  WebhookListReq {
   string cursor = 1;
   int32 size = 2;
+  string search = 3;
 }
 
 message WebhookListRes {

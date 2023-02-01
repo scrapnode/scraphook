@@ -63,7 +63,7 @@ func UseExamineRequestScan(app *App) pipeline.Pipeline {
 
 			res := &ExamineRequestRes{Requests: []entities.Request{}, Results: []pipeline.BatchResult{}}
 			query := &repositories.RequestScanQuery{
-				ScanQuery: database.ScanQuery{Cursor: "", Limit: app.Configs.Trigger.ScanSize},
+				ScanQuery: database.ScanQuery{Cursor: "", Size: app.Configs.Trigger.ScanSize},
 				Filters:   map[string]string{"endpoint_id": req.Trigger.EndpointId},
 				Before:    req.Trigger.End,
 				After:     req.Trigger.Start,

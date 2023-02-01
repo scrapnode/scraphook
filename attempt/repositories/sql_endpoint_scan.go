@@ -9,7 +9,7 @@ import (
 func (repo *SqlEndpoint) Scan(query *database.ScanQuery) (*EndpointScanResult, error) {
 	conn := repo.db.GetConn().(*gorm.DB)
 	tx := conn.Model(&entities.Endpoint{}).
-		Limit(query.Limit).
+		Limit(query.Size).
 		Order("id ASC")
 	if query.Cursor != "" {
 		tx = tx.Where("id > ?", query.Cursor)
@@ -21,7 +21,7 @@ func (repo *SqlEndpoint) Scan(query *database.ScanQuery) (*EndpointScanResult, e
 	}
 	// total records we got less than the number we requested
 	// that mean in database, we have no more record to fetch
-	if len(endpoints) < query.Limit {
+	if len(endpoints) < query.Size {
 		return &EndpointScanResult{Records: endpoints}, nil
 	}
 

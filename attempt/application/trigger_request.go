@@ -71,7 +71,7 @@ func UseTriggerRequestScanEndpoints(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("bucket_template", req.BucketTemplate)
 
 			res := &TriggerRequestRes{Endpoints: []entities.Endpoint{}, Triggers: []entities.RequestTrigger{}}
-			query := &database.ScanQuery{Cursor: "", Limit: app.Configs.Trigger.ScanSize}
+			query := &database.ScanQuery{Cursor: "", Size: app.Configs.Trigger.ScanSize}
 
 			for {
 				results, err := app.Repo.Endpoint.Scan(query)

@@ -11,7 +11,7 @@ func (repo *SqlRequest) Scan(query *RequestScanQuery) (*RequestScanResult, error
 	conn := repo.db.GetConn().(*gorm.DB)
 	tx := conn.Model(&entities.Request{}).
 		Where("status in ?", []int{entities.REQ_STATUS_INIT, entities.REQ_STATUS_ATTEMPT}).
-		Limit(query.Limit).
+		Limit(query.Size).
 		Order("id ASC")
 	if len(query.Filters) > 0 {
 		for col, value := range query.Filters {
@@ -34,7 +34,7 @@ func (repo *SqlRequest) Scan(query *RequestScanQuery) (*RequestScanResult, error
 	}
 	// total records we got less than the number we requested
 	// that mean in database, we have no more record to fetch
-	if len(requests) < query.Limit {
+	if len(requests) < query.Size {
 		return &RequestScanResult{Records: requests}, nil
 	}
 
