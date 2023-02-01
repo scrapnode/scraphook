@@ -8,7 +8,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.37.0
-	github.com/scrapnode/scrapcore v0.0.0-20230131125823-78dd48b0d494
+	github.com/scrapnode/scrapcore v0.0.0-20230201025633-c4ee72c8886c
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
