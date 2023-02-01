@@ -4,11 +4,12 @@ go 1.19
 
 require (
 	github.com/benbjohnson/clock v1.1.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/json-iterator/go v1.1.12
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/samber/lo v1.37.0
-	github.com/scrapnode/scrapcore v0.0.0-20230201033400-55b01b458f7f
+	github.com/scrapnode/scrapcore v0.0.0-20230201043623-5569e3bdf1b9
 	github.com/sourcegraph/conc v0.1.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
