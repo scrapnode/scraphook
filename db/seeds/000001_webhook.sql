@@ -1,4 +1,9 @@
 -- cleanup
+DELETE FROM workspaces WHERE id = 'ws_default';
+-- insert a new one
+INSERT INTO workspaces (user_id, id, name, created_at, updated_at) VALUES ('ski_root', 'ws_default', 'default workspace', 1645488000000000000, 0);
+
+-- cleanup
 DELETE FROM webhooks WHERE id = 'wh_demo';
 -- insert a new one
 INSERT INTO webhooks (workspace_id, id, name, created_at, updated_at) VALUES ('ws_default', 'wh_demo', 'demo webhook', 1645488000000000000, 0);
