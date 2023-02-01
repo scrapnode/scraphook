@@ -42,7 +42,7 @@ func WebhookSaveVerifyOwnership(app *App) pipeline.Pipeline {
 			// if request id is not empty -> update action -> need verifying
 			if req.Id != "" {
 				ws := ctx.Value(pipeline.CTXKEY_WS).(string)
-				ok, err := app.Repo.Webhook.BelongToWorkspace(req.Id, ws)
+				ok, err := app.Repo.Webhook.BelongToWorkspace(ws, req.Id)
 				if err != nil {
 					logger.Errorw("could not check whether webhook is belong to workspace or not", "error", err.Error())
 					return ctx, err
