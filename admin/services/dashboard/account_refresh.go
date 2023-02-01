@@ -30,8 +30,8 @@ func (server *AccountServer) Refresh(ctx context.Context, req *protos.RefreshReq
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountRefreshRes)
 
 	res := &protos.RefreshRes{
-		AccessToken:  response.AccessToken,
-		RefreshToken: response.RefreshToken,
+		AccessToken:  response.TokenPair.AccessToken,
+		RefreshToken: response.TokenPair.RefreshToken,
 	}
 	return res, nil
 }

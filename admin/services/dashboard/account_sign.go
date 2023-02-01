@@ -24,8 +24,8 @@ func (server *AccountServer) Sign(ctx context.Context, req *protos.SignReq) (*pr
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountSignRes)
 	res := &protos.SignRes{
-		AccessToken:  response.AccessToken,
-		RefreshToken: response.RefreshToken,
+		AccessToken:  response.TokenPair.AccessToken,
+		RefreshToken: response.TokenPair.RefreshToken,
 	}
 	return res, nil
 }

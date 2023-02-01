@@ -19,7 +19,7 @@ func (wh *Webhook) TableName() string {
 	return "webhooks"
 }
 
-func (wh *Webhook) UseIds() {
+func (wh *Webhook) UseId() {
 	wh.Id = utils.NewId("wh")
 }
 
