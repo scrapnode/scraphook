@@ -84,7 +84,7 @@ func (service *Dashboard) Start(ctx context.Context) error {
 						return nil, status.Error(codes.Unauthenticated, "workspace is not found")
 					}
 					//	@TODO: validate workspace is exist
-					ctx = context.WithValue(ctx, pipeline.CTXKEY_WS, workspace)
+					ctx = context.WithValue(ctx, pipeline.CTXKEY_WS, workspace.Id)
 				}
 
 				return handler(ctx, req)

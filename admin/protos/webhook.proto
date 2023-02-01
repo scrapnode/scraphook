@@ -9,10 +9,12 @@ service Webhook {
 message WebhookSaveReq {
   string id  = 1;
   string name = 2;
+  int32 token_count = 3;
 }
 
 message WebhookSaveRes {
   string id = 1;
   int64 created_at = 2;
   int64 updated_at = 3;
+  repeated string tokens = 4;
 }

@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"github.com/scrapnode/scrapcore/utils"
 	"strings"
 )
@@ -46,16 +47,14 @@ func (wht *WebhookToken) TableName() string {
 	return "webhook_tokens"
 }
 
-func (wht *WebhookToken) Censor() {
-	wht.Token = utils.Censor(wht.Token, 5)
+func (wht *WebhookToken) UseId() {
+	wht.Id = utils.NewId("wht")
 }
 
-func (wht *WebhookToken) WithId() bool {
-	// only set data if it wasn't set yet
-	if wht.Id != "" {
-		return false
-	}
+func (wht *WebhookToken) UseToken(len int) {
+	wht.Token = fmt.Sprintf("wht_%s", utils.RandomString(len))
+}
 
-	wht.Id = utils.NewId("wht")
-	return true
+func (wht *WebhookToken) Censor() {
+	wht.Token = utils.Censor(wht.Token, 5)
 }
