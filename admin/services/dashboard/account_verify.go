@@ -10,10 +10,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *AccountServer) Verify(ctx context.Context, req *protos.VerifyReq) (*protos.VerifyRes, error) {
-	request := &application.AccountVerifyReq{
-		AccessToken: req.AccessToken,
-	}
+func (server *AccountServer) Verify(ctx context.Context, req *protos.AccountVerifyReq) (*protos.AccountVerifyRes, error) {
+	request := &application.AccountVerifyReq{AccessToken: req.AccessToken}
 	if meta, ok := metadata.FromIncomingContext(ctx); ok {
 		if types := meta.Get("X-ScrapNode-Token-Type"); len(types) > 0 {
 			request.Type = types[0]
@@ -28,7 +26,7 @@ func (server *AccountServer) Verify(ctx context.Context, req *protos.VerifyReq) 
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountVerifyRes)
-	res := &protos.VerifyRes{
+	res := &protos.AccountVerifyRes{
 		Workspaces: response.Account.Workspaces,
 		Id:         response.Account.Id,
 		Name:       response.Account.Name,

@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *AccountServer) Sign(ctx context.Context, req *protos.SignReq) (*protos.SignRes, error) {
+func (server *AccountServer) Sign(ctx context.Context, req *protos.AccountSignReq) (*protos.AccountSignRes, error) {
 	request := &application.AccountSignReq{
 		Username: req.Username,
 		Password: req.Password,
@@ -23,7 +23,7 @@ func (server *AccountServer) Sign(ctx context.Context, req *protos.SignReq) (*pr
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountSignRes)
-	res := &protos.SignRes{
+	res := &protos.AccountSignRes{
 		AccessToken:  response.TokenPair.AccessToken,
 		RefreshToken: response.TokenPair.RefreshToken,
 	}

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *AccountServer) Refresh(ctx context.Context, req *protos.RefreshReq) (*protos.RefreshRes, error) {
+func (server *AccountServer) Refresh(ctx context.Context, req *protos.AccountRefreshReq) (*protos.AccountRefreshRes, error) {
 	request := &application.AccountRefreshReq{
 		AccessToken:  req.AccessToken,
 		RefreshToken: req.RefreshToken,
@@ -27,9 +27,9 @@ func (server *AccountServer) Refresh(ctx context.Context, req *protos.RefreshReq
 		server.app.Logger.Errorw("could not refresh access token", "error", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "could not refresh access token")
 	}
-	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountRefreshRes)
 
-	res := &protos.RefreshRes{
+	response := ctx.Value(pipeline.CTXKEY_RES).(*application.AccountRefreshRes)
+	res := &protos.AccountRefreshRes{
 		AccessToken:  response.TokenPair.AccessToken,
 		RefreshToken: response.TokenPair.RefreshToken,
 	}

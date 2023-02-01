@@ -18,6 +18,7 @@ func NewWebhookSave(app *App) pipeline.Pipe {
 }
 
 type WebhookSaveReq struct {
+	Id   string
 	Name string `validate:"required"`
 }
 
@@ -34,7 +35,12 @@ func WebhookSavePrepare(app *App) pipeline.Pipeline {
 				Name:        req.Name,
 				CreatedAt:   app.Clock.Now().UTC().UnixMilli(),
 			}
-			webhook.UseId()
+			if req.Id != "" {
+				webhook.Id = req.Id
+				webhook.UpdatedAt = app.Clock.Now().UTC().UnixMilli()
+			} else {
+				webhook.UseId()
+			}
 
 			res := &WebhookSaveRes{Webhook: webhook}
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
@@ -50,7 +56,7 @@ func WebhookSavePutToDatabase(app *App) pipeline.Pipeline {
 			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
-			res := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveRes)
+			res := ctx.Value(pipeline.CTXKEY_RES).(*WebhookSaveRes)
 			if err := app.Repo.Webhook.Save(res.Webhook); err != nil {
 				logger.Errorw("could not save webhook", "error", err.Error())
 				return ctx, err
