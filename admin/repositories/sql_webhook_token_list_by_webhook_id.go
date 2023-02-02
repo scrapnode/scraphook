@@ -6,7 +6,7 @@ import (
 )
 
 func (repo *SqlWebhookToken) ListByWebhookId(webhookId string) ([]entities.WebhookToken, error) {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	var tokens []entities.WebhookToken
 	tx := conn.Model(&entities.WebhookToken{}).
 		Where("webhook_id = ?", webhookId).

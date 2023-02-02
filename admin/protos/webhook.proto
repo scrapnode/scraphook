@@ -6,6 +6,7 @@ service Webhook {
   rpc Save(WebhookSaveReq) returns (WebhookSaveRes) {}
   rpc Get(WebhookGetReq) returns (WebhookGetRes) {}
   rpc List(WebhookListReq) returns (WebhookListRes) {}
+  rpc Delete(WebhookDeleteReq) returns (WebhookDeleteRes) {}
 }
 
 message WebhookSaveReq {
@@ -55,4 +56,12 @@ message  WebhookListReq {
 message WebhookListRes {
   string cursor = 1;
   repeated WebhookRecord data = 3;
+}
+
+message WebhookDeleteReq {
+  string id  = 1;
+}
+
+message WebhookDeleteRes {
+
 }

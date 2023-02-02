@@ -8,7 +8,7 @@ import (
 )
 
 func (repo *SqlRequest) Scan(query *RequestScanQuery) (*RequestScanResult, error) {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Model(&entities.Request{}).
 		Where("status in ?", []int{entities.REQ_STATUS_INIT, entities.REQ_STATUS_ATTEMPT}).
 		Limit(query.Size).

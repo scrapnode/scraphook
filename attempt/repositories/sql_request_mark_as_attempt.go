@@ -6,7 +6,7 @@ import (
 )
 
 func (repo *SqlRequest) MarkAsAttempt(ids []string) error {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Model(&entities.Request{}).
 		Where("id in ?", ids).
 		Update("status", entities.REQ_STATUS_ATTEMPT)

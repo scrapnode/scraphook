@@ -11,16 +11,16 @@ import (
 func NewWebhookGet(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		pipeline.UseValidator(),
 		pipeline.UseWorkspaceValidator(),
-		WebhookGetVerifyOwnership(app),
+		pipeline.UseValidator(),
+		WebhookVerifyOwnership(app),
 		WebhookGetById(app),
 		WebhookGetGetTokens(app),
 	})
 }
 
 type WebhookGetReq struct {
-	Id         string `validate:"required"`
+	WebhookReq
 	WithTokens bool
 }
 

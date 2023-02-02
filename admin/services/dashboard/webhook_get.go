@@ -12,13 +12,16 @@ import (
 )
 
 func (server *WebhookServer) Get(ctx context.Context, req *protos.WebhookGetReq) (*protos.WebhookGetRes, error) {
-	request := &application.WebhookGetReq{Id: req.Id, WithTokens: true}
+	request := &application.WebhookGetReq{
+		WebhookReq: application.WebhookReq{Id: req.Id},
+		WithTokens: true,
+	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
 	ctx, err := server.get(ctx)
 	if err != nil {
 		server.app.Logger.Errorw("could not get webhook", "error", err.Error())
-		return nil, status.Error(codes.InvalidArgument, "could not get webhook")
+		return nil, status.Error(codes.NotFound, "could not get webhook")
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.WebhookGetRes)

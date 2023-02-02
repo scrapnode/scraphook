@@ -6,7 +6,7 @@ import (
 )
 
 func (repo *SqlWebhook) Get(workspaceId, webhookId string) (*entities.Webhook, error) {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 
 	var webhook entities.Webhook
 	tx := conn.Model(&entities.Webhook{}).

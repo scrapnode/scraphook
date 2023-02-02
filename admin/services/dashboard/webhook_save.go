@@ -12,7 +12,11 @@ import (
 )
 
 func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveReq) (*protos.WebhookSaveRes, error) {
-	request := &application.WebhookSaveReq{Id: req.Id, Name: req.Name, GenerateTokenCount: 1}
+	request := &application.WebhookSaveReq{
+		Id:                 req.Id,
+		Name:               req.Name,
+		GenerateTokenCount: 1,
+	}
 	if req.TokenCount > 0 {
 		request.GenerateTokenCount = int(req.TokenCount)
 	}
@@ -21,7 +25,7 @@ func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveRe
 	ctx, err := server.save(ctx)
 	if err != nil {
 		server.app.Logger.Errorw("could not save webhook", "error", err.Error())
-		return nil, status.Error(codes.InvalidArgument, "could not save webhook")
+		return nil, status.Error(codes.Internal, "could not save webhook")
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.WebhookSaveRes)

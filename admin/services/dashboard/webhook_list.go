@@ -16,7 +16,7 @@ func (server *WebhookServer) List(ctx context.Context, req *protos.WebhookListRe
 	ctx, err := server.list(ctx)
 	if err != nil {
 		server.app.Logger.Errorw("could not list webhook", "error", err.Error())
-		return nil, status.Error(codes.InvalidArgument, "could not list webhook")
+		return nil, status.Error(codes.Internal, "could not list webhook")
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.WebhookListRes)

@@ -6,7 +6,7 @@ import (
 )
 
 func (repo *SqlWebhookToken) Create(tokens *[]entities.WebhookToken) error {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Create(tokens)
 	return tx.Error
 }

@@ -13,7 +13,7 @@ func (repo *SqlWorkspace) GetById(id string) (*entities.Workspace, error) {
 	}
 
 	var workspace entities.Workspace
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	if tx := conn.Model(&entities.Workspace{}).Where("id = ?", id).First(&workspace); tx.Error != nil {
 		return nil, tx.Error
 	}

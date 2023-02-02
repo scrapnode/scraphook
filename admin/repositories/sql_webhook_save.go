@@ -11,7 +11,7 @@ func (repo *SqlWebhook) Save(webhook *entities.Webhook) error {
 		Columns:   []clause.Column{{Name: "id"}},
 		DoUpdates: clause.Assignments(map[string]interface{}{"name": webhook.Name}),
 	}
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Clauses(clauses).Create(webhook)
 	return tx.Error
 }

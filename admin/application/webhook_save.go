@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
@@ -11,9 +10,9 @@ import (
 func NewWebhookSave(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
-		pipeline.UseValidator(),
 		pipeline.UseWorkspaceValidator(),
-		WebhookSaveVerifyOwnership(app),
+		pipeline.UseValidator(),
+		WebhookVerifyOwnership(app),
 		WebhookSavePrepare(app),
 		WebhookSavePutToDatabase(app),
 		WebhookSaveGenerateTokens(app),
@@ -31,34 +30,6 @@ type WebhookSaveRes struct {
 	Tokens  []entities.WebhookToken
 }
 
-func WebhookSaveVerifyOwnership(app *App) pipeline.Pipeline {
-	return func(next pipeline.Pipe) pipeline.Pipe {
-		return func(ctx context.Context) (context.Context, error) {
-			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
-			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
-			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
-
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveReq)
-			// if request id is not empty -> update action -> need verifying
-			if req.Id != "" {
-				ws := ctx.Value(pipeline.CTXKEY_WS).(string)
-				ok, err := app.Repo.Webhook.BelongToWorkspace(ws, req.Id)
-				if err != nil {
-					logger.Errorw("could not check whether webhook is belong to workspace or not", "error", err.Error())
-					return ctx, err
-				}
-
-				if !ok {
-					logger.Error("webhook is not exist in workspace")
-					return ctx, errors.New("webhook is not exist in workspace")
-				}
-			}
-
-			return next(ctx)
-		}
-	}
-}
-
 func WebhookSavePrepare(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
@@ -68,10 +39,10 @@ func WebhookSavePrepare(app *App) pipeline.Pipeline {
 				WorkspaceId: ws,
 				Name:        req.Name,
 				CreatedAt:   app.Clock.Now().UTC().UnixMilli(),
+				UpdatedAt:   app.Clock.Now().UTC().UnixMilli(),
 			}
 			if req.Id != "" {
 				webhook.Id = req.Id
-				webhook.UpdatedAt = app.Clock.Now().UTC().UnixMilli()
 			} else {
 				webhook.UseId()
 			}

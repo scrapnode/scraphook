@@ -12,7 +12,7 @@ func (repo *SqlWebhook) BelongToWorkspace(workspaceId, webhookId string) (bool, 
 	}
 
 	var webhook entities.Webhook
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.
 		Model(&entities.Webhook{}).
 		Scopes(UseWorkspaceScope(workspaceId)).

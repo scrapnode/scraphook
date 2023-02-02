@@ -8,7 +8,7 @@ import (
 func (repo *SqlWebhook) GetEndpoints(ws, id string) ([]*entities.Endpoint, error) {
 	var endpoints []*entities.Endpoint
 
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.
 		Model(&entities.Endpoint{}).
 		Preload("Rules").

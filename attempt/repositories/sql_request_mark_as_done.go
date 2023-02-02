@@ -6,7 +6,7 @@ import (
 )
 
 func (repo *SqlRequest) MarkAsDone(id string) error {
-	conn := repo.db.GetConn().(*gorm.DB)
+	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Model(&entities.Request{}).
 		Where("id = ?", id).
 		Update("status", entities.REQ_STATUS_DONE)

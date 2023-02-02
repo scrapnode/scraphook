@@ -10,6 +10,7 @@ type Webhook interface {
 	BelongToWorkspace(workspaceId, webhookId string) (bool, error)
 	Get(workspaceId, webhookId string) (*entities.Webhook, error)
 	List(query *WebhookListQuery) (*WebhookListResult, error)
+	Delete(workspaceId, webhookId string) error
 }
 
 type WebhookListQuery struct {
