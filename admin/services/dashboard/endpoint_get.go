@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *EndpointServer) Get(ctx context.Context, req *protos.EndpointGetReq) (*protos.EndpointGetRes, error) {
+func (server *EndpointServer) Get(ctx context.Context, req *protos.EndpointGetReq) (*protos.EndpointRecord, error) {
 	request := &application.EndpointGetReq{
 		EndpointReq: application.EndpointReq{
 			WebhookId: req.WebhookId,
@@ -25,16 +25,6 @@ func (server *EndpointServer) Get(ctx context.Context, req *protos.EndpointGetRe
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.EndpointGetRes)
-	res := &protos.EndpointGetRes{
-		Endpoint: &protos.EndpointRecord{
-			WorkspaceId: response.Endpoint.WorkspaceId,
-			Id:          response.Endpoint.Id,
-			Name:        response.Endpoint.Name,
-			Uri:         response.Endpoint.Uri,
-			CreatedAt:   response.Endpoint.CreatedAt,
-			UpdatedAt:   response.Endpoint.UpdatedAt,
-		},
-	}
-
+	res := protos.ConvertEndpointToRecord(response.Endpoint)
 	return res, nil
 }

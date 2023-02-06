@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WebhookClient interface {
-	Save(ctx context.Context, in *WebhookSaveReq, opts ...grpc.CallOption) (*WebhookSaveRes, error)
-	Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookGetRes, error)
+	Save(ctx context.Context, in *WebhookSaveReq, opts ...grpc.CallOption) (*WebhookRecord, error)
+	Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookRecord, error)
 	List(ctx context.Context, in *WebhookListReq, opts ...grpc.CallOption) (*WebhookListRes, error)
 	Delete(ctx context.Context, in *WebhookDeleteReq, opts ...grpc.CallOption) (*WebhookDeleteRes, error)
 }
@@ -36,8 +36,8 @@ func NewWebhookClient(cc grpc.ClientConnInterface) WebhookClient {
 	return &webhookClient{cc}
 }
 
-func (c *webhookClient) Save(ctx context.Context, in *WebhookSaveReq, opts ...grpc.CallOption) (*WebhookSaveRes, error) {
-	out := new(WebhookSaveRes)
+func (c *webhookClient) Save(ctx context.Context, in *WebhookSaveReq, opts ...grpc.CallOption) (*WebhookRecord, error) {
+	out := new(WebhookRecord)
 	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Webhook/Save", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func (c *webhookClient) Save(ctx context.Context, in *WebhookSaveReq, opts ...gr
 	return out, nil
 }
 
-func (c *webhookClient) Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookGetRes, error) {
-	out := new(WebhookGetRes)
+func (c *webhookClient) Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookRecord, error) {
+	out := new(WebhookRecord)
 	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Webhook/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -76,8 +76,8 @@ func (c *webhookClient) Delete(ctx context.Context, in *WebhookDeleteReq, opts .
 // All implementations must embed UnimplementedWebhookServer
 // for forward compatibility
 type WebhookServer interface {
-	Save(context.Context, *WebhookSaveReq) (*WebhookSaveRes, error)
-	Get(context.Context, *WebhookGetReq) (*WebhookGetRes, error)
+	Save(context.Context, *WebhookSaveReq) (*WebhookRecord, error)
+	Get(context.Context, *WebhookGetReq) (*WebhookRecord, error)
 	List(context.Context, *WebhookListReq) (*WebhookListRes, error)
 	Delete(context.Context, *WebhookDeleteReq) (*WebhookDeleteRes, error)
 	mustEmbedUnimplementedWebhookServer()
@@ -87,10 +87,10 @@ type WebhookServer interface {
 type UnimplementedWebhookServer struct {
 }
 
-func (UnimplementedWebhookServer) Save(context.Context, *WebhookSaveReq) (*WebhookSaveRes, error) {
+func (UnimplementedWebhookServer) Save(context.Context, *WebhookSaveReq) (*WebhookRecord, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Save not implemented")
 }
-func (UnimplementedWebhookServer) Get(context.Context, *WebhookGetReq) (*WebhookGetRes, error) {
+func (UnimplementedWebhookServer) Get(context.Context, *WebhookGetReq) (*WebhookRecord, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedWebhookServer) List(context.Context, *WebhookListReq) (*WebhookListRes, error) {

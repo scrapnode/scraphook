@@ -24,14 +24,10 @@ func (server *WebhookServer) List(ctx context.Context, req *protos.WebhookListRe
 		Data:   []*protos.WebhookRecord{},
 		Cursor: response.Cursor,
 	}
-	for _, webhook := range response.Webhooks {
-		res.Data = append(res.Data, &protos.WebhookRecord{
-			WorkspaceId: webhook.WorkspaceId,
-			Id:          webhook.Id,
-			Name:        webhook.Name,
-			CreatedAt:   webhook.CreatedAt,
-			UpdatedAt:   webhook.UpdatedAt,
-		})
+	for _, wh := range response.Webhooks {
+		// be careful with pointer in loop
+		webhook := wh
+		res.Data = append(res.Data, protos.ConvertWebhookToRecord(&webhook, nil))
 	}
 
 	return res, nil

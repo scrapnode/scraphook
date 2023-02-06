@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EndpointClient interface {
-	Save(ctx context.Context, in *EndpointSaveReq, opts ...grpc.CallOption) (*EndpointSaveRes, error)
-	Get(ctx context.Context, in *EndpointGetReq, opts ...grpc.CallOption) (*EndpointGetRes, error)
+	Save(ctx context.Context, in *EndpointSaveReq, opts ...grpc.CallOption) (*EndpointRecord, error)
+	Get(ctx context.Context, in *EndpointGetReq, opts ...grpc.CallOption) (*EndpointRecord, error)
 	List(ctx context.Context, in *EndpointListReq, opts ...grpc.CallOption) (*EndpointListRes, error)
 	Delete(ctx context.Context, in *EndpointDeleteReq, opts ...grpc.CallOption) (*EndpointDeleteRes, error)
 }
@@ -36,8 +36,8 @@ func NewEndpointClient(cc grpc.ClientConnInterface) EndpointClient {
 	return &endpointClient{cc}
 }
 
-func (c *endpointClient) Save(ctx context.Context, in *EndpointSaveReq, opts ...grpc.CallOption) (*EndpointSaveRes, error) {
-	out := new(EndpointSaveRes)
+func (c *endpointClient) Save(ctx context.Context, in *EndpointSaveReq, opts ...grpc.CallOption) (*EndpointRecord, error) {
+	out := new(EndpointRecord)
 	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Endpoint/Save", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func (c *endpointClient) Save(ctx context.Context, in *EndpointSaveReq, opts ...
 	return out, nil
 }
 
-func (c *endpointClient) Get(ctx context.Context, in *EndpointGetReq, opts ...grpc.CallOption) (*EndpointGetRes, error) {
-	out := new(EndpointGetRes)
+func (c *endpointClient) Get(ctx context.Context, in *EndpointGetReq, opts ...grpc.CallOption) (*EndpointRecord, error) {
+	out := new(EndpointRecord)
 	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Endpoint/Get", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -76,8 +76,8 @@ func (c *endpointClient) Delete(ctx context.Context, in *EndpointDeleteReq, opts
 // All implementations must embed UnimplementedEndpointServer
 // for forward compatibility
 type EndpointServer interface {
-	Save(context.Context, *EndpointSaveReq) (*EndpointSaveRes, error)
-	Get(context.Context, *EndpointGetReq) (*EndpointGetRes, error)
+	Save(context.Context, *EndpointSaveReq) (*EndpointRecord, error)
+	Get(context.Context, *EndpointGetReq) (*EndpointRecord, error)
 	List(context.Context, *EndpointListReq) (*EndpointListRes, error)
 	Delete(context.Context, *EndpointDeleteReq) (*EndpointDeleteRes, error)
 	mustEmbedUnimplementedEndpointServer()
@@ -87,10 +87,10 @@ type EndpointServer interface {
 type UnimplementedEndpointServer struct {
 }
 
-func (UnimplementedEndpointServer) Save(context.Context, *EndpointSaveReq) (*EndpointSaveRes, error) {
+func (UnimplementedEndpointServer) Save(context.Context, *EndpointSaveReq) (*EndpointRecord, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Save not implemented")
 }
-func (UnimplementedEndpointServer) Get(context.Context, *EndpointGetReq) (*EndpointGetRes, error) {
+func (UnimplementedEndpointServer) Get(context.Context, *EndpointGetReq) (*EndpointRecord, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedEndpointServer) List(context.Context, *EndpointListReq) (*EndpointListRes, error) {

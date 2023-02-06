@@ -2,16 +2,14 @@ package dashboard
 
 import (
 	"context"
-	"github.com/samber/lo"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/admin/application"
 	"github.com/scrapnode/scraphook/admin/protos"
-	"github.com/scrapnode/scraphook/entities"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveReq) (*protos.WebhookSaveRes, error) {
+func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveReq) (*protos.WebhookRecord, error) {
 	request := &application.WebhookSaveReq{
 		Id:                 req.Id,
 		Name:               req.Name,
@@ -29,14 +27,6 @@ func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveRe
 	}
 
 	response := ctx.Value(pipeline.CTXKEY_RES).(*application.WebhookSaveRes)
-	res := &protos.WebhookSaveRes{
-		Id:        response.Webhook.Id,
-		CreatedAt: response.Webhook.CreatedAt,
-		UpdatedAt: response.Webhook.UpdatedAt,
-		Tokens: lo.Map(response.Tokens, func(item entities.WebhookToken, _ int) string {
-			return item.Token
-		}),
-	}
-
+	res := protos.ConvertWebhookToRecord(response.Webhook, response.Tokens)
 	return res, nil
 }

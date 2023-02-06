@@ -29,16 +29,10 @@ func (server *EndpointServer) List(ctx context.Context, req *protos.EndpointList
 		Data:   []*protos.EndpointRecord{},
 		Cursor: response.Cursor,
 	}
-	for _, endpoint := range response.Endpoints {
-		res.Data = append(res.Data, &protos.EndpointRecord{
-			WorkspaceId: endpoint.WorkspaceId,
-			WebhookId:   endpoint.WebhookId,
-			Id:          endpoint.Id,
-			Name:        endpoint.Name,
-			Uri:         endpoint.Uri,
-			CreatedAt:   endpoint.CreatedAt,
-			UpdatedAt:   endpoint.UpdatedAt,
-		})
+	for _, edp := range response.Endpoints {
+		// be careful with pointer in loop
+		endpoint := edp
+		res.Data = append(res.Data, protos.ConvertEndpointToRecord(&endpoint))
 	}
 
 	return res, nil
