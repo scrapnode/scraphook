@@ -5,13 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhook) BelongToWorkspace(workspaceId, webhookId string) (bool, error) {
-	var webhook entities.Webhook
+func (repo *SqlEndpoint) BelongToWorkspace(workspaceId, webhookId, endpointId string) (bool, error) {
+	var endpoint entities.Endpoint
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.
-		Model(&entities.Webhook{}).
+		Model(&entities.Endpoint{}).
 		Scopes(UseWorkspaceScope(workspaceId)).
-		Where("id = ?", webhookId).First(&webhook)
+		Scopes(UseWebhookScope(webhookId)).
+		Where("id = ?", endpointId).First(&endpoint)
 	if tx.Error != nil {
 		return false, tx.Error
 	}

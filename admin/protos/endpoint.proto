@@ -1,0 +1,63 @@
+syntax = "proto3";
+package scraphook.admin.dashboard.v1;
+option go_package = "github.com/scrapnode/scraphook/admin/protos";
+
+service Endpoint {
+  rpc Save(EndpointSaveReq) returns (EndpointSaveRes) {}
+  rpc Get(EndpointGetReq) returns (EndpointGetRes) {}
+  rpc List(EndpointListReq) returns (EndpointListRes) {}
+  rpc Delete(EndpointDeleteReq) returns (EndpointDeleteRes) {}
+}
+
+message EndpointSaveReq {
+  string webhook_id = 1;
+  string id  = 2;
+  string name = 3;
+  string uri = 4;
+}
+
+message EndpointSaveRes {
+  string id = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+}
+
+message EndpointRecord {
+  string workspace_id = 1;
+  string webhook_id = 2;
+  string id = 3;
+  string name = 4;
+  string uri = 5;
+  int64 created_at = 6;
+  int64 updated_at = 7;
+}
+
+message EndpointGetReq {
+  string webhook_id = 1;
+  string id = 2;
+}
+
+message EndpointGetRes {
+  EndpointRecord endpoint = 1;
+}
+
+message  EndpointListReq {
+  string webhook_id = 1;
+  string cursor = 2;
+  int32 size = 3;
+  string search = 4;
+}
+
+message EndpointListRes {
+  string cursor = 1;
+  repeated EndpointRecord data = 3;
+}
+
+message EndpointDeleteReq {
+  string webhook_id = 1;
+  string id  = 2;
+}
+
+message EndpointDeleteRes {
+
+}

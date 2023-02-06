@@ -6,10 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhook) List(query *WebhookListQuery) (*WebhookListResult, error) {
+func (repo *SqlEndpoint) List(query *EndpointListQuery) (*EndpointListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.Webhook{}).
+	tx := conn.Model(&entities.Endpoint{}).
 		Scopes(UseWorkspaceScope(query.WorkspaceId)).
+		Scopes(UseWebhookScope(query.WebhookId)).
 		Limit(query.Size).
 		Order("id DESC")
 	if query.Cursor != "" {
@@ -17,10 +18,10 @@ func (repo *SqlWebhook) List(query *WebhookListQuery) (*WebhookListResult, error
 	}
 	if query.Search != "" {
 		filter := "%" + query.Search + "%"
-		tx = tx.Where("name LIKE ?", filter)
+		tx = tx.Where("name LIKE ? OR uri LIKE ?", filter, filter)
 	}
 
-	var data []entities.Webhook
+	var data []entities.Endpoint
 	if tx = tx.Find(&data); tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -31,5 +32,5 @@ func (repo *SqlWebhook) List(query *WebhookListQuery) (*WebhookListResult, error
 		cursor = data[len(data)-1].Id
 	}
 
-	return &WebhookListResult{database.ScanResult{Cursor: cursor}, data}, tx.Error
+	return &EndpointListResult{database.ScanResult{Cursor: cursor}, data}, tx.Error
 }

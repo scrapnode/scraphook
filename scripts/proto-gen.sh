@@ -5,8 +5,10 @@ set -e
 PROTO_FILES=(
   "admin/protos/account.proto"
   "admin/protos/webhook.proto"
+  "admin/protos/endpoint.proto"
 )
 PROTO_FOLDERS=(
+  "admin/protos"
   "admin/protos"
   "admin/protos"
 )

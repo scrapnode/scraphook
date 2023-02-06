@@ -13,7 +13,8 @@ func New(ctx context.Context, cfg *database.Configs) (*Repo, error) {
 
 type Repo struct {
 	Database     database.Database
+	Workspace    Workspace
 	Webhook      Webhook
 	WebhookToken WebhookToken
-	Workspace    Workspace
+	Endpoint     Endpoint
 }

@@ -8,11 +8,12 @@ import (
 	"reflect"
 )
 
-type WebhookReq struct {
-	Id string `validate:"required"`
+type EndpointReq struct {
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
-func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
+func EndpointVerifyOwnership(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
@@ -20,29 +21,32 @@ func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			// if we want to check webhook ownership, we need the webhook id
+			webhookId := reflect.ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).
+				Elem().FieldByName("WebhookId").String()
 			id := reflect.ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).
-				Elem().FieldByName(property).String()
-			// if the ID is empty, we can get ID from request property WebhookReq
+				Elem().FieldByName("Id").String()
+			// if the ID is empty, we can get ID from request property EndpointReq
 			if id == "" {
 				field := reflect.ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).
-					Elem().FieldByName("WebhookReq")
+					Elem().FieldByName("EndpointReq")
 				if field.IsValid() {
-					id = field.Interface().(WebhookReq).Id
+					webhookId = field.Interface().(EndpointReq).WebhookId
+					id = field.Interface().(EndpointReq).Id
 				}
 			}
 
 			// if request id is not empty -> update action -> need verifying
 			if id != "" {
 				workspaceId := ctx.Value(pipeline.CTXKEY_WS).(string)
-				ok, err := app.Repo.Webhook.BelongToWorkspace(workspaceId, id)
+				ok, err := app.Repo.Endpoint.BelongToWorkspace(workspaceId, webhookId, id)
 				if err != nil {
-					logger.Errorw("could not check whether webhook is belong to workspace or not", "error", err.Error())
+					logger.Errorw("could not check whether endpoint is belong to workspace or not", "error", err.Error())
 					return ctx, err
 				}
 
 				if !ok {
-					logger.Error("webhook is not exist in workspace")
-					return ctx, errors.New("webhook is not exist in workspace")
+					logger.Error("endpoint is not exist in workspace")
+					return ctx, errors.New("endpoint is not exist in workspace")
 				}
 			}
 

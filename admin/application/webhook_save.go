@@ -12,7 +12,7 @@ func NewWebhookSave(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyOwnership(app),
+		WebhookVerifyOwnership(app, "Id"),
 		WebhookSavePrepare(app),
 		WebhookSavePutToDatabase(app),
 		WebhookSaveGenerateTokens(app),
