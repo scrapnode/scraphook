@@ -3,7 +3,9 @@ package application
 import (
 	"context"
 	"github.com/scrapnode/scrapcore/auth"
+	"github.com/scrapnode/scrapcore/database"
 	"github.com/scrapnode/scrapcore/pipeline"
+	"github.com/scrapnode/scraphook/admin/repositories"
 	"github.com/scrapnode/scraphook/entities"
 )
 
@@ -20,7 +22,7 @@ func NewWebhookGet(app *App) pipeline.Pipe {
 
 type WebhookGetReq struct {
 	WebhookReq
-	WithTokens bool
+	WithTokenCount int
 }
 
 type WebhookGetRes struct {
@@ -58,13 +60,17 @@ func WebhookGetGetTokens(app *App) pipeline.Pipeline {
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookGetReq)
 			res := ctx.Value(pipeline.CTXKEY_RES).(*WebhookGetRes)
-			if req.WithTokens {
-				tokens, err := app.Repo.WebhookToken.ListByWebhookId(res.Webhook.Id)
+			if req.WithTokenCount > 0 {
+				query := &repositories.WebhookTokenListQuery{
+					ScanQuery: database.ScanQuery{Size: req.WithTokenCount},
+					WebhookId: req.WebhookReq.Id,
+				}
+				results, err := app.Repo.WebhookToken.List(query)
 				if err != nil {
 					logger.Errorw("could not get tokens of webhook", "error", err.Error())
 					return ctx, err
 				}
-				res.Tokens = tokens
+				res.Tokens = results.Data
 				ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			}
 

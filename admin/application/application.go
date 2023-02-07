@@ -17,7 +17,7 @@ import (
 func New(ctx context.Context, cfg *configs.Configs) (*App, error) {
 	app := &App{
 		Configs: cfg,
-		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.attempt.application"),
+		Logger:  xlogger.FromContext(ctx).With("pkg", "scraphook.aadmin.application"),
 		Clock:   clock.New(),
 		Root:    auth.NewAccessKey(cfg.AuthRoot.AccessKeyId, cfg.AuthRoot.AccessKeySecret),
 	}

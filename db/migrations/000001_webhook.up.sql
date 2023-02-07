@@ -21,6 +21,7 @@ CREATE INDEX webhooks_idx_workspace_id ON webhooks (workspace_id DESC);
 CREATE TABLE IF NOT EXISTS webhook_tokens (
     webhook_id VARCHAR(64) NOT NULL,
     id VARCHAR(64) NOT NULL,
+    name VARCHAR(256) NOT NULL,
     token VARCHAR(256) NOT NULL,
     created_at BIGINT DEFAULT 0,
     CONSTRAINT webhook_tokens_pk PRIMARY KEY (id)

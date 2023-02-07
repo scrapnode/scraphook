@@ -11,7 +11,7 @@ INSERT INTO webhooks (workspace_id, id, name, created_at, updated_at) VALUES ('w
 -- cleanup
 DELETE FROM webhook_tokens WHERE webhook_id = 'wh_demo';
 -- insert a new one
-INSERT INTO webhook_tokens (webhook_id, id, token, created_at) VALUES ('wh_demo', 'wht_simple','notsimpleasyouthought', 1645488000000);
+INSERT INTO webhook_tokens (webhook_id, id, name, token, created_at) VALUES ('wh_demo', 'wht_simple', 'simple demo webhook token','notsimpleasyouthought', 1645488000000);
 
 -- cleanup
 DELETE FROM endpoints WHERE webhook_id = 'wh_demo';

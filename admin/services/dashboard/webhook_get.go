@@ -12,7 +12,8 @@ import (
 func (server *WebhookServer) Get(ctx context.Context, req *protos.WebhookGetReq) (*protos.WebhookRecord, error) {
 	request := &application.WebhookGetReq{
 		WebhookReq: application.WebhookReq{Id: req.Id},
-		WithTokens: true,
+		// @TODO: change hardcode
+		WithTokenCount: 5,
 	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 

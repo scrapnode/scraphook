@@ -18,6 +18,7 @@ func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.Webhook
 			return &WebhookTokenRecord{
 				WebhookId: item.WebhookId,
 				Id:        item.Id,
+				Name:      item.Name,
 				Token:     item.Token,
 				CreatedAt: item.CreatedAt,
 			}

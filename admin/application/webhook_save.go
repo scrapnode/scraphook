@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
@@ -80,13 +81,16 @@ func WebhookSaveGenerateTokens(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveReq)
-			if req.GenerateTokenCount == 0 {
+			isUpdated := req.Id != ""
+			if isUpdated || req.GenerateTokenCount == 0 {
+				logger.Warnw("ignore generate token step", "is_update", isUpdated, "generate_token_count", req.GenerateTokenCount)
 				return next(ctx)
 			}
 
 			res := ctx.Value(pipeline.CTXKEY_RES).(*WebhookSaveRes)
 			for i := 0; i < req.GenerateTokenCount; i++ {
 				token := entities.WebhookToken{
+					Name:      fmt.Sprintf("Generated token #%d from webhook creation", i),
 					WebhookId: res.Webhook.Id,
 					CreatedAt: app.Clock.Now().UTC().UnixMilli(),
 				}

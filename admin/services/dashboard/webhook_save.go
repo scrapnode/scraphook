@@ -15,8 +15,8 @@ func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveRe
 		Name:               req.Name,
 		GenerateTokenCount: 1,
 	}
-	if req.TokenCount > 0 {
-		request.GenerateTokenCount = int(req.TokenCount)
+	if req.AddTokenCount > 0 {
+		request.GenerateTokenCount = int(req.AddTokenCount)
 	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 

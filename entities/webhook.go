@@ -36,6 +36,7 @@ type WebhookToken struct {
 	WebhookId string `json:"webhook_id"`
 	Id        string `json:"id"`
 
+	Name  string `json:"name"`
 	Token string `json:"token"`
 
 	CreatedAt int64 `json:"created_at"`
