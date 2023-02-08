@@ -30,9 +30,6 @@ func New(provider *viper.Viper) (*Configs, error) {
 	if err := cfg.Configs.Unmarshal(provider); err != nil {
 		return nil, err
 	}
-	if err := provider.Unmarshal(cfg); err != nil {
-		return nil, err
-	}
 	if err := cfg.useValidator(provider); err != nil {
 		return nil, err
 	}
