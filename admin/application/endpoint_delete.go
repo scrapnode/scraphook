@@ -11,7 +11,7 @@ func NewEndpointDelete(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		EndpointVerifyOwnership(app),
+		WebhookVerifyOwnership(app, "WebhookId"),
 		EndpointDeleteById(app),
 	})
 }
@@ -31,7 +31,7 @@ func EndpointDeleteById(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointDeleteReq)
-			if err := app.Repo.Endpoint.Delete(ws, req.WebhookId, req.Id); err != nil {
+			if err := app.Repo.Endpoint.Delete(req.WebhookId, req.Id); err != nil {
 				logger.Errorw("could not get endpoint", "error", err.Error())
 				return ctx, err
 			}

@@ -40,9 +40,8 @@ func EndpointListFilter(app *App) pipeline.Pipeline {
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointListReq)
 			query := &repositories.EndpointListQuery{
-				ScanQuery:   database.ScanQuery{Cursor: req.Cursor, Size: int(req.Size), Search: req.Search},
-				WorkspaceId: ws,
-				WebhookId:   req.WebhookId,
+				ScanQuery: database.ScanQuery{Cursor: req.Cursor, Size: int(req.Size), Search: req.Search},
+				WebhookId: req.WebhookId,
 			}
 			results, err := app.Repo.Endpoint.List(query)
 			if err != nil {

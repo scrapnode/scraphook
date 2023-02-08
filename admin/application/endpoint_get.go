@@ -12,7 +12,7 @@ func NewEndpointGet(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		EndpointVerifyOwnership(app),
+		WebhookVerifyOwnership(app, "WebhookId"),
 		EndpointGetById(app),
 	})
 }
@@ -33,7 +33,7 @@ func EndpointGetById(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointGetReq)
-			endpoint, err := app.Repo.Endpoint.Get(ws, req.WebhookId, req.Id)
+			endpoint, err := app.Repo.Endpoint.Get(req.WebhookId, req.Id)
 			if err != nil {
 				logger.Errorw("could not get endpoint", "error", err.Error())
 				return ctx, err

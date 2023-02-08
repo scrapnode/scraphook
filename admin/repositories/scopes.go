@@ -13,3 +13,9 @@ func UseWebhookScope(id string) func(*gorm.DB) *gorm.DB {
 		return db.Where("webhook_id = ?", id)
 	}
 }
+
+func UseEndpointScope(id string) func(*gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		return db.Where("endpoint_id = ?", id)
+	}
+}

@@ -9,6 +9,7 @@ import (
 func ConvertEndpointToRecord(endpoint *entities.Endpoint) *EndpointRecord {
 	record := &EndpointRecord{
 		WorkspaceId: endpoint.WorkspaceId,
+		WebhookId:   endpoint.WebhookId,
 		Id:          endpoint.Id,
 		Name:        endpoint.Name,
 		Uri:         endpoint.Uri,

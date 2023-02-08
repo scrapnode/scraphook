@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlEndpoint) List(query *EndpointListQuery) (*EndpointListResult, error) {
+func (repo *SqlEndpointRule) List(query *EndpointRuleListQuery) (*EndpointRuleListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.Endpoint{}).
-		Scopes(UseWebhookScope(query.WebhookId)).
+	tx := conn.Model(&entities.EndpointRule{}).
+		Scopes(UseEndpointScope(query.EndpointId)).
 		Limit(query.Size).
-		Order("id DESC")
+		Order("priority DESC, id DESC")
 	if query.Cursor != "" {
 		tx = tx.Where("id < ?", query.Cursor)
 	}
@@ -20,7 +20,7 @@ func (repo *SqlEndpoint) List(query *EndpointListQuery) (*EndpointListResult, er
 		tx = tx.Where("name LIKE ? OR uri LIKE ?", filter, filter)
 	}
 
-	var data []entities.Endpoint
+	var data []entities.EndpointRule
 	if tx = tx.Find(&data); tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -31,5 +31,5 @@ func (repo *SqlEndpoint) List(query *EndpointListQuery) (*EndpointListResult, er
 		cursor = data[len(data)-1].Id
 	}
 
-	return &EndpointListResult{database.ScanResult{Cursor: cursor}, data}, tx.Error
+	return &EndpointRuleListResult{database.ScanResult{Cursor: cursor}, data}, tx.Error
 }
