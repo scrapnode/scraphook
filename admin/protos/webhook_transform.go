@@ -3,6 +3,8 @@ package protos
 import (
 	"github.com/samber/lo"
 	"github.com/scrapnode/scraphook/entities"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.WebhookToken) *WebhookRecord {
@@ -10,8 +12,8 @@ func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.Webhook
 		WorkspaceId: webhook.WorkspaceId,
 		Id:          webhook.Id,
 		Name:        webhook.Name,
-		CreatedAt:   ConvertMilliToTimestamp(webhook.CreatedAt),
-		UpdatedAt:   ConvertMilliToTimestamp(webhook.UpdatedAt),
+		CreatedAt:   timestamppb.New(time.UnixMilli(webhook.CreatedAt)),
+		UpdatedAt:   timestamppb.New(time.UnixMilli(webhook.UpdatedAt)),
 	}
 	if tokens != nil && len(tokens) > 0 {
 		record.Tokens = lo.Map(tokens, func(item entities.WebhookToken, _ int) *WebhookTokenRecord {
@@ -20,7 +22,7 @@ func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.Webhook
 				Id:        item.Id,
 				Name:      item.Name,
 				Token:     item.Token,
-				CreatedAt: ConvertMilliToTimestamp(item.CreatedAt),
+				CreatedAt: timestamppb.New(time.UnixMilli(item.CreatedAt)),
 			}
 		})
 	}
@@ -33,7 +35,7 @@ func ConvertWebhookTokenToRecord(token *entities.WebhookToken) *WebhookTokenReco
 		Id:        token.Id,
 		Name:      token.Name,
 		Token:     token.Token,
-		CreatedAt: ConvertMilliToTimestamp(token.CreatedAt),
+		CreatedAt: timestamppb.New(time.UnixMilli(token.CreatedAt)),
 	}
 	return record
 }

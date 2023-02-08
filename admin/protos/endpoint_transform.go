@@ -1,6 +1,10 @@
 package protos
 
-import "github.com/scrapnode/scraphook/entities"
+import (
+	"github.com/scrapnode/scraphook/entities"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
+)
 
 func ConvertEndpointToRecord(endpoint *entities.Endpoint) *EndpointRecord {
 	record := &EndpointRecord{
@@ -8,8 +12,8 @@ func ConvertEndpointToRecord(endpoint *entities.Endpoint) *EndpointRecord {
 		Id:          endpoint.Id,
 		Name:        endpoint.Name,
 		Uri:         endpoint.Uri,
-		CreatedAt:   ConvertMilliToTimestamp(endpoint.CreatedAt),
-		UpdatedAt:   ConvertMilliToTimestamp(endpoint.UpdatedAt),
+		CreatedAt:   timestamppb.New(time.UnixMilli(endpoint.CreatedAt)),
+		UpdatedAt:   timestamppb.New(time.UnixMilli(endpoint.UpdatedAt)),
 	}
 	return record
 }
