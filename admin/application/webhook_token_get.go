@@ -4,39 +4,43 @@ import (
 	"context"
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
+	"github.com/scrapnode/scraphook/entities"
 )
 
-func NewWebhookDelete(app *App) pipeline.Pipe {
+func NewWebhookTokenGet(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyOwnership(app, "Id"),
-		WebhookDeleteById(app),
+		WebhookVerifyOwnership(app, "WebhookId"),
+		WebhookTokenGetById(app),
 	})
 }
 
-type WebhookDeleteReq struct {
-	WebhookReq
+type WebhookTokenGetReq struct {
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
-type WebhookDeleteRes struct {
+type WebhookTokenGetRes struct {
+	Token *entities.WebhookToken
 }
 
-func WebhookDeleteById(app *App) pipeline.Pipeline {
+func WebhookTokenGetById(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
 			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookDeleteReq)
-			if err := app.Repo.Webhook.Delete(ws, req.Id); err != nil {
-				logger.Errorw("could not delete webhook", "error", err.Error())
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookTokenGetReq)
+			token, err := app.Repo.WebhookToken.Get(req.WebhookId, req.Id)
+			if err != nil {
+				logger.Errorw("could not get webhook token", "error", err.Error())
 				return ctx, err
 			}
 
-			res := &WebhookDeleteRes{}
+			res := &WebhookTokenGetRes{Token: token}
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}

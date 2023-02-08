@@ -8,8 +8,8 @@ func ConvertEndpointToRecord(endpoint *entities.Endpoint) *EndpointRecord {
 		Id:          endpoint.Id,
 		Name:        endpoint.Name,
 		Uri:         endpoint.Uri,
-		CreatedAt:   endpoint.CreatedAt,
-		UpdatedAt:   endpoint.UpdatedAt,
+		CreatedAt:   ConvertMilliToTimestamp(endpoint.CreatedAt),
+		UpdatedAt:   ConvertMilliToTimestamp(endpoint.UpdatedAt),
 	}
 	return record
 }

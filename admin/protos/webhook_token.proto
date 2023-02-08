@@ -1,0 +1,42 @@
+syntax = "proto3";
+package scraphook.admin.dashboard.v1;
+option go_package = "github.com/scrapnode/scraphook/admin/protos";
+import "entities.proto";
+
+service WebhookToken {
+  rpc Create(WebhookTokenCreateReq) returns (WebhookTokenRecord) {}
+  rpc Get(WebhookTokenGetReq) returns (WebhookTokenRecord) {}
+  rpc List(WebhookTokenListReq) returns (WebhookTokenListRes) {}
+  rpc Delete(WebhookTokenDeleteReq) returns (WebhookTokenDeleteRes) {}
+}
+
+message WebhookTokenCreateReq {
+  string webhook_id = 1;
+  string name = 2;
+  int32 count = 3;
+}
+
+message WebhookTokenGetReq {
+  string webhook_id = 1;
+  string id = 2;
+}
+
+message WebhookTokenListReq {
+  string webhook_id = 1;
+  string cursor = 2;
+  int32 size = 3;
+  string search = 4;
+}
+
+message WebhookTokenListRes {
+  string cursor = 1;
+  repeated WebhookTokenRecord data = 3;
+}
+
+message WebhookTokenDeleteReq {
+  string webhook_id = 1;
+  string id = 2;
+}
+
+message WebhookTokenDeleteRes {
+}

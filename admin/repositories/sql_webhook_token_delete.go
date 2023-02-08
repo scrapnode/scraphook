@@ -5,11 +5,11 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhookToken) Delete(webhookId, tokenId string) error {
+func (repo *SqlWebhookToken) Delete(webhookId, Id string) error {
 	conn := repo.db.Conn().(*gorm.DB)
 
 	tx := conn.
-		Scopes(UseWorkspaceScope(webhookId)).
-		Delete(&entities.WebhookToken{Id: tokenId})
+		Scopes(UseWebhookScope(webhookId)).
+		Delete(&entities.WebhookToken{Id: Id})
 	return tx.Error
 }

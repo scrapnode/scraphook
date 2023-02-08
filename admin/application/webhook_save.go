@@ -6,6 +6,7 @@ import (
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"github.com/scrapnode/scraphook/entities"
+	"time"
 )
 
 func NewWebhookSave(app *App) pipeline.Pipe {
@@ -21,9 +22,9 @@ func NewWebhookSave(app *App) pipeline.Pipe {
 }
 
 type WebhookSaveReq struct {
-	Id                 string
-	Name               string `validate:"required"`
-	GenerateTokenCount int    `validate:"gte=0,lte=5"`
+	Id                string
+	Name              string `validate:"required"`
+	AutoGenerateToken bool
 }
 
 type WebhookSaveRes struct {
@@ -82,28 +83,27 @@ func WebhookSaveGenerateTokens(app *App) pipeline.Pipeline {
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveReq)
 			isUpdated := req.Id != ""
-			if isUpdated || req.GenerateTokenCount == 0 {
-				logger.Warnw("ignore generate token step", "is_update", isUpdated, "generate_token_count", req.GenerateTokenCount)
+			if isUpdated || !req.AutoGenerateToken {
+				logger.Warnw("ignore generate token step", "is_update", isUpdated, "autho_generate_token", req.AutoGenerateToken)
 				return next(ctx)
 			}
 
 			res := ctx.Value(pipeline.CTXKEY_RES).(*WebhookSaveRes)
-			for i := 0; i < req.GenerateTokenCount; i++ {
-				token := entities.WebhookToken{
-					Name:      fmt.Sprintf("Generated token #%d from webhook creation", i),
-					WebhookId: res.Webhook.Id,
-					CreatedAt: app.Clock.Now().UTC().UnixMilli(),
-				}
-				token.UseId()
-				token.UseToken(64)
-				res.Tokens = append(res.Tokens, token)
+			token := &entities.WebhookToken{
+				Name:      fmt.Sprintf("Generated token at %s", app.Clock.Now().UTC().Format(time.RFC3339)),
+				WebhookId: res.Webhook.Id,
+				CreatedAt: app.Clock.Now().UTC().UnixMilli(),
 			}
-
-			if err := app.Repo.WebhookToken.Create(&res.Tokens); err != nil {
-				logger.Errorw("could not generate tokens", "error", err.Error())
+			token.UseId()
+			token.UseToken(64)
+			if err := app.Repo.WebhookToken.Create(token); err != nil {
+				logger.Errorw("could not generate token", "error", err.Error())
 				// IMPORTANT: ignore error because user can generate token by themselves later
+				return next(ctx)
 			}
 
+			res.Tokens = append(res.Tokens, *token)
+			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
 	}

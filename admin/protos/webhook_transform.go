@@ -10,8 +10,8 @@ func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.Webhook
 		WorkspaceId: webhook.WorkspaceId,
 		Id:          webhook.Id,
 		Name:        webhook.Name,
-		CreatedAt:   webhook.CreatedAt,
-		UpdatedAt:   webhook.UpdatedAt,
+		CreatedAt:   ConvertMilliToTimestamp(webhook.CreatedAt),
+		UpdatedAt:   ConvertMilliToTimestamp(webhook.UpdatedAt),
 	}
 	if tokens != nil && len(tokens) > 0 {
 		record.Tokens = lo.Map(tokens, func(item entities.WebhookToken, _ int) *WebhookTokenRecord {
@@ -20,9 +20,20 @@ func ConvertWebhookToRecord(webhook *entities.Webhook, tokens []entities.Webhook
 				Id:        item.Id,
 				Name:      item.Name,
 				Token:     item.Token,
-				CreatedAt: item.CreatedAt,
+				CreatedAt: ConvertMilliToTimestamp(item.CreatedAt),
 			}
 		})
+	}
+	return record
+}
+
+func ConvertWebhookTokenToRecord(token *entities.WebhookToken) *WebhookTokenRecord {
+	record := &WebhookTokenRecord{
+		WebhookId: token.WebhookId,
+		Id:        token.Id,
+		Name:      token.Name,
+		Token:     token.Token,
+		CreatedAt: ConvertMilliToTimestamp(token.CreatedAt),
 	}
 	return record
 }

@@ -6,10 +6,10 @@ import (
 )
 
 type WebhookToken interface {
-	Create(tokens *[]entities.WebhookToken) error
-	Get(webhookId, tokenId string) (*entities.WebhookToken, error)
+	Create(token *entities.WebhookToken) error
+	Get(webhookId, Id string) (*entities.WebhookToken, error)
 	List(query *WebhookTokenListQuery) (*WebhookTokenListResult, error)
-	Delete(webhookId, tokenId string) error
+	Delete(webhookId, Id string) error
 }
 
 type WebhookTokenListQuery struct {

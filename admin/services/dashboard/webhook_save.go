@@ -11,12 +11,9 @@ import (
 
 func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveReq) (*protos.WebhookRecord, error) {
 	request := &application.WebhookSaveReq{
-		Id:                 req.Id,
-		Name:               req.Name,
-		GenerateTokenCount: 1,
-	}
-	if req.AddTokenCount > 0 {
-		request.GenerateTokenCount = int(req.AddTokenCount)
+		Id:                req.Id,
+		Name:              req.Name,
+		AutoGenerateToken: req.AutoGenerateToken,
 	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 

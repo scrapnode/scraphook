@@ -5,8 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhookToken) Create(tokens *[]entities.WebhookToken) error {
+func (repo *SqlWebhookToken) Create(token *entities.WebhookToken) error {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Create(tokens)
+	tx := conn.Create(token)
 	return tx.Error
 }

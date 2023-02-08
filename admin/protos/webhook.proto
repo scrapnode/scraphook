@@ -1,45 +1,26 @@
 syntax = "proto3";
 package scraphook.admin.dashboard.v1;
 option go_package = "github.com/scrapnode/scraphook/admin/protos";
+import "entities.proto";
 
 service Webhook {
   rpc Save(WebhookSaveReq) returns (WebhookRecord) {}
   rpc Get(WebhookGetReq) returns (WebhookRecord) {}
   rpc List(WebhookListReq) returns (WebhookListRes) {}
   rpc Delete(WebhookDeleteReq) returns (WebhookDeleteRes) {}
-  rpc AddTokens(WebhookAddTokensReq) returns (WebhookAddTokensRes) {}
-  rpc DeleteToken(WebhookDeleteTokenReq) returns (WebhookDeleteTokenRes) {}
 }
 
 message WebhookSaveReq {
   string id  = 1;
   string name = 2;
-  int32 add_token_count = 3;
-}
-
-message WebhookRecord {
-  string workspace_id = 1;
-  string id = 2;
-  string name = 3;
-  int64 created_at = 4;
-  int64 updated_at = 5;
-
-  repeated WebhookTokenRecord tokens = 6;
-}
-
-message WebhookTokenRecord {
-  string webhook_id = 1;
-  string id = 2;
-  string name = 3;
-  string token = 4;
-  int64 created_at = 5;
+  bool auto_generate_token = 3;
 }
 
 message WebhookGetReq {
-    string id = 1;
+  string id = 1;
 }
 
-message  WebhookListReq {
+message WebhookListReq {
   string cursor = 1;
   int32 size = 2;
   string search = 3;
@@ -56,21 +37,4 @@ message WebhookDeleteReq {
 
 message WebhookDeleteRes {
 
-}
-
-message WebhookAddTokensReq {
-  string webhook_id = 1;
-  int64 count = 2;
-}
-
-message WebhookAddTokensRes {
-  repeated WebhookTokenRecord tokens = 1;
-}
-
-message WebhookDeleteTokenReq {
-  string webhook_id = 1;
-  repeated string id  = 2;
-}
-
-message WebhookDeleteTokenRes {
 }

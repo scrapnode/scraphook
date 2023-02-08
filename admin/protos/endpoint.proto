@@ -1,6 +1,7 @@
 syntax = "proto3";
 package scraphook.admin.dashboard.v1;
 option go_package = "github.com/scrapnode/scraphook/admin/protos";
+import "entities.proto";
 
 service Endpoint {
   rpc Save(EndpointSaveReq) returns (EndpointRecord) {}
@@ -14,16 +15,6 @@ message EndpointSaveReq {
   string id  = 2;
   string name = 3;
   string uri = 4;
-}
-
-message EndpointRecord {
-  string workspace_id = 1;
-  string webhook_id = 2;
-  string id = 3;
-  string name = 4;
-  string uri = 5;
-  int64 created_at = 6;
-  int64 updated_at = 7;
 }
 
 message EndpointGetReq {

@@ -26,8 +26,6 @@ type WebhookClient interface {
 	Get(ctx context.Context, in *WebhookGetReq, opts ...grpc.CallOption) (*WebhookRecord, error)
 	List(ctx context.Context, in *WebhookListReq, opts ...grpc.CallOption) (*WebhookListRes, error)
 	Delete(ctx context.Context, in *WebhookDeleteReq, opts ...grpc.CallOption) (*WebhookDeleteRes, error)
-	AddTokens(ctx context.Context, in *WebhookAddTokensReq, opts ...grpc.CallOption) (*WebhookAddTokensRes, error)
-	DeleteToken(ctx context.Context, in *WebhookDeleteTokenReq, opts ...grpc.CallOption) (*WebhookDeleteTokenRes, error)
 }
 
 type webhookClient struct {
@@ -74,24 +72,6 @@ func (c *webhookClient) Delete(ctx context.Context, in *WebhookDeleteReq, opts .
 	return out, nil
 }
 
-func (c *webhookClient) AddTokens(ctx context.Context, in *WebhookAddTokensReq, opts ...grpc.CallOption) (*WebhookAddTokensRes, error) {
-	out := new(WebhookAddTokensRes)
-	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Webhook/AddTokens", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *webhookClient) DeleteToken(ctx context.Context, in *WebhookDeleteTokenReq, opts ...grpc.CallOption) (*WebhookDeleteTokenRes, error) {
-	out := new(WebhookDeleteTokenRes)
-	err := c.cc.Invoke(ctx, "/scraphook.admin.dashboard.v1.Webhook/DeleteToken", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WebhookServer is the server API for Webhook service.
 // All implementations must embed UnimplementedWebhookServer
 // for forward compatibility
@@ -100,8 +80,6 @@ type WebhookServer interface {
 	Get(context.Context, *WebhookGetReq) (*WebhookRecord, error)
 	List(context.Context, *WebhookListReq) (*WebhookListRes, error)
 	Delete(context.Context, *WebhookDeleteReq) (*WebhookDeleteRes, error)
-	AddTokens(context.Context, *WebhookAddTokensReq) (*WebhookAddTokensRes, error)
-	DeleteToken(context.Context, *WebhookDeleteTokenReq) (*WebhookDeleteTokenRes, error)
 	mustEmbedUnimplementedWebhookServer()
 }
 
@@ -120,12 +98,6 @@ func (UnimplementedWebhookServer) List(context.Context, *WebhookListReq) (*Webho
 }
 func (UnimplementedWebhookServer) Delete(context.Context, *WebhookDeleteReq) (*WebhookDeleteRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
-}
-func (UnimplementedWebhookServer) AddTokens(context.Context, *WebhookAddTokensReq) (*WebhookAddTokensRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddTokens not implemented")
-}
-func (UnimplementedWebhookServer) DeleteToken(context.Context, *WebhookDeleteTokenReq) (*WebhookDeleteTokenRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteToken not implemented")
 }
 func (UnimplementedWebhookServer) mustEmbedUnimplementedWebhookServer() {}
 
@@ -212,42 +184,6 @@ func _Webhook_Delete_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Webhook_AddTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WebhookAddTokensReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WebhookServer).AddTokens(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/scraphook.admin.dashboard.v1.Webhook/AddTokens",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WebhookServer).AddTokens(ctx, req.(*WebhookAddTokensReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Webhook_DeleteToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WebhookDeleteTokenReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WebhookServer).DeleteToken(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/scraphook.admin.dashboard.v1.Webhook/DeleteToken",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WebhookServer).DeleteToken(ctx, req.(*WebhookDeleteTokenReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Webhook_ServiceDesc is the grpc.ServiceDesc for Webhook service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -270,14 +206,6 @@ var Webhook_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _Webhook_Delete_Handler,
-		},
-		{
-			MethodName: "AddTokens",
-			Handler:    _Webhook_AddTokens_Handler,
-		},
-		{
-			MethodName: "DeleteToken",
-			Handler:    _Webhook_DeleteToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
