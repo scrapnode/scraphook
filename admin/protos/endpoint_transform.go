@@ -8,13 +8,12 @@ import (
 
 func ConvertEndpointToRecord(endpoint *entities.Endpoint) *EndpointRecord {
 	record := &EndpointRecord{
-		WorkspaceId: endpoint.WorkspaceId,
-		WebhookId:   endpoint.WebhookId,
-		Id:          endpoint.Id,
-		Name:        endpoint.Name,
-		Uri:         endpoint.Uri,
-		CreatedAt:   timestamppb.New(time.UnixMilli(endpoint.CreatedAt)),
-		UpdatedAt:   timestamppb.New(time.UnixMilli(endpoint.UpdatedAt)),
+		WebhookId: endpoint.WebhookId,
+		Id:        endpoint.Id,
+		Name:      endpoint.Name,
+		Uri:       endpoint.Uri,
+		CreatedAt: timestamppb.New(time.UnixMilli(endpoint.CreatedAt)),
+		UpdatedAt: timestamppb.New(time.UnixMilli(endpoint.UpdatedAt)),
 	}
 	return record
 }

@@ -3,9 +3,8 @@ package entities
 import "github.com/scrapnode/scrapcore/utils"
 
 type Endpoint struct {
-	WorkspaceId string `json:"workspace_id"`
-	WebhookId   string `json:"webhook_id"`
-	Id          string `json:"id"`
+	WebhookId string `json:"webhook_id"`
+	Id        string `json:"id"`
 
 	Name string `json:"name"`
 	// http, gRPC

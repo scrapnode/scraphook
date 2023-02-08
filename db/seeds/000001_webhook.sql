@@ -15,8 +15,8 @@ INSERT INTO webhook_tokens (webhook_id, id, name, token, created_at) VALUES ('wh
 
 -- cleanup
 DELETE FROM endpoints WHERE webhook_id = 'wh_demo';
-INSERT INTO endpoints (workspace_id, webhook_id, id, name, uri, created_at, updated_at) VALUES ('ws_default', 'wh_demo', 'ep_httpbinpost','httpbin.org POST', 'https://httpbin.org/post', 1645488000000, 0);
-INSERT INTO endpoints (workspace_id, webhook_id, id, name, uri, created_at, updated_at) VALUES ('ws_default', 'wh_demo', 'ep_httpbinput','httpbin.org PUT', 'https://httpbin.org/put', 1645488000000, 0);
+INSERT INTO endpoints (webhook_id, id, name, uri, created_at, updated_at) VALUES ('wh_demo', 'ep_httpbinpost', 'httpbin.org POST', 'https://httpbin.org/post', 1645488000000, 0);
+INSERT INTO endpoints ( webhook_id, id, name, uri, created_at, updated_at) VALUES ('wh_demo', 'ep_httpbinput', 'httpbin.org PUT', 'https://httpbin.org/put', 1645488000000, 0);
 
 DELETE FROM endpoint_rules WHERE endpoint_id = 'ep_httpbinpost';
 DELETE FROM endpoint_rules WHERE endpoint_id = 'ep_httpbinput';

@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+var (
+	TRIGGER_WORKSPACE = "scrapnode.attempt"
+)
+
 func UseTriggerRequest(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
@@ -106,11 +110,10 @@ func UseTriggerRequestBuildTriggers(app *App) pipeline.Pipeline {
 			for _, endpoint := range res.Endpoints {
 				for _, bucket := range req.Buckets {
 					trigger := entities.RequestTrigger{
-						Start:       bucket.Start,
-						End:         bucket.End,
-						WorkspaceId: endpoint.WorkspaceId,
-						WebhookId:   endpoint.WebhookId,
-						EndpointId:  endpoint.Id,
+						Start:      bucket.Start,
+						End:        bucket.End,
+						WebhookId:  endpoint.WebhookId,
+						EndpointId: endpoint.Id,
 					}
 					trigger.UseId()
 					res.Triggers = append(res.Triggers, trigger)
@@ -135,7 +138,7 @@ func UseTriggerRequestPublish(app *App) pipeline.Pipeline {
 				wg.Go(func() {
 					result := pipeline.BatchResult{Key: trigger.Key()}
 					event := &msgbus.Event{
-						Workspace: trigger.WorkspaceId,
+						Workspace: TRIGGER_WORKSPACE,
 						App:       trigger.WebhookId,
 						Type:      events.TRIGGER_REQUEST,
 						Metadata:  map[string]string{},

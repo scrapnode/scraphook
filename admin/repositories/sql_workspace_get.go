@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWorkspace) GetById(id string) (*entities.Workspace, error) {
+func (repo *SqlWorkspace) Get(id string) (*entities.Workspace, error) {
 	if id == "" {
 		return nil, errors.New(fmt.Sprintf("workspace #%s is not found", id))
 	}

@@ -10,10 +10,9 @@ type RequestTrigger struct {
 	Start  int64  `json:"start"`
 	End    int64  `json:"end"`
 
-	WorkspaceId string `json:"workspace_id"`
-	WebhookId   string `json:"webhook_id"`
-	EndpointId  string `json:"endpoint_id"`
-	Id          string `json:"id"`
+	WebhookId  string `json:"webhook_id"`
+	EndpointId string `json:"endpoint_id"`
+	Id         string `json:"id"`
 }
 
 func (trigger *RequestTrigger) UseId() {
@@ -22,9 +21,9 @@ func (trigger *RequestTrigger) UseId() {
 
 func (trigger *RequestTrigger) Key() string {
 	keys := []string{
-		trigger.WorkspaceId,
 		trigger.WebhookId,
 		trigger.EndpointId,
+		trigger.Id,
 	}
 	return strings.Join(keys, "/")
 }

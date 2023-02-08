@@ -32,15 +32,13 @@ type EndpointSaveRes struct {
 func EndpointSavePrepare(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointSaveReq)
 			endpoint := &entities.Endpoint{
-				WorkspaceId: ws,
-				WebhookId:   req.WebhookId,
-				Name:        req.Name,
-				Uri:         req.Uri,
-				CreatedAt:   app.Clock.Now().UTC().UnixMilli(),
-				UpdatedAt:   app.Clock.Now().UTC().UnixMilli(),
+				WebhookId: req.WebhookId,
+				Name:      req.Name,
+				Uri:       req.Uri,
+				CreatedAt: app.Clock.Now().UTC().UnixMilli(),
+				UpdatedAt: app.Clock.Now().UTC().UnixMilli(),
 			}
 			if req.Id != "" {
 				endpoint.Id = req.Id

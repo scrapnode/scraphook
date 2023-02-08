@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS webhook_tokens (
 CREATE INDEX webhooks_idx_webhook_id ON webhook_tokens (webhook_id DESC);
 
 CREATE TABLE IF NOT EXISTS endpoints (
-    workspace_id VARCHAR(64) NOT NULL,
     webhook_id VARCHAR(64) NOT NULL,
     id VARCHAR(64) NOT NULL,
     name VARCHAR(256) NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE IF NOT EXISTS endpoints (
     updated_at BIGINT DEFAULT 0,
     CONSTRAINT endpoints_pk PRIMARY KEY (id)
 );
-CREATE INDEX endpoints_idx_workspace_webhook_ids ON endpoints (workspace_id DESC, webhook_id DESC);
+CREATE INDEX endpoints_idx_workspace_webhook_ids ON endpoints (webhook_id DESC);
 
 CREATE TABLE IF NOT EXISTS endpoint_rules (
     endpoint_id VARCHAR(64) NOT NULL,
