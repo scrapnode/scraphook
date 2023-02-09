@@ -19,9 +19,12 @@ func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
 			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
-			id := reflect.
-				ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).Elem().
-				FieldByName(property).String()
+			var id string
+			if property != "" {
+				id = reflect.
+					ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).Elem().
+					FieldByName(property).String()
+			}
 			if id == "" {
 				field := reflect.
 					ValueOf(ctx.Value(pipeline.CTXKEY_REQ)).Elem().
@@ -31,18 +34,22 @@ func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
 				}
 			}
 
-			// if request id is not empty -> update action -> need verifying
-			if id != "" {
-				ok, err := app.Repo.Webhook.BelongToWorkspace(ws, id)
-				if err != nil {
-					logger.Errorw("could not check whether webhook is belong to workspace or not", "error", err.Error())
-					return ctx, err
-				}
+			if id == "" {
+				logger.Error("no requested webhook is specified")
+				return ctx, errors.New("no requested webhook is specified")
+			}
 
-				if !ok {
-					logger.Error("webhook is not exist in workspace")
-					return ctx, errors.New("webhook is not exist in workspace")
-				}
+			logger = logger.With("webhook_id", id)
+			// if request id is not empty -> update action -> need verifying
+			ok, err := app.Repo.Webhook.VerifyOwnership(ws, id)
+			if err != nil {
+				logger.Errorw("could not verify ownership of the requested webhook.", "error", err.Error())
+				return ctx, err
+			}
+
+			if !ok {
+				logger.Errorw("ownership check is failed")
+				return ctx, errors.New("you do not have the right to access the requested webhook")
 			}
 
 			return next(ctx)

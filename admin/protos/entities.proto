@@ -22,11 +22,10 @@ message WebhookTokenRecord {
 }
 
 message EndpointRecord {
-  string workspace_id = 1;
-  string webhook_id = 2;
-  string id = 3;
-  string name = 4;
-  string uri = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
+  string webhook_id = 1;
+  string id = 2;
+  string name = 3;
+  string uri = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
 }

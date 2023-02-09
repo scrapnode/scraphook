@@ -17,7 +17,12 @@ func (server *WebhookServer) Save(ctx context.Context, req *protos.WebhookSaveRe
 	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
-	ctx, err := server.save(ctx)
+	var err error
+	if req.Id == "" {
+		ctx, err = server.create(ctx)
+	} else {
+		ctx, err = server.update(ctx)
+	}
 	if err != nil {
 		server.app.Logger.Errorw("could not save webhook", "error", err.Error())
 		return nil, status.Error(codes.Internal, "could not save webhook")

@@ -35,14 +35,13 @@ func EndpointSavePrepare(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointSaveReq)
 			endpoint := &entities.Endpoint{
 				WebhookId: req.WebhookId,
+				Id:        req.Id,
 				Name:      req.Name,
 				Uri:       req.Uri,
 				CreatedAt: app.Clock.Now().UTC().UnixMilli(),
 				UpdatedAt: app.Clock.Now().UTC().UnixMilli(),
 			}
-			if req.Id != "" {
-				endpoint.Id = req.Id
-			} else {
+			if req.Id == "" {
 				endpoint.UseId()
 			}
 

@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhook) BelongToWorkspace(workspaceId, webhookId string) (bool, error) {
+func (repo *SqlWebhook) VerifyOwnership(workspaceId, webhookId string) (bool, error) {
 	var webhook entities.Webhook
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.

@@ -9,7 +9,8 @@ import (
 func NewWebhookServer(app *application.App) *WebhookServer {
 	return &WebhookServer{
 		app:         app,
-		save:        application.NewWebhookSave(app),
+		create:      application.NewWebhookCreate(app),
+		update:      application.NewWebhookUpdate(app),
 		list:        application.NewWebhookList(app),
 		get:         application.NewWebhookGet(app),
 		delete:      application.NewWebhookDelete(app),
@@ -21,7 +22,8 @@ func NewWebhookServer(app *application.App) *WebhookServer {
 type WebhookServer struct {
 	protos.WebhookServer
 	app         *application.App
-	save        pipeline.Pipe
+	create      pipeline.Pipe
+	update      pipeline.Pipe
 	list        pipeline.Pipe
 	get         pipeline.Pipe
 	delete      pipeline.Pipe

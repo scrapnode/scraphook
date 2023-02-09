@@ -9,7 +9,18 @@ import (
 	"time"
 )
 
-func NewWebhookSave(app *App) pipeline.Pipe {
+func NewWebhookCreate(app *App) pipeline.Pipe {
+	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseRecovery(app.Logger),
+		pipeline.UseWorkspaceValidator(),
+		pipeline.UseValidator(),
+		WebhookSavePrepare(app),
+		WebhookSavePutToDatabase(app),
+		WebhookSaveGenerateTokens(app),
+	})
+}
+
+func NewWebhookUpdate(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
@@ -39,13 +50,12 @@ func WebhookSavePrepare(app *App) pipeline.Pipeline {
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookSaveReq)
 			webhook := &entities.Webhook{
 				WorkspaceId: ws,
+				Id:          req.Id,
 				Name:        req.Name,
 				CreatedAt:   app.Clock.Now().UTC().UnixMilli(),
 				UpdatedAt:   app.Clock.Now().UTC().UnixMilli(),
 			}
-			if req.Id != "" {
-				webhook.Id = req.Id
-			} else {
+			if req.Id == "" {
 				webhook.UseId()
 			}
 
