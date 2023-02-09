@@ -8,8 +8,9 @@ import (
 
 func (repo *SqlEndpoint) List(query *EndpointListQuery) (*EndpointListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.Endpoint{}).
-		Scopes(UseWebhookScope(query.WebhookId)).
+	model := &entities.Endpoint{}
+	tx := conn.Model(model).
+		Scopes(UseWebhookScope(model, query.WebhookId)).
 		Limit(query.Size).
 		Order("id DESC")
 	if query.Cursor != "" {

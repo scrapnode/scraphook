@@ -28,14 +28,6 @@ func (response *Response) TableName() string {
 	return "responses"
 }
 
-func (response *Response) UseId() {
-	response.Id = utils.NewId("res")
-}
-
-func (response *Response) UseTs(tpl string, t time.Time) {
-	response.Bucket, response.Timestamps = utils.NewBucket(tpl, t)
-}
-
 func (response *Response) Key() string {
 	keys := []string{
 		response.WorkspaceId,
@@ -45,6 +37,14 @@ func (response *Response) Key() string {
 		response.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (response *Response) UseId() {
+	response.Id = utils.NewId("res")
+}
+
+func (response *Response) UseTs(tpl string, t time.Time) {
+	response.Bucket, response.Timestamps = utils.NewBucket(tpl, t)
 }
 
 func (response *Response) OK() bool {

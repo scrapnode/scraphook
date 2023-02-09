@@ -42,8 +42,8 @@ func EndpointVerifyExisting(app *App, webhookProp, endpointProp string) pipeline
 				return ctx, errors.New("no requested endpoint is specified")
 			}
 
-			logger = logger.With("endpoint_id", id)
-			exist, err := app.Repo.Endpoint.Exist(webhookId, id)
+			logger = logger.With("webhook_id", webhookId, "endpoint_id", id)
+			exist, err := app.Repo.Endpoint.Exist(ws, webhookId, id)
 			if err != nil {
 				logger.Errorw("could not verify whether endpoint is exist or not", "error", err.Error())
 				return ctx, err

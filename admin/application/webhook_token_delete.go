@@ -11,14 +11,13 @@ func NewWebhookTokenDelete(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyOwnership(app, "WebhookId"),
+		WebhookTokenVerifyExisting(app, "WebhookId", "Id"),
 		WebhookTokenDeleteById(app),
 	})
 }
 
 type WebhookTokenDeleteReq struct {
-	WebhookId string `validate:"required"`
-	Id        string `validate:"required"`
+	WebhookTokenReq
 }
 
 type WebhookTokenDeleteRes struct {

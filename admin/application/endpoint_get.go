@@ -12,7 +12,8 @@ func NewEndpointGet(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		EndpointVerifyExisting(app, "WebhookId", "Id"),
+		// don't need verify whether endpoint is exist or not by EndpointVerifyExisting
+		// because if we could not find an endpoint, this pipeline will return not found error by itself
 		EndpointGetById(app),
 	})
 }

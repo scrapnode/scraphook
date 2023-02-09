@@ -8,8 +8,9 @@ import (
 
 func (repo *SqlWebhook) List(query *WebhookListQuery) (*WebhookListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.Webhook{}).
-		Scopes(UseWorkspaceScope(query.WorkspaceId)).
+	model := &entities.Webhook{}
+	tx := conn.Model(model).
+		Scopes(UseWorkspaceScope(model, query.WorkspaceId)).
 		Limit(query.Size).
 		Order("id DESC")
 	if query.Cursor != "" {

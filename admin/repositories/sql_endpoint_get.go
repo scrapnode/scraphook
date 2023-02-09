@@ -8,10 +8,10 @@ import (
 func (repo *SqlEndpoint) Get(webhookId, endpointId string) (*entities.Endpoint, error) {
 	conn := repo.db.Conn().(*gorm.DB)
 
-	var endpoint entities.Endpoint
-	tx := conn.Model(&entities.Endpoint{}).
-		Scopes(UseWebhookScope(webhookId)).
+	endpoint := &entities.Endpoint{}
+	tx := conn.Model(endpoint).
+		Scopes(UseWebhookScope(endpoint, webhookId)).
 		Where("id = ?", endpointId).
-		First(&endpoint)
-	return &endpoint, tx.Error
+		First(endpoint)
+	return endpoint, tx.Error
 }

@@ -1,0 +1,44 @@
+syntax = "proto3";
+package scraphook.admin.dashboard.v1;
+option go_package = "github.com/scrapnode/scraphook/admin/protos";
+import "entities.proto";
+
+service EndpointRule {
+  rpc Save(EndpointRuleSaveReq) returns (EndpointRuleRecord) {}
+  rpc Get(EndpointRuleGetReq) returns (EndpointRuleRecord) {}
+  rpc List(EndpointRuleListReq) returns (EndpointRuleListRes) {}
+  rpc Delete(EndpointRuleDeleteReq) returns (EndpointRuleDeleteRes) {}
+}
+
+message EndpointRuleSaveReq {
+  string endpoint_id = 1;
+  string id  = 2;
+  string name = 3;
+  string uri = 4;
+}
+
+message EndpointRuleGetReq {
+  string endpoint_id = 1;
+  string id = 2;
+}
+
+message  EndpointRuleListReq {
+  string endpoint_id = 1;
+  string cursor = 2;
+  int32 size = 3;
+  string search = 4;
+}
+
+message EndpointRuleListRes {
+  string cursor = 1;
+  repeated EndpointRuleRecord data = 3;
+}
+
+message EndpointRuleDeleteReq {
+  string endpoint_id = 1;
+  string id  = 2;
+}
+
+message EndpointRuleDeleteRes {
+
+}

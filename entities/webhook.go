@@ -20,16 +20,16 @@ func (wh *Webhook) TableName() string {
 	return "webhooks"
 }
 
-func (wh *Webhook) UseId() {
-	wh.Id = utils.NewId("wh")
-}
-
 func (wh *Webhook) Key() string {
 	keys := []string{
 		wh.WorkspaceId,
 		wh.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (wh *Webhook) UseId() {
+	wh.Id = utils.NewId("wh")
 }
 
 type WebhookToken struct {
@@ -46,6 +46,14 @@ type WebhookToken struct {
 
 func (wht *WebhookToken) TableName() string {
 	return "webhook_tokens"
+}
+
+func (wht *WebhookToken) Key() string {
+	keys := []string{
+		wht.WebhookId,
+		wht.Id,
+	}
+	return strings.Join(keys, "/")
 }
 
 func (wht *WebhookToken) UseId() {

@@ -8,10 +8,10 @@ import (
 func (repo *SqlEndpointRule) Get(endpointId, ruleId string) (*entities.EndpointRule, error) {
 	conn := repo.db.Conn().(*gorm.DB)
 
-	var rule entities.EndpointRule
-	tx := conn.Model(&entities.EndpointRule{}).
-		Scopes(UseEndpointScope(endpointId)).
+	rule := &entities.EndpointRule{}
+	tx := conn.Model(rule).
+		Scopes(UseEndpointScope(rule, endpointId)).
 		Where("id = ?", ruleId).
-		First(&rule)
-	return &rule, tx.Error
+		First(rule)
+	return rule, tx.Error
 }

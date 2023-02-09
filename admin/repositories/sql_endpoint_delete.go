@@ -8,16 +8,18 @@ import (
 func (repo *SqlEndpoint) Delete(webhookId, endpointId string) error {
 	conn := repo.db.Conn().(*gorm.DB)
 	return conn.Transaction(func(tx *gorm.DB) error {
+		rule := &entities.EndpointRule{}
 		endpointRuleTx := tx.
-			Scopes(UseEndpointScope(endpointId)).
-			Delete(&entities.EndpointRule{})
+			Scopes(UseEndpointScope(rule, endpointId)).
+			Delete(rule)
 		if endpointRuleTx.Error != nil {
 			return endpointRuleTx.Error
 		}
 
+		endpoint := &entities.Endpoint{Id: endpointId}
 		endpointTx := tx.
-			Scopes(UseWebhookScope(webhookId)).
-			Delete(&entities.Endpoint{Id: endpointId})
+			Scopes(UseWebhookScope(endpoint, webhookId)).
+			Delete(endpoint)
 		if endpointTx.Error != nil {
 			return endpointTx.Error
 		}

@@ -13,7 +13,7 @@ type WebhookReq struct {
 	Id string `validate:"required"`
 }
 
-func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
+func WebhookVerifyExisting(app *App, property string) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
@@ -42,7 +42,7 @@ func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
 
 			logger = logger.With("webhook_id", id)
 			// if request id is not empty -> update action -> need verifying
-			ok, err := app.Repo.Webhook.VerifyOwnership(ws, id)
+			ok, err := app.Repo.Webhook.VerifyExisting(ws, id)
 			if err != nil {
 				logger.Errorw("could not verify ownership of the requested webhook.", "error", err.Error())
 				return ctx, err

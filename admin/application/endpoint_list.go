@@ -14,7 +14,7 @@ func NewEndpointList(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseValidator(),
 		pipeline.UseWorkspaceValidator(),
-		WebhookVerifyOwnership(app, "WebhookId"),
+		WebhookVerifyExisting(app, "WebhookId"),
 		EndpointListFilter(app),
 	})
 }

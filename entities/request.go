@@ -34,14 +34,6 @@ func (request *Request) TableName() string {
 	return "requests"
 }
 
-func (request *Request) UseId() {
-	request.Id = utils.NewId("req")
-}
-
-func (request *Request) UseTs(tpl string, t time.Time) {
-	request.Bucket, request.Timestamps = utils.NewBucket(tpl, t)
-}
-
 func (request *Request) Key() string {
 	keys := []string{
 		request.WorkspaceId,
@@ -50,4 +42,12 @@ func (request *Request) Key() string {
 		request.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (request *Request) UseId() {
+	request.Id = utils.NewId("req")
+}
+
+func (request *Request) UseTs(tpl string, t time.Time) {
+	request.Bucket, request.Timestamps = utils.NewBucket(tpl, t)
 }

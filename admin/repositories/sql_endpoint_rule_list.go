@@ -8,8 +8,9 @@ import (
 
 func (repo *SqlEndpointRule) List(query *EndpointRuleListQuery) (*EndpointRuleListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.EndpointRule{}).
-		Scopes(UseEndpointScope(query.EndpointId)).
+	model := &entities.EndpointRule{}
+	tx := conn.Model(model).
+		Scopes(UseEndpointScope(model, query.EndpointId)).
 		Limit(query.Size).
 		Order("priority DESC, id DESC")
 	if query.Cursor != "" {

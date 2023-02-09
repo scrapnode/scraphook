@@ -8,8 +8,10 @@ PROTO_FILES=(
   "admin/protos/webhook.proto"
   "admin/protos/webhook_token.proto"
   "admin/protos/endpoint.proto"
+  "admin/protos/endpoint_rule.proto"
 )
 PROTO_FOLDERS=(
+  "admin/protos"
   "admin/protos"
   "admin/protos"
   "admin/protos"

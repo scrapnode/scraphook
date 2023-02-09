@@ -7,9 +7,10 @@ import (
 
 type WebhookToken interface {
 	Create(token *entities.WebhookToken) error
-	Get(webhookId, Id string) (*entities.WebhookToken, error)
+	Exist(workspaceId, webhookId, tokenId string) (bool, error)
+	Get(webhookId, tokenId string) (*entities.WebhookToken, error)
 	List(query *WebhookTokenListQuery) (*WebhookTokenListResult, error)
-	Delete(webhookId, Id string) error
+	Delete(webhookId, tokenId string) error
 }
 
 type WebhookTokenListQuery struct {

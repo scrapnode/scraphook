@@ -8,8 +8,9 @@ import (
 
 func (repo *SqlWebhookToken) List(query *WebhookTokenListQuery) (*WebhookTokenListResult, error) {
 	conn := repo.db.Conn().(*gorm.DB)
-	tx := conn.Model(&entities.WebhookToken{}).
-		Scopes(UseWebhookScope(query.WebhookId)).
+	model := &entities.WebhookToken{}
+	tx := conn.Model(model).
+		Scopes(UseWebhookScope(model, query.WebhookId)).
 		Limit(query.Size).
 		Order("id DESC")
 	if query.Cursor != "" {

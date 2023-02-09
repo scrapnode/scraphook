@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/scrapnode/scrapcore/utils"
+import (
+	"github.com/scrapnode/scrapcore/utils"
+	"strings"
+)
 
 type Endpoint struct {
 	WebhookId string `json:"webhook_id"`
@@ -16,12 +19,20 @@ type Endpoint struct {
 	Rules []EndpointRule
 }
 
-func (endpoint *Endpoint) UseId() {
-	endpoint.Id = utils.NewId("ep")
-}
-
 func (endpoint *Endpoint) TableName() string {
 	return "endpoints"
+}
+
+func (endpoint *Endpoint) Key() string {
+	keys := []string{
+		endpoint.WebhookId,
+		endpoint.Id,
+	}
+	return strings.Join(keys, "/")
+}
+
+func (endpoint *Endpoint) UseId() {
+	endpoint.Id = utils.NewId("ep")
 }
 
 type EndpointRule struct {
@@ -38,10 +49,18 @@ type EndpointRule struct {
 	Endpoint *Endpoint
 }
 
-func (rule *EndpointRule) UseId() {
-	rule.Id = utils.NewId("epr")
-}
-
 func (rule *EndpointRule) TableName() string {
 	return "endpoint_rules"
+}
+
+func (rule *EndpointRule) Key() string {
+	keys := []string{
+		rule.EndpointId,
+		rule.Id,
+	}
+	return strings.Join(keys, "/")
+}
+
+func (rule *EndpointRule) UseId() {
+	rule.Id = utils.NewId("epr")
 }

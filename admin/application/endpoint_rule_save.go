@@ -7,11 +7,23 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func NewEndpointRuleSave(app *App) pipeline.Pipe {
+func NewEndpointRuleCreate(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
+		// @TODO: verify
+		EndpointSaveRulePrepare(app),
+		EndpointSaveRulePutToDatabase(app),
+	})
+}
+
+func NewEndpointRuleUpdate(app *App) pipeline.Pipe {
+	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseRecovery(app.Logger),
+		pipeline.UseWorkspaceValidator(),
+		pipeline.UseValidator(),
+		EndpointRuleVerifyExisting(app, "EndpointId", "Id"),
 		EndpointSaveRulePrepare(app),
 		EndpointSaveRulePutToDatabase(app),
 	})

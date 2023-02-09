@@ -7,8 +7,10 @@ import (
 
 func (repo *SqlEndpointRule) Delete(endpointId, ruleId string) error {
 	conn := repo.db.Conn().(*gorm.DB)
+
+	rule := &entities.EndpointRule{Id: ruleId}
 	tx := conn.
-		Scopes(UseEndpointScope(endpointId)).
-		Delete(&entities.EndpointRule{Id: ruleId})
+		Scopes(UseEndpointScope(rule, endpointId)).
+		Delete(rule)
 	return tx.Error
 }

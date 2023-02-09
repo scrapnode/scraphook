@@ -29,3 +29,13 @@ message EndpointRecord {
   google.protobuf.Timestamp created_at = 5;
   google.protobuf.Timestamp updated_at = 6;
 }
+
+message EndpointRuleRecord {
+  string endpoint_id = 1;
+  string id = 2;
+  string rule = 3;
+  bool negative = 4;
+  int32 priority = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

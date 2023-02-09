@@ -19,14 +19,14 @@ func (ws *Workspace) TableName() string {
 	return "workspaces"
 }
 
-func (ws *Workspace) UseId() {
-	ws.Id = utils.NewId("ws")
-}
-
 func (ws *Workspace) Key() string {
 	keys := []string{
 		ws.UserId,
 		ws.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (ws *Workspace) UseId() {
+	ws.Id = utils.NewId("ws")
 }

@@ -15,10 +15,6 @@ type RequestTrigger struct {
 	Id         string `json:"id"`
 }
 
-func (trigger *RequestTrigger) UseId() {
-	trigger.Id = utils.NewId("ep")
-}
-
 func (trigger *RequestTrigger) Key() string {
 	keys := []string{
 		trigger.WebhookId,
@@ -26,4 +22,8 @@ func (trigger *RequestTrigger) Key() string {
 		trigger.Id,
 	}
 	return strings.Join(keys, "/")
+}
+
+func (trigger *RequestTrigger) UseId() {
+	trigger.Id = utils.NewId("ep")
 }

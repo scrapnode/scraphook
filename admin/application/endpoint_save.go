@@ -12,7 +12,7 @@ func NewEndpointCreate(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyOwnership(app, "WebhookId"),
+		WebhookVerifyExisting(app, "WebhookId"),
 		EndpointSavePrepare(app),
 		EndpointSavePutToDatabase(app),
 	})

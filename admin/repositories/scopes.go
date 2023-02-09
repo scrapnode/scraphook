@@ -1,21 +1,25 @@
 package repositories
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+	"github.com/scrapnode/scraphook/entities"
+	"gorm.io/gorm"
+)
 
-func UseWorkspaceScope(id string) func(*gorm.DB) *gorm.DB {
+func UseWorkspaceScope(model entities.Model, id string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where("workspace_id = ?", id)
+		return db.Where(fmt.Sprintf("%s.workspace_id = ?", model.TableName()), id)
 	}
 }
 
-func UseWebhookScope(id string) func(*gorm.DB) *gorm.DB {
+func UseWebhookScope(model entities.Model, id string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where("webhook_id = ?", id)
+		return db.Where(fmt.Sprintf("%s.webhook_id = ?", model.TableName()), id)
 	}
 }
 
-func UseEndpointScope(id string) func(*gorm.DB) *gorm.DB {
+func UseEndpointScope(model entities.Model, id string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where("endpoint_id = ?", id)
+		return db.Where(fmt.Sprintf("%s.endpoint_id = ?", model.TableName()), id)
 	}
 }

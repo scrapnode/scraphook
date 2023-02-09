@@ -8,10 +8,10 @@ import (
 func (repo *SqlWebhook) Get(workspaceId, webhookId string) (*entities.Webhook, error) {
 	conn := repo.db.Conn().(*gorm.DB)
 
-	var webhook entities.Webhook
-	tx := conn.Model(&entities.Webhook{}).
-		Scopes(UseWorkspaceScope(workspaceId)).
+	webhook := &entities.Webhook{}
+	tx := conn.Model(webhook).
+		Scopes(UseWorkspaceScope(webhook, workspaceId)).
 		Where("id = ?", webhookId).
-		First(&webhook)
-	return &webhook, tx.Error
+		First(webhook)
+	return webhook, tx.Error
 }
