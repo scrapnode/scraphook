@@ -1,6 +1,6 @@
 # @scrapnode/scraphook
 
-> The fast, secure, and efficient webhook service 
+> Empower your applications with lightning-fast webhooks: Reliable, scalable, and easy for developers to integrate.
 
 ## Get Started
 
