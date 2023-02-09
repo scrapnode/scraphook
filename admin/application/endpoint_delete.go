@@ -11,7 +11,7 @@ func NewEndpointDelete(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyOwnership(app, "WebhookId"),
+		EndpointVerifyExisting(app, "WebhookId", "Id"),
 		EndpointDeleteById(app),
 	})
 }

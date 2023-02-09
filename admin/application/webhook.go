@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
 	"reflect"
@@ -48,8 +49,9 @@ func WebhookVerifyOwnership(app *App, property string) pipeline.Pipeline {
 			}
 
 			if !ok {
-				logger.Errorw("ownership check is failed")
-				return ctx, errors.New("you do not have the right to access the requested webhook")
+				msg := fmt.Sprintf("webhook #%s is not exist in your workspace", id)
+				logger.Errorw(msg)
+				return ctx, errors.New(msg)
 			}
 
 			return next(ctx)

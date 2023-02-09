@@ -11,12 +11,12 @@ func (repo *SqlEndpointRule) Save(rule *entities.EndpointRule) error {
 		"rule":       rule.Rule,
 		"negative":   rule.Negative,
 		"priority":   rule.Priority,
-		"created_at": rule.CreatedAt,
 		"updated_at": rule.UpdatedAt,
 	}
 	clauses := clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
 		DoUpdates: clause.Assignments(updates),
+		Where:     clause.Where{Exprs: []clause.Expression{clause.Eq{Column: "endpoint_id", Value: rule.EndpointId}}},
 	}
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Clauses(clauses).Create(rule)

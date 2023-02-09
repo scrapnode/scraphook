@@ -18,7 +18,12 @@ func (server *EndpointServer) Save(ctx context.Context, req *protos.EndpointSave
 	}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
-	ctx, err := server.save(ctx)
+	var err error
+	if req.Id == "" {
+		ctx, err = server.create(ctx)
+	} else {
+		ctx, err = server.update(ctx)
+	}
 	if err != nil {
 		server.app.Logger.Errorw("could not save endpoint", "error", err.Error())
 		return nil, status.Error(codes.Internal, "could not save endpoint")

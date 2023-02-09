@@ -9,7 +9,8 @@ import (
 func NewEndpointServer(app *application.App) *EndpointServer {
 	return &EndpointServer{
 		app:    app,
-		save:   application.NewEndpointSave(app),
+		create: application.NewEndpointCreate(app),
+		update: application.NewEndpointUpdate(app),
 		list:   application.NewEndpointList(app),
 		get:    application.NewEndpointGet(app),
 		delete: application.NewEndpointDelete(app),
@@ -19,7 +20,8 @@ func NewEndpointServer(app *application.App) *EndpointServer {
 type EndpointServer struct {
 	protos.EndpointServer
 	app    *application.App
-	save   pipeline.Pipe
+	create pipeline.Pipe
+	update pipeline.Pipe
 	list   pipeline.Pipe
 	get    pipeline.Pipe
 	delete pipeline.Pipe

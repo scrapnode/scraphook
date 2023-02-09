@@ -17,4 +17,5 @@ type Repo struct {
 	Webhook      Webhook
 	WebhookToken WebhookToken
 	Endpoint     Endpoint
+	EndpointRule EndpointRule
 }

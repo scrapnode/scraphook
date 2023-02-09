@@ -7,12 +7,23 @@ import (
 	"github.com/scrapnode/scraphook/entities"
 )
 
-func NewEndpointSave(app *App) pipeline.Pipe {
+func NewEndpointCreate(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
 		WebhookVerifyOwnership(app, "WebhookId"),
+		EndpointSavePrepare(app),
+		EndpointSavePutToDatabase(app),
+	})
+}
+
+func NewEndpointUpdate(app *App) pipeline.Pipe {
+	return pipeline.New([]pipeline.Pipeline{
+		pipeline.UseRecovery(app.Logger),
+		pipeline.UseWorkspaceValidator(),
+		pipeline.UseValidator(),
+		EndpointVerifyExisting(app, "WebhookId", "Id"),
 		EndpointSavePrepare(app),
 		EndpointSavePutToDatabase(app),
 	})
