@@ -10,12 +10,7 @@ import (
 )
 
 func (server *EndpointServer) Delete(ctx context.Context, req *protos.EndpointDeleteReq) (*protos.EndpointDeleteRes, error) {
-	request := &application.EndpointDeleteReq{
-		EndpointReq: application.EndpointReq{
-			WebhookId: req.WebhookId,
-			Id:        req.Id,
-		},
-	}
+	request := &application.EndpointDeleteReq{WebhookId: req.WebhookId, Id: req.Id}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
 	ctx, err := server.delete(ctx)

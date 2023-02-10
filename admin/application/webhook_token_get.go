@@ -12,13 +12,13 @@ func NewWebhookTokenGet(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookTokenVerifyExisting(app, "WebhookId", "Id"),
 		WebhookTokenGetById(app),
 	})
 }
 
 type WebhookTokenGetReq struct {
-	WebhookTokenReq
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
 type WebhookTokenGetRes struct {

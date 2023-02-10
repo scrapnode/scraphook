@@ -7,10 +7,10 @@ import (
 
 type Webhook interface {
 	Save(webhook *entities.Webhook) error
-	VerifyExisting(workspaceId, webhookId string) (bool, error)
-	Get(workspaceId, webhookId string) (*entities.Webhook, error)
+	VerifyExisting(workspaceId, id string) (bool, error)
+	Get(workspaceId, id string) (*entities.Webhook, error)
 	List(query *WebhookListQuery) (*WebhookListResult, error)
-	Delete(workspaceId, webhookId string) error
+	Delete(workspaceId, id string) error
 }
 
 type WebhookListQuery struct {

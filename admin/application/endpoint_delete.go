@@ -11,13 +11,14 @@ func NewEndpointDelete(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		EndpointVerifyExisting(app, "WebhookId", "Id"),
+		EndpointVerifyExisting(app, "Id"),
 		EndpointDeleteById(app),
 	})
 }
 
 type EndpointDeleteReq struct {
-	EndpointReq
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
 type EndpointDeleteRes struct {

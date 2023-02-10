@@ -19,7 +19,8 @@ func NewEndpointGet(app *App) pipeline.Pipe {
 }
 
 type EndpointGetReq struct {
-	EndpointReq
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
 type EndpointGetRes struct {

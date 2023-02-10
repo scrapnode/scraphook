@@ -15,7 +15,6 @@ func (repo *SqlEndpoint) Save(endpoint *entities.Endpoint) error {
 	clauses := clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
 		DoUpdates: clause.Assignments(updates),
-		Where:     clause.Where{Exprs: []clause.Expression{clause.Eq{Column: "webhook_id", Value: endpoint.WebhookId}}},
 	}
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Clauses(clauses).Create(endpoint)

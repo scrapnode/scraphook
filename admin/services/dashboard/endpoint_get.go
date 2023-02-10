@@ -10,12 +10,7 @@ import (
 )
 
 func (server *EndpointServer) Get(ctx context.Context, req *protos.EndpointGetReq) (*protos.EndpointRecord, error) {
-	request := &application.EndpointGetReq{
-		EndpointReq: application.EndpointReq{
-			WebhookId: req.WebhookId,
-			Id:        req.Id,
-		},
-	}
+	request := &application.EndpointGetReq{WebhookId: req.WebhookId, Id: req.Id}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
 	ctx, err := server.get(ctx)

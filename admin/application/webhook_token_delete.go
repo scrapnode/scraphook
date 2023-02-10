@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"github.com/scrapnode/scrapcore/auth"
 	"github.com/scrapnode/scrapcore/pipeline"
 )
@@ -11,13 +12,14 @@ func NewWebhookTokenDelete(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookTokenVerifyExisting(app, "WebhookId", "Id"),
+		WebhookTokenVerifyExisting(app, "Id"),
 		WebhookTokenDeleteById(app),
 	})
 }
 
 type WebhookTokenDeleteReq struct {
-	WebhookTokenReq
+	WebhookId string `validate:"required"`
+	Id        string `validate:"required"`
 }
 
 type WebhookTokenDeleteRes struct {
@@ -31,8 +33,12 @@ func WebhookTokenDeleteById(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookTokenDeleteReq)
-			if err := app.Repo.WebhookToken.Delete(req.WebhookId, req.Id); err != nil {
-				logger.Errorw("could not delete webhook token", "error", err.Error())
+			ok, err := app.Repo.WebhookToken.Delete(req.WebhookId, req.Id)
+			if err == nil && !ok {
+				err = errors.New("webhook token is not found to delete")
+			}
+			if err != nil {
+				logger.Errorw("delete webhook token got error", "error", err.Error())
 				return ctx, err
 			}
 

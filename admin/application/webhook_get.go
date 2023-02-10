@@ -14,14 +14,13 @@ func NewWebhookGet(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		WebhookVerifyExisting(app, "Id"),
 		WebhookGetById(app),
 		WebhookGetGetTokens(app),
 	})
 }
 
 type WebhookGetReq struct {
-	WebhookReq
+	Id             string `validate:"required"`
 	WithTokenCount int
 }
 
@@ -63,7 +62,7 @@ func WebhookGetGetTokens(app *App) pipeline.Pipeline {
 			if req.WithTokenCount > 0 {
 				query := &repositories.WebhookTokenListQuery{
 					ScanQuery: database.ScanQuery{Size: req.WithTokenCount},
-					WebhookId: req.WebhookReq.Id,
+					WebhookId: res.Webhook.Id,
 				}
 				results, err := app.Repo.WebhookToken.List(query)
 				if err != nil {

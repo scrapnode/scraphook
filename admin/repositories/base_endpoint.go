@@ -7,10 +7,10 @@ import (
 
 type Endpoint interface {
 	Save(endpoint *entities.Endpoint) error
-	Exist(workspaceId, webhookId, endpointId string) (bool, error)
-	Get(webhookId, endpointId string) (*entities.Endpoint, error)
+	Get(webhookId, id string) (*entities.Endpoint, error)
 	List(query *EndpointListQuery) (*EndpointListResult, error)
-	Delete(webhookId, endpointId string) error
+	Delete(webhookId, id string) error
+	Exist(workspaceId, id string) (bool, error)
 }
 
 type EndpointListQuery struct {

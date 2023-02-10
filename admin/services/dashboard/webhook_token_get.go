@@ -10,9 +10,7 @@ import (
 )
 
 func (server *WebhookTokenServer) Get(ctx context.Context, req *protos.WebhookTokenGetReq) (*protos.WebhookTokenRecord, error) {
-	request := &application.WebhookTokenGetReq{
-		WebhookTokenReq: application.WebhookTokenReq{WebhookId: req.WebhookId, Id: req.Id},
-	}
+	request := &application.WebhookTokenGetReq{WebhookId: req.WebhookId, Id: req.Id}
 	ctx = context.WithValue(ctx, pipeline.CTXKEY_REQ, request)
 
 	ctx, err := server.get(ctx)

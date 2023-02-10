@@ -6,11 +6,11 @@ import (
 )
 
 type EndpointRule interface {
-	Save(endpoint *entities.EndpointRule) error
-	Get(endpointId, ruleId string) (*entities.EndpointRule, error)
+	Save(rule *entities.EndpointRule) error
+	Get(endpointId, id string) (*entities.EndpointRule, error)
 	List(query *EndpointRuleListQuery) (*EndpointRuleListResult, error)
-	Delete(endpointId, ruleId string) error
-	Exist(workspaceId, endpointId, ruleId string) (bool, error)
+	Delete(endpointId, id string) error
+	Exist(workspaceId, id string) (bool, error)
 }
 
 type EndpointRuleListQuery struct {

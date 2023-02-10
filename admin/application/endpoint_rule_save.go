@@ -12,7 +12,7 @@ func NewEndpointRuleCreate(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		// @TODO: verify
+		EndpointVerifyExisting(app, "EndpointId"),
 		EndpointSaveRulePrepare(app),
 		EndpointSaveRulePutToDatabase(app),
 	})
@@ -23,7 +23,7 @@ func NewEndpointRuleUpdate(app *App) pipeline.Pipe {
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
-		EndpointRuleVerifyExisting(app, "EndpointId", "Id"),
+		EndpointRuleVerifyExisting(app, "Id"),
 		EndpointSaveRulePrepare(app),
 		EndpointSaveRulePutToDatabase(app),
 	})

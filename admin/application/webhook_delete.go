@@ -17,7 +17,7 @@ func NewWebhookDelete(app *App) pipeline.Pipe {
 }
 
 type WebhookDeleteReq struct {
-	WebhookReq
+	Id string `validate:"required"`
 }
 
 type WebhookDeleteRes struct {

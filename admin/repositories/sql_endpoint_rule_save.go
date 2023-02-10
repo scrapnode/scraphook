@@ -16,7 +16,6 @@ func (repo *SqlEndpointRule) Save(rule *entities.EndpointRule) error {
 	clauses := clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
 		DoUpdates: clause.Assignments(updates),
-		Where:     clause.Where{Exprs: []clause.Expression{clause.Eq{Column: "endpoint_id", Value: rule.EndpointId}}},
 	}
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.Clauses(clauses).Create(rule)

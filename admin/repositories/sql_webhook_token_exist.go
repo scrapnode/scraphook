@@ -5,16 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhookToken) Exist(workspaceId, webhookId, tokenId string) (bool, error) {
+func (repo *SqlWebhookToken) Exist(workspaceId, Id string) (bool, error) {
 	conn := repo.db.Conn().(*gorm.DB)
 
 	var count int64
-	model := &entities.WebhookToken{}
-	tx := conn.Model(model).
+	tx := conn.Model(&entities.WebhookToken{}).
 		Joins("LEFT JOIN webhooks ON webhooks.id = webhook_tokens.webhook_id").
 		Scopes(UseWorkspaceScope(&entities.Webhook{}, workspaceId)).
-		Scopes(UseWebhookScope(model, webhookId)).
-		Where("webhook_tokens.id = ?", tokenId).
+		Where("webhook_tokens.id = ?", Id).
 		Count(&count)
 	return count > 0, tx.Error
 }
