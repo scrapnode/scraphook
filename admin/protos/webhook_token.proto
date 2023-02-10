@@ -13,7 +13,6 @@ service WebhookToken {
 message WebhookTokenCreateReq {
   string webhook_id = 1;
   string name = 2;
-  int32 count = 3;
 }
 
 message WebhookTokenGetReq {
