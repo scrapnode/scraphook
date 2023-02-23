@@ -7,14 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *SqlWebhook) GetToken(id, token string) (*entities.WebhookToken, error) {
+func (repo *SqlWebhook) GetToken(webhookId, token string) (*entities.WebhookToken, error) {
 	whtoken := &entities.WebhookToken{}
 
 	conn := repo.db.Conn().(*gorm.DB)
 	tx := conn.
 		Model(&entities.WebhookToken{}).
 		Preload("Webhook").
-		Where("webhook_id = ? AND token = ?", id, token).
+		Where("webhook_id = ? AND token = ?", webhookId, token).
 		First(whtoken)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {

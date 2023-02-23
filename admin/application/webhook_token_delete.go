@@ -33,8 +33,8 @@ func WebhookTokenDeleteById(app *App) pipeline.Pipeline {
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
 			req := ctx.Value(pipeline.CTXKEY_REQ).(*WebhookTokenDeleteReq)
-			ok, err := app.Repo.WebhookToken.Delete(req.WebhookId, req.Id)
-			if err == nil && !ok {
+			err := app.Repo.WebhookToken.Delete(req.WebhookId, req.Id)
+			if err == nil {
 				err = errors.New("webhook token is not found to delete")
 			}
 			if err != nil {

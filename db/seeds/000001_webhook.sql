@@ -21,4 +21,4 @@ INSERT INTO endpoints ( webhook_id, id, name, uri, created_at, updated_at) VALUE
 DELETE FROM endpoint_rules WHERE endpoint_id = 'ep_httpbinpost';
 DELETE FROM endpoint_rules WHERE endpoint_id = 'ep_httpbinput';
 INSERT INTO endpoint_rules (endpoint_id, id, rule, negative, priority, created_at, updated_at) VALUES ('ep_httpbinpost', 'epr_schedulepost', 'regex::wh_demo' , FALSE, 0, 1645488000000, 0);
-INSERT INTO endpoint_rules (endpoint_id, id, rule, negative, priority, created_at, updated_at) VALUES ('ep_httpbinput', 'epr_scheduleput', 'regex::wh_demo' , FALSE, 0, 1645488000000, 0);
+INSERT INTO endpoint_rules (endpoint_id, id, rule, negative, priority, created_at, updated_at) VALUES ('ep_httpbinput', 'epr_scheduleput', 'regex::wh_demo' , FALSE, 0, 1645488000000, 0);INSERT INTO endpoint_rules (endpoint_id, id, rule, negative, priority, created_at, updated_at) VALUES ('ep_httpbinpost', 'epr_scheduleignore', 'regex::scraphook_ignore' , TRUE, 0, 1645488000000, 0);

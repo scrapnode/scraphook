@@ -18,6 +18,6 @@ type Repo struct {
 }
 
 type Webhook interface {
-	GetToken(id, token string) (*entities.WebhookToken, error)
-	GetEndpoints(ws, id string) ([]*entities.Endpoint, error)
+	GetToken(webhookId, token string) (*entities.WebhookToken, error)
+	GetEndpoints(webhookId string) ([]*entities.Endpoint, error)
 }

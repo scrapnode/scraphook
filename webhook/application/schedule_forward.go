@@ -64,7 +64,7 @@ func UseScheduleForwardGetEndpoints(app *App) pipeline.Pipeline {
 				With("event_key", req.Event.Key()).
 				With("message_key", req.Message.Key())
 
-			endpoints, err := app.Repo.Webhook.GetEndpoints(req.Message.WorkspaceId, req.Message.WebhookId)
+			endpoints, err := app.Repo.Webhook.GetEndpoints(req.Message.WebhookId)
 			if err != nil {
 				logger.Errorw(ErrGetEndpointsFail.Error(), "error", err.Error())
 				return ctx, err
@@ -115,6 +115,15 @@ func UseScheduleForwardBuildRequests(app *App) pipeline.Pipeline {
 								"endpoint_id", endpoint.Id, "rule_id", rule.Id, "rule", rule.Rule,
 							)
 							continue
+						}
+
+						if rule.Negative {
+							app.Logger.Warnw("negative rule is matched",
+								"endpoint_id", endpoint.Id, "rule_id", rule.Id,
+								"rule", rule.Rule, "negative", rule.Negative,
+							)
+							// IMPORTANT: once we reach a negative rule, we will stop ASAP
+							break
 						}
 
 						request := entities.Request{
