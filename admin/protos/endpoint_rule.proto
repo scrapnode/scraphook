@@ -13,8 +13,9 @@ service EndpointRule {
 message EndpointRuleSaveReq {
   string endpoint_id = 1;
   string id  = 2;
-  string name = 3;
-  string uri = 4;
+  string rule = 3;
+  bool negative = 4;
+  int32 priority = 5;
 }
 
 message EndpointRuleGetReq {

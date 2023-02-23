@@ -13,8 +13,8 @@ func NewEndpointRuleCreate(app *App) pipeline.Pipe {
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
 		EndpointVerifyExisting(app, "EndpointId"),
-		EndpointSaveRulePrepare(app),
-		EndpointSaveRulePutToDatabase(app),
+		EndpointRuleSavePrepare(app),
+		EndpointRuleSavePutToDatabase(app),
 	})
 }
 
@@ -24,27 +24,27 @@ func NewEndpointRuleUpdate(app *App) pipeline.Pipe {
 		pipeline.UseWorkspaceValidator(),
 		pipeline.UseValidator(),
 		EndpointRuleVerifyExisting(app, "Id"),
-		EndpointSaveRulePrepare(app),
-		EndpointSaveRulePutToDatabase(app),
+		EndpointRuleSavePrepare(app),
+		EndpointRuleSavePutToDatabase(app),
 	})
 }
 
-type EndpointSaveRuleReq struct {
+type EndpointRuleSaveReq struct {
 	EndpointId string `validate:"required"`
 	Id         string
 	Rule       string `validate:"required"`
 	Negative   bool
-	Priority   int `validate:"required"`
+	Priority   int32 `validate:"required"`
 }
 
-type EndpointSaveRuleRes struct {
+type EndpointRuleSaveRes struct {
 	EndpointRule *entities.EndpointRule
 }
 
-func EndpointSaveRulePrepare(app *App) pipeline.Pipeline {
+func EndpointRuleSavePrepare(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
-			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointSaveRuleReq)
+			req := ctx.Value(pipeline.CTXKEY_REQ).(*EndpointRuleSaveReq)
 			rule := &entities.EndpointRule{
 				EndpointId: req.EndpointId,
 				Id:         req.Id,
@@ -58,21 +58,21 @@ func EndpointSaveRulePrepare(app *App) pipeline.Pipeline {
 				rule.UseId()
 			}
 
-			res := &EndpointSaveRuleRes{EndpointRule: rule}
+			res := &EndpointRuleSaveRes{EndpointRule: rule}
 			ctx = context.WithValue(ctx, pipeline.CTXKEY_RES, res)
 			return next(ctx)
 		}
 	}
 }
 
-func EndpointSaveRulePutToDatabase(app *App) pipeline.Pipeline {
+func EndpointRuleSavePutToDatabase(app *App) pipeline.Pipeline {
 	return func(next pipeline.Pipe) pipeline.Pipe {
 		return func(ctx context.Context) (context.Context, error) {
 			ws := ctx.Value(pipeline.CTXKEY_WS).(string)
 			account := ctx.Value(pipeline.CTXKEY_ACC).(*auth.Account)
 			logger := app.Logger.With("ws_id", ws, "account_id", account.Id)
 
-			res := ctx.Value(pipeline.CTXKEY_RES).(*EndpointSaveRuleRes)
+			res := ctx.Value(pipeline.CTXKEY_RES).(*EndpointRuleSaveRes)
 			if err := app.Repo.EndpointRule.Save(res.EndpointRule); err != nil {
 				logger.Errorw("could not save endpoint rule", "error", err.Error())
 				return ctx, err

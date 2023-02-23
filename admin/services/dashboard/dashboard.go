@@ -95,6 +95,7 @@ func (service *Dashboard) Start(ctx context.Context) error {
 	protos.RegisterWebhookServer(service.server, NewWebhookServer(service.app))
 	protos.RegisterWebhookTokenServer(service.server, NewWebhookTokenServer(service.app))
 	protos.RegisterEndpointServer(service.server, NewEndpointServer(service.app))
+	protos.RegisterEndpointRuleServer(service.server, NewEndpointRuleServer(service.app))
 	reflection.Register(service.server)
 
 	service.logger.Debug("connected")

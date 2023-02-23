@@ -10,6 +10,7 @@ func NewEndpointDelete(app *App) pipeline.Pipe {
 	return pipeline.New([]pipeline.Pipeline{
 		pipeline.UseRecovery(app.Logger),
 		pipeline.UseWorkspaceValidator(),
+		// @TODO: remove pipeline.UseValidator because we need to validate in transport layers
 		pipeline.UseValidator(),
 		EndpointVerifyExisting(app, "Id"),
 		EndpointDeleteById(app),
