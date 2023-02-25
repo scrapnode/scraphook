@@ -11,9 +11,9 @@ func NewEndpointRuleServer(app *application.App) *EndpointRuleServer {
 		app:    app,
 		create: application.NewEndpointRuleCreate(app),
 		update: application.NewEndpointRuleUpdate(app),
-		//list:   application.NewEndpointRuleList(app),
-		//get:    application.NewEndpointRuleGet(app),
-		//delete: application.NewEndpointRuleDelete(app),
+		list:   application.NewEndpointRuleList(app),
+		get:    application.NewEndpointRuleGet(app),
+		delete: application.NewEndpointRuleDelete(app),
 	}
 }
 
